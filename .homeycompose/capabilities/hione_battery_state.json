@@ -1,0 +1,49 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Battery State",
+    "nl": "Batterijstatus"
+  },
+  "values": [
+    {
+      "id": "charging",
+      "title": {
+        "en": "Charging",
+        "nl": "Laden"
+      }
+    },
+    {
+      "id": "discharging",
+      "title": {
+        "en": "Discharging",
+        "nl": "Ontladen"
+      }
+    },
+    {
+      "id": "idle",
+      "title": {
+        "en": "Idle",
+        "nl": "Inactief"
+      }
+    },
+    {
+      "id": "standby",
+      "title": {
+        "en": "Standby",
+        "nl": "Stand-by"
+      }
+    },
+    {
+      "id": "fault",
+      "title": {
+        "en": "Fault",
+        "nl": "Storing"
+      }
+    }
+  ],
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/power.svg"
+}

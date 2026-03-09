@@ -1,0 +1,18 @@
+{
+  "id": "grid_exporting",
+  "title": {
+    "en": "Grid !{{is|is not}} exporting power",
+    "nl": "Net !{{exporteert|exporteert niet}}"
+  },
+  "hint": {
+    "en": "Check if the grid is currently exporting power.",
+    "nl": "Controleer of het net momenteel stroom exporteert."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

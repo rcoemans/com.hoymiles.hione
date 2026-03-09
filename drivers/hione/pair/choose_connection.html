@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           padding: 20px; color: #1a1a1a; line-height: 1.5; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    h3 { font-size: 17px; font-weight: 600; }
+    .compat { font-size: 12px; color: #888; margin-bottom: 16px; }
+    .option {
+      border: 2px solid #e8e8e8; border-radius: 12px;
+      padding: 16px; margin-bottom: 10px; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option:hover { border-color: #61BA1A; background: #f7fdf4; }
+    .option.selected { border-color: #61BA1A; background: #f0faf0; box-shadow: 0 0 0 1px #61BA1A; }
+    .option-title { display: flex; align-items: center; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .option-desc { font-size: 12px; color: #666; line-height: 1.4; }
+    .badge { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+             background: #e8f5e9; color: #2e7d32; border-radius: 4px; padding: 2px 8px; margin-left: 8px; }
+    .btn-primary {
+      margin-top: 14px; width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+      background: #61BA1A; color: white; border: none; border-radius: 10px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #52a014; }
+    .btn-primary:active { background: #478c12; transform: scale(0.99); }
+    .footer { text-align: center; font-size: 11px; color: #aaa; margin-top: 16px; }
+    .lang-toggle {
+      font-size: 11px; font-weight: 600; cursor: pointer; color: #666;
+      border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px;
+      background: #f5f5f5; transition: all 0.15s;
+    }
+    .lang-toggle:hover { background: #e8e8e8; color: #333; }
+  </style>
+</head>
+<body>
+  <div class='header'>
+    <h3 id='t-title'>How do you want to connect?</h3>
+    <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>NL</button>
+  </div>
+  <p class='compat' id='t-compat'>Compatible with all HiOne systems (single-phase &amp; three-phase).</p>
+
+  <div class='option' id='opt-local' onclick='select("local")'>
+    <div class='option-title' id='t-local-title'>Local (LAN) <span class="badge">offline</span></div>
+    <div class='option-desc' id='t-local-desc'>Direct via IP address. No account needed. Works without internet.</div>
+  </div>
+
+  <div class='option' id='opt-both' onclick='select("both")'>
+    <div class='option-title' id='t-both-title'>Local + Cloud <span class="badge">recommended</span></div>
+    <div class='option-desc' id='t-both-desc'>Local primary, S-Miles Cloud as fallback. Requires account.</div>
+  </div>
+
+  <div class='option' id='opt-cloud' onclick='select("cloud")'>
+    <div class='option-title' id='t-cloud-title'>Cloud only</div>
+    <div class='option-desc' id='t-cloud-desc'>Via S-Miles Cloud API. Requires account at hoymiles.com.</div>
+  </div>
+
+  <button class='btn-primary' id='t-next' onclick='proceed()'>Next</button>
+
+  <p class='footer' id='t-disclaimer'>&#x26a0;&#xfe0f; Unofficial &#x2014; not affiliated with Hoymiles. Use at your own risk.</p>
+
+  <script>
+    var i18n = {
+      nl: {
+        title: 'Hoe wil je verbinden?',
+        localTitle: 'Lokaal (LAN) <span class="badge">offline</span>',
+        localDesc: 'Direct via IP-adres. Geen account nodig. Werkt ook zonder internet.',
+        bothTitle: 'Lokaal + Cloud <span class="badge">aanbevolen</span>',
+        bothDesc: 'Lokaal primair, S-Miles Cloud als fallback. Vereist account.',
+        cloudTitle: 'Alleen Cloud',
+        cloudDesc: 'Via S-Miles Cloud API. Vereist account bij hoymiles.com.',
+        next: 'Volgende',
+        disclaimer: '\u26a0\ufe0f Onofficieel \u2014 niet gelieerd aan Hoymiles. Gebruik op eigen risico.',
+        compat: 'Compatibel met alle HiOne systemen (1-fase & 3-fase).'
+      },
+      en: {
+        title: 'How do you want to connect?',
+        localTitle: 'Local (LAN) <span class="badge">offline</span>',
+        localDesc: 'Direct via IP address. No account needed. Works without internet.',
+        bothTitle: 'Local + Cloud <span class="badge">recommended</span>',
+        bothDesc: 'Local primary, S-Miles Cloud as fallback. Requires account.',
+        cloudTitle: 'Cloud only',
+        cloudDesc: 'Via S-Miles Cloud API. Requires account at hoymiles.com.',
+        next: 'Next',
+        disclaimer: '\u26a0\ufe0f Unofficial \u2014 not affiliated with Hoymiles. Use at your own risk.',
+        compat: 'Compatible with all HiOne systems (single-phase & three-phase).'
+      }
+    };
+
+    var _lang = 'en';
+
+    function applyLang(lang) {
+      _lang = lang;
+      var t = i18n[lang] || i18n.en;
+      document.getElementById('t-title').textContent = t.title;
+      document.getElementById('t-compat').textContent = t.compat;
+      document.getElementById('t-local-title').innerHTML = t.localTitle;
+      document.getElementById('t-local-desc').textContent = t.localDesc;
+      document.getElementById('t-both-title').innerHTML = t.bothTitle;
+      document.getElementById('t-both-desc').textContent = t.bothDesc;
+      document.getElementById('t-cloud-title').textContent = t.cloudTitle;
+      document.getElementById('t-cloud-desc').textContent = t.cloudDesc;
+      document.getElementById('t-next').textContent = t.next;
+      document.getElementById('t-disclaimer').textContent = t.disclaimer;
+      document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'EN' : 'NL';
+    }
+
+    function toggleLang() {
+      applyLang(_lang === 'nl' ? 'en' : 'nl');
+    }
+
+    var _mode = 'local';
+    select('local');
+    Homey.getLanguage().then(function(lang) { applyLang(lang); }).catch(function() {});
+
+    function select(mode) {
+      _mode = mode;
+      ['local','both','cloud'].forEach(function(m) {
+        document.getElementById('opt-' + m).className = 'option' + (m === mode ? ' selected' : '');
+      });
+    }
+
+    async function proceed() {
+      await Homey.emit('set_connection_mode', { mode: _mode });
+      if (_mode === 'cloud') {
+        Homey.showView('login_credentials');
+      } else {
+        Homey.showView('gateway_ip');
+      }
+    }
+  </script>
+</body>
+</html>

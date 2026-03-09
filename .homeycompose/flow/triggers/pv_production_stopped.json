@@ -1,0 +1,18 @@
+{
+  "id": "pv_production_stopped",
+  "title": {
+    "en": "PV production stopped",
+    "nl": "PV-productie gestopt"
+  },
+  "hint": {
+    "en": "Triggers when the solar panels stop producing power.",
+    "nl": "Wordt geactiveerd wanneer de zonnepanelen stoppen met stroom opwekken."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

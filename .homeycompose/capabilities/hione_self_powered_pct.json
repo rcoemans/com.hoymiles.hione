@@ -1,0 +1,16 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Self-Powered",
+    "nl": "Zelfvoorzienend"
+  },
+  "units": "%",
+  "insights": true,
+  "decimals": 1,
+  "min": 0,
+  "max": 100,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/percentage.svg"
+}

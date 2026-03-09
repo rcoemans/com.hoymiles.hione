@@ -1,0 +1,44 @@
+{
+  "id": "battery_soc_above_threshold",
+  "title": {
+    "en": "Battery SoC rose above threshold",
+    "nl": "Batterij SoC boven drempel gestegen"
+  },
+  "titleFormatted": {
+    "en": "Battery SoC rose above [[threshold]] %",
+    "nl": "Batterij SoC boven [[threshold]] % gestegen"
+  },
+  "hint": {
+    "en": "Triggers when the battery state of charge rises above the specified threshold.",
+    "nl": "Wordt geactiveerd wanneer het laadniveau boven de opgegeven drempel stijgt."
+  },
+  "tokens": [
+    {
+      "name": "value",
+      "type": "number",
+      "title": {
+        "en": "SoC (%)",
+        "nl": "SoC (%)"
+      },
+      "example": 80
+    }
+  ],
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "title": {
+        "en": "Threshold (%)",
+        "nl": "Drempel (%)"
+      },
+      "min": 0,
+      "max": 100,
+      "step": 1
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "poll_failed": "Kan het HiOne-systeem niet bereiken. Controleer je netwerkverbinding en apparaatinstellingen.",
+    "login_failed": "Inloggen mislukt. Controleer je S-Miles Cloud e-mail en wachtwoord.",
+    "missing_credentials": "Ontbrekende inloggegevens. Koppel het apparaat opnieuw.",
+    "local_unreachable": "Lokale gateway onbereikbaar. Controleer het IP-adres in de apparaatinstellingen.",
+    "set_mode_failed": "Kan de batterijmodus niet wijzigen. Probeer het later opnieuw."
+  },
+  "pair": {
+    "login_title": "Inloggen bij S-Miles Cloud",
+    "login_disclaimer": "Deze app gebruikt een niet-officiële API. Je inloggegevens worden alleen verstuurd naar hoymiles.com."
+  },
+  "status": {
+    "initializing": "Initialiseren...",
+    "polling": "Gegevens ophalen...",
+    "connected_local": "Verbonden (lokaal)",
+    "connected_cloud": "Verbonden (cloud)",
+    "offline": "Offline"
+  }
+}

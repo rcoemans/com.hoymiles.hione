@@ -1,0 +1,18 @@
+{
+  "id": "grid_started_exporting",
+  "title": {
+    "en": "Grid started exporting",
+    "nl": "Net begon met exporteren"
+  },
+  "hint": {
+    "en": "Triggers when the grid starts exporting power.",
+    "nl": "Wordt geactiveerd wanneer het net begint met stroom exporteren."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

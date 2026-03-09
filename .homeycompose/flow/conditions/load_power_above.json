@@ -1,0 +1,32 @@
+{
+  "id": "load_power_above",
+  "title": {
+    "en": "Load power !{{is|is not}} above threshold",
+    "nl": "Belastingsvermogen !{{is|is niet}} boven drempel"
+  },
+  "titleFormatted": {
+    "en": "Load power !{{is|is not}} above [[threshold]] W",
+    "nl": "Belastingsvermogen !{{is|is niet}} boven [[threshold]] W"
+  },
+  "hint": {
+    "en": "Check if the load power is above a threshold.",
+    "nl": "Controleer of het belastingsvermogen boven een drempel is."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "title": {
+        "en": "Threshold (W)",
+        "nl": "Drempel (W)"
+      },
+      "min": 0,
+      "step": 10
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "System State",
+    "nl": "Systeemstatus"
+  },
+  "values": [
+    {
+      "id": "online_local",
+      "title": {
+        "en": "Online (Local)",
+        "nl": "Online (lokaal)"
+      }
+    },
+    {
+      "id": "online_cloud",
+      "title": {
+        "en": "Online (Cloud)",
+        "nl": "Online (cloud)"
+      }
+    },
+    {
+      "id": "degraded",
+      "title": {
+        "en": "Degraded",
+        "nl": "Beperkt"
+      }
+    },
+    {
+      "id": "offline",
+      "title": {
+        "en": "Offline",
+        "nl": "Offline"
+      }
+    },
+    {
+      "id": "syncing",
+      "title": {
+        "en": "Syncing",
+        "nl": "Synchroniseren"
+      }
+    },
+    {
+      "id": "error",
+      "title": {
+        "en": "Error",
+        "nl": "Fout"
+      }
+    }
+  ],
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/on-off-button.svg"
+}

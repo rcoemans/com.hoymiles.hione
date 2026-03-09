@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="960" viewBox="0 0 960 960" fill="none">
+  <!-- Battery storage unit - outline icon per Homey Guidelines 1.5.2 -->
+  <g stroke="currentColor" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Battery body -->
+    <rect x="260" y="200" width="440" height="620" rx="40"/>
+    <!-- Battery terminal -->
+    <rect x="400" y="140" width="160" height="60" rx="20"/>
+    <!-- Module separator lines -->
+    <line x1="260" y1="410" x2="700" y2="410"/>
+    <line x1="260" y1="620" x2="700" y2="620"/>
+    <!-- Lightning bolt (energy symbol) -->
+    <polyline points="520,280 440,480 520,480 440,700"/>
+  </g>
+</svg>

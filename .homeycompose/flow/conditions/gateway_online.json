@@ -1,0 +1,18 @@
+{
+  "id": "gateway_online",
+  "title": {
+    "en": "Gateway !{{is|is not}} online",
+    "nl": "Gateway !{{is|is niet}} online"
+  },
+  "hint": {
+    "en": "Check if the HiBox gateway is online.",
+    "nl": "Controleer of de HiBox gateway online is."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

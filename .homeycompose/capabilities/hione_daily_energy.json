@@ -1,0 +1,14 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Daily Energy",
+    "nl": "Dagelijkse energie"
+  },
+  "units": "kWh",
+  "insights": true,
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/sun.svg"
+}

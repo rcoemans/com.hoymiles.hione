@@ -1,0 +1,18 @@
+{
+  "id": "gateway_went_offline",
+  "title": {
+    "en": "Gateway went offline",
+    "nl": "Gateway ging offline"
+  },
+  "hint": {
+    "en": "Triggers when the HiBox gateway becomes unreachable.",
+    "nl": "Wordt geactiveerd wanneer de HiBox gateway onbereikbaar wordt."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "battery_stopped_charging",
+  "title": {
+    "en": "Battery stopped charging",
+    "nl": "Batterij gestopt met laden"
+  },
+  "hint": {
+    "en": "Triggers when the battery stops charging.",
+    "nl": "Wordt geactiveerd wanneer de batterij stopt met laden."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "battery_started_discharging",
+  "title": {
+    "en": "Battery started discharging",
+    "nl": "Batterij begon met ontladen"
+  },
+  "hint": {
+    "en": "Triggers when the battery starts discharging.",
+    "nl": "Wordt geactiveerd wanneer de batterij begint met ontladen."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

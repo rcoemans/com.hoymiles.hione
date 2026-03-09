@@ -1,0 +1,35 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Connection Source",
+    "nl": "Verbindingsbron"
+  },
+  "values": [
+    {
+      "id": "local",
+      "title": {
+        "en": "Local (LAN)",
+        "nl": "Lokaal (LAN)"
+      }
+    },
+    {
+      "id": "cloud",
+      "title": {
+        "en": "Cloud",
+        "nl": "Cloud"
+      }
+    },
+    {
+      "id": "unknown",
+      "title": {
+        "en": "Unknown",
+        "nl": "Onbekend"
+      }
+    }
+  ],
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/graph.svg"
+}

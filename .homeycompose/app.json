@@ -1,16 +1,37 @@
 {
   "id": "com.hoymiles.hione",
   "version": "1.0.0",
-  "compatibility": ">=12.4.0",
+  "compatibility": ">=10.0.0",
   "sdk": 3,
   "platforms": [
     "local"
   ],
+  "brandColor": "#61BA1A",
   "name": {
-    "en": "Hoymiles HiOne"
+    "en": "Hoymiles HiOne",
+    "nl": "Hoymiles HiOne"
   },
   "description": {
-    "en": "Local insights and smart automation for your Hoymiles HiOne home battery system."
+    "en": "Local insights and smart automation for your Hoymiles HiOne home battery system.",
+    "nl": "Lokale inzichten en slimme automatisering voor je Hoymiles HiOne thuisbatterij."
+  },
+  "tags": {
+    "en": [
+      "hoymiles",
+      "hione",
+      "solar",
+      "battery",
+      "bess",
+      "energy",
+      "smiles"
+    ],
+    "nl": [
+      "hoymiles",
+      "hione",
+      "zonnepanelen",
+      "batterij",
+      "energie"
+    ]
   },
   "category": [
     "energy"
@@ -24,5 +45,11 @@
   "author": {
     "name": "Robert Coemans",
     "email": "r.coemans@hotmail.com"
+  },
+  "homepage": "https://github.com/rcoemans/com.hoymiles.hione",
+  "support": "https://github.com/rcoemans/com.hoymiles.hione/issues",
+  "source": "https://github.com/rcoemans/com.hoymiles.hione",
+  "bugs": {
+    "url": "https://github.com/rcoemans/com.hoymiles.hione/issues"
   }
 }

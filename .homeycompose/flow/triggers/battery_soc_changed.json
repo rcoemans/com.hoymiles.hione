@@ -1,0 +1,29 @@
+{
+  "id": "battery_soc_changed",
+  "title": {
+    "en": "Battery SoC changed",
+    "nl": "Batterij SoC gewijzigd"
+  },
+  "hint": {
+    "en": "Triggers when the battery state of charge changes.",
+    "nl": "Wordt geactiveerd wanneer het laadniveau van de batterij verandert."
+  },
+  "tokens": [
+    {
+      "name": "value",
+      "type": "number",
+      "title": {
+        "en": "SoC (%)",
+        "nl": "SoC (%)"
+      },
+      "example": 75
+    }
+  ],
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

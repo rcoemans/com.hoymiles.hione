@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           padding: 20px; color: #1a1a1a; line-height: 1.5; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    h3 { font-size: 17px; font-weight: 600; }
+    .tip {
+      background: #f0f7ff; border-radius: 10px; padding: 14px 16px;
+      margin-bottom: 18px; font-size: 13px; color: #1a1a1a; line-height: 1.5;
+    }
+    .tip strong { color: #1565c0; }
+    label { display: block; font-size: 13px; font-weight: 500; color: #444; }
+    input {
+      width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #e8e8e8;
+      border-radius: 10px; font-size: 15px; transition: border-color 0.2s;
+      outline: none;
+    }
+    input:focus { border-color: #61BA1A; }
+    .hint { font-size: 11px; color: #999; margin-top: 6px; }
+    .btn-primary {
+      margin-top: 20px; width: 100%; padding: 12px; font-size: 15px; font-weight: 600;
+      background: #61BA1A; color: white; border: none; border-radius: 10px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #52a014; }
+    .btn-primary:active { background: #478c12; transform: scale(0.99); }
+    .error {
+      color: #d32f2f; background: #fef2f2; border-radius: 8px; padding: 10px 14px;
+      margin-top: 10px; font-size: 13px; display: none;
+    }
+    .lang-toggle {
+      font-size: 11px; font-weight: 600; cursor: pointer; color: #666;
+      border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px;
+      background: #f5f5f5; transition: all 0.15s;
+    }
+    .lang-toggle:hover { background: #e8e8e8; color: #333; }
+  </style>
+</head>
+<body>
+  <div class='header'>
+    <h3 id='t-title'>HiBox gateway IP address</h3>
+    <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>NL</button>
+  </div>
+  <div class='tip' id='t-tip'>Find the IP in your router under 'connected devices'.<br>Look for <strong>DTUBI-…</strong> or <strong>HiBox</strong>.</div>
+  <label>
+    <span id='t-label-text'>IP address</span>
+    <input type='text' id='ip' placeholder='192.168.1.100'>
+  </label>
+  <div class='hint' id='t-hint'>Port 10081 is used automatically.</div>
+  <div class='error' id='error'></div>
+  <button class='btn-primary' id='t-next' onclick='proceed()'>Next</button>
+  <script>
+    var i18n = {
+      nl: {
+        title: 'IP-adres HiBox gateway',
+        tip: 'Vind het IP in je router onder \'verbonden apparaten\'.<br>Zoek op <strong>DTUBI-\u2026</strong> of <strong>HiBox</strong>.',
+        label: 'IP-adres',
+        hint: 'Poort 10081 wordt automatisch gebruikt.',
+        next: 'Volgende',
+        errorEmpty: 'Vul een IP-adres in.',
+        errorInvalid: 'Ongeldig IP-adres formaat.'
+      },
+      en: {
+        title: 'HiBox gateway IP address',
+        tip: 'Find the IP in your router under \'connected devices\'.<br>Look for <strong>DTUBI-\u2026</strong> or <strong>HiBox</strong>.',
+        label: 'IP address',
+        hint: 'Port 10081 is used automatically.',
+        next: 'Next',
+        errorEmpty: 'Please enter an IP address.',
+        errorInvalid: 'Invalid IP address format.'
+      }
+    };
+
+    var _lang = 'en';
+
+    function applyLang(lang) {
+      _lang = lang;
+      var t = i18n[lang] || i18n.en;
+      document.getElementById('t-title').textContent = t.title;
+      document.getElementById('t-tip').innerHTML = t.tip;
+      document.getElementById('t-label-text').textContent = t.label;
+      document.getElementById('t-hint').textContent = t.hint;
+      document.getElementById('t-next').textContent = t.next;
+      document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'EN' : 'NL';
+    }
+
+    function toggleLang() {
+      applyLang(_lang === 'nl' ? 'en' : 'nl');
+    }
+
+    Homey.getLanguage().then(function(lang) { applyLang(lang); }).catch(function() {});
+
+    function isValidIp(ip) {
+      return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) &&
+        ip.split('.').every(function(n){ return parseInt(n) <= 255; });
+    }
+
+    async function proceed() {
+      var ip = document.getElementById('ip').value.trim();
+      var errEl = document.getElementById('error');
+      var t = i18n[_lang] || i18n.en;
+      errEl.style.display = 'none';
+      if (!ip) { errEl.textContent = t.errorEmpty; errEl.style.display = 'block'; return; }
+      if (!isValidIp(ip)) { errEl.textContent = t.errorInvalid; errEl.style.display = 'block'; return; }
+      await Homey.emit('set_gateway_ip', { ip });
+      var mode = await Homey.emit('get_connection_mode');
+      if (mode === 'local') {
+        Homey.showView('list_devices');
+      } else {
+        Homey.showView('login_credentials');
+      }
+    }
+  </script>
+</body>
+</html>

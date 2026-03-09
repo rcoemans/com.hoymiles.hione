@@ -1,0 +1,18 @@
+{
+  "id": "enable_cloud_fallback",
+  "title": {
+    "en": "Enable cloud fallback",
+    "nl": "Schakel cloud-fallback in"
+  },
+  "hint": {
+    "en": "Enable automatic fallback to cloud when local gateway is unreachable.",
+    "nl": "Schakel automatische fallback naar cloud in wanneer de lokale gateway onbereikbaar is."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Time to Full",
+    "nl": "Tijd tot vol"
+  },
+  "units": "h",
+  "insights": true,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/performance.svg"
+}

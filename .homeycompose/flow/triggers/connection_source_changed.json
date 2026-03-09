@@ -1,0 +1,31 @@
+{
+  "id": "connection_source_changed",
+  "title": {
+    "en": "Connection source changed",
+    "nl": "Verbindingsbron gewijzigd"
+  },
+  "hint": {
+    "en": "Triggers when the connection switches between local and cloud.",
+    "nl": "Wordt geactiveerd wanneer de verbinding wisselt tussen lokaal en cloud."
+  },
+  "tokens": [
+    {
+      "name": "source",
+      "type": "string",
+      "title": {
+        "en": "Source",
+        "nl": "Bron"
+      },
+      "example": {
+        "en": "local"
+      }
+    }
+  ],
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

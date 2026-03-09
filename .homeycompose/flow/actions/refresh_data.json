@@ -1,0 +1,18 @@
+{
+  "id": "refresh_data",
+  "title": {
+    "en": "Refresh data now",
+    "nl": "Vernieuw data nu"
+  },
+  "hint": {
+    "en": "Immediately poll the latest data from the gateway or cloud.",
+    "nl": "Haal direct de laatste gegevens op van de gateway of cloud."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

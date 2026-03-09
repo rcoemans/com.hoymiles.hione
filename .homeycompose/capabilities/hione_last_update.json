@@ -1,0 +1,12 @@
+{
+  "type": "string",
+  "title": {
+    "en": "Last Update",
+    "nl": "Laatste update"
+  },
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/graph.svg"
+}

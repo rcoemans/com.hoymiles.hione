@@ -1,0 +1,14 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Battery Runtime",
+    "nl": "Batterijlooptijd"
+  },
+  "units": "h",
+  "insights": true,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/performance.svg"
+}

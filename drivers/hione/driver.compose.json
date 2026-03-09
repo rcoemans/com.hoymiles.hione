@@ -1,0 +1,161 @@
+{
+  "name": {
+    "en": "HiOne Station",
+    "nl": "HiOne Station"
+  },
+  "class": "sensor",
+  "capabilities": [
+    "measure_battery",
+    "measure_power",
+    "meter_power",
+    "hione_pv_power",
+    "hione_battery_power",
+    "hione_grid_power",
+    "hione_load_power",
+    "hione_battery_mode",
+    "hione_daily_energy",
+    "hione_total_energy",
+    "hione_battery_state",
+    "hione_grid_state",
+    "hione_self_powered_pct",
+    "hione_battery_runtime_hours",
+    "hione_time_to_full_hours",
+    "hione_power_balance",
+    "hione_energy_state",
+    "hione_system_state",
+    "hione_connection_source",
+    "hione_gateway_online",
+    "hione_last_update"
+  ],
+  "capabilitiesOptions": {
+    "measure_power": {
+      "title": {
+        "en": "PV Power",
+        "nl": "PV-vermogen"
+      }
+    },
+    "measure_battery": {
+      "title": {
+        "en": "Battery State of Charge",
+        "nl": "Batterij laadniveau"
+      }
+    },
+    "meter_power": {
+      "title": {
+        "en": "Total Energy Generated",
+        "nl": "Totale energie opgewekt"
+      }
+    }
+  },
+  "energy": {
+    "batteries": [
+      "INTERNAL"
+    ]
+  },
+  "images": {
+    "small": "/drivers/hione/assets/images/small.png",
+    "large": "/drivers/hione/assets/images/large.png",
+    "xlarge": "/drivers/hione/assets/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "choose_connection"
+    },
+    {
+      "id": "gateway_ip"
+    },
+    {
+      "id": "login_credentials"
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "settings": [
+    {
+      "id": "gateway_ip",
+      "type": "text",
+      "label": {
+        "en": "HiBox Gateway IP Address (optional)",
+        "nl": "HiBox Gateway IP-adres (optioneel)"
+      },
+      "hint": {
+        "en": "Local LAN IP of the HiBox gateway for offline access (e.g. 192.168.1.100). Leave empty to use cloud only.",
+        "nl": "Lokaal LAN IP-adres van de HiBox gateway voor offline toegang (bijv. 192.168.1.100). Leeg laten voor cloud only."
+      },
+      "value": ""
+    },
+    {
+      "id": "cloud_api_url",
+      "type": "text",
+      "label": {
+        "en": "Cloud API URL",
+        "nl": "Cloud API URL"
+      },
+      "hint": {
+        "en": "Base URL of the S-Miles Cloud API (default: https://neapi.hoymiles.com). Only change this if Hoymiles migrates to a different endpoint.",
+        "nl": "Basis-URL van de S-Miles Cloud API (standaard: https://neapi.hoymiles.com). Wijzig dit alleen als Hoymiles naar een ander endpoint migreert."
+      },
+      "value": "https://neapi.hoymiles.com"
+    },
+    {
+      "id": "poll_interval",
+      "type": "number",
+      "label": {
+        "en": "Poll interval (seconds)",
+        "nl": "Poll-interval (seconden)"
+      },
+      "hint": {
+        "en": "How often to fetch data (30-300 seconds). Default: 60.",
+        "nl": "Hoe vaak data ophalen (30-300 seconden). Standaard: 60."
+      },
+      "value": 60,
+      "min": 30,
+      "max": 300
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Gateway info",
+        "nl": "Gateway info"
+      },
+      "children": [
+        {
+          "id": "dtu_serial",
+          "type": "label",
+          "label": {
+            "en": "Serial number",
+            "nl": "Serienummer"
+          },
+          "value": "-"
+        },
+        {
+          "id": "firmware_version",
+          "type": "label",
+          "label": {
+            "en": "Firmware version",
+            "nl": "Firmwareversie"
+          },
+          "value": "-"
+        },
+        {
+          "id": "hardware_version",
+          "type": "label",
+          "label": {
+            "en": "Hardware version",
+            "nl": "Hardwareversie"
+          },
+          "value": "-"
+        }
+      ]
+    }
+  ]
+}

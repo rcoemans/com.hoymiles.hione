@@ -1,0 +1,18 @@
+{
+  "id": "prefer_local_connection",
+  "title": {
+    "en": "Prefer local connection",
+    "nl": "Geef voorkeur aan lokale verbinding"
+  },
+  "hint": {
+    "en": "Attempt to reconnect via the local gateway.",
+    "nl": "Probeer opnieuw te verbinden via de lokale gateway."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "gateway_came_online",
+  "title": {
+    "en": "Gateway came online",
+    "nl": "Gateway kwam online"
+  },
+  "hint": {
+    "en": "Triggers when the HiBox gateway becomes reachable again.",
+    "nl": "Wordt geactiveerd wanneer de HiBox gateway weer bereikbaar is."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

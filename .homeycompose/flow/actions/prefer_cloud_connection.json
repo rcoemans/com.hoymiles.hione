@@ -1,0 +1,18 @@
+{
+  "id": "prefer_cloud_connection",
+  "title": {
+    "en": "Prefer cloud connection",
+    "nl": "Geef voorkeur aan cloudverbinding"
+  },
+  "hint": {
+    "en": "Switch to using the S-Miles Cloud API.",
+    "nl": "Schakel over naar de S-Miles Cloud API."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

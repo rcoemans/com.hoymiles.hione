@@ -1,0 +1,18 @@
+{
+  "id": "connection_is_local",
+  "title": {
+    "en": "Connection !{{is|is not}} local (LAN)",
+    "nl": "Verbinding !{{is|is niet}} lokaal (LAN)"
+  },
+  "hint": {
+    "en": "Check if the connection is via local LAN.",
+    "nl": "Controleer of de verbinding via lokaal LAN is."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

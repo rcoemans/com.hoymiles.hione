@@ -1,0 +1,18 @@
+{
+  "id": "grid_importing",
+  "title": {
+    "en": "Grid !{{is|is not}} importing power",
+    "nl": "Net !{{importeert|importeert niet}}"
+  },
+  "hint": {
+    "en": "Check if the grid is currently importing power.",
+    "nl": "Controleer of het net momenteel stroom importeert."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

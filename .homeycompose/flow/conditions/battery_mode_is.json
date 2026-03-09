@@ -1,0 +1,74 @@
+{
+  "id": "battery_mode_is",
+  "title": {
+    "en": "Battery mode !{{is|is not}}",
+    "nl": "Batterijmodus !{{is|is niet}}"
+  },
+  "titleFormatted": {
+    "en": "Battery mode !{{is|is not}} [[mode]]",
+    "nl": "Batterijmodus !{{is|is niet}} [[mode]]"
+  },
+  "hint": {
+    "en": "Check if the battery is in a specific mode.",
+    "nl": "Controleer of de batterij in een specifieke modus staat."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "mode",
+      "type": "dropdown",
+      "title": {
+        "en": "Mode",
+        "nl": "Modus"
+      },
+      "values": [
+        {
+          "id": "0",
+          "label": {
+            "en": "Self-Consumption",
+            "nl": "Eigen verbruik"
+          }
+        },
+        {
+          "id": "1",
+          "label": {
+            "en": "Economy",
+            "nl": "Economie"
+          }
+        },
+        {
+          "id": "2",
+          "label": {
+            "en": "Backup",
+            "nl": "Noodstroom"
+          }
+        },
+        {
+          "id": "3",
+          "label": {
+            "en": "Off-Grid",
+            "nl": "Off-Grid"
+          }
+        },
+        {
+          "id": "4",
+          "label": {
+            "en": "Peak Shaving",
+            "nl": "Pieksturing"
+          }
+        },
+        {
+          "id": "5",
+          "label": {
+            "en": "Time of Use",
+            "nl": "Tijdafhankelijk"
+          }
+        }
+      ]
+    }
+  ]
+}

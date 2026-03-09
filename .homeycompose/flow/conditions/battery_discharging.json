@@ -1,0 +1,18 @@
+{
+  "id": "battery_discharging",
+  "title": {
+    "en": "Battery !{{is|is not}} discharging",
+    "nl": "Batterij !{{is|is niet}} aan het ontladen"
+  },
+  "hint": {
+    "en": "Check if the battery is currently discharging.",
+    "nl": "Controleer of de batterij momenteel aan het ontladen is."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

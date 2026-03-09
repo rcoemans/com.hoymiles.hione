@@ -1,0 +1,18 @@
+{
+  "id": "battery_started_charging",
+  "title": {
+    "en": "Battery started charging",
+    "nl": "Batterij begon met laden"
+  },
+  "hint": {
+    "en": "Triggers when the battery starts charging.",
+    "nl": "Wordt geactiveerd wanneer de batterij begint met laden."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

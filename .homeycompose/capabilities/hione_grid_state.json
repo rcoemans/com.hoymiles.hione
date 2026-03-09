@@ -1,0 +1,35 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Grid State",
+    "nl": "Netstatus"
+  },
+  "values": [
+    {
+      "id": "importing",
+      "title": {
+        "en": "Importing",
+        "nl": "Importeren"
+      }
+    },
+    {
+      "id": "exporting",
+      "title": {
+        "en": "Exporting",
+        "nl": "Exporteren"
+      }
+    },
+    {
+      "id": "neutral",
+      "title": {
+        "en": "Neutral",
+        "nl": "Neutraal"
+      }
+    }
+  ],
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/graph.svg"
+}

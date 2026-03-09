@@ -1,0 +1,33 @@
+{
+  "id": "battery_soc_below",
+  "title": {
+    "en": "Battery SoC !{{is|is not}} below threshold",
+    "nl": "Batterij SoC !{{is|is niet}} onder drempel"
+  },
+  "titleFormatted": {
+    "en": "Battery SoC !{{is|is not}} below [[threshold]] %",
+    "nl": "Batterij SoC !{{is|is niet}} onder [[threshold]] %"
+  },
+  "hint": {
+    "en": "Check if the battery state of charge is below a threshold.",
+    "nl": "Controleer of het laadniveau van de batterij onder een drempel is."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "title": {
+        "en": "Threshold (%)",
+        "nl": "Drempel (%)"
+      },
+      "min": 0,
+      "max": 100,
+      "step": 1
+    }
+  ]
+}

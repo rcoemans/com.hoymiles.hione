@@ -1,0 +1,74 @@
+{
+  "id": "set_battery_mode",
+  "title": {
+    "en": "Set battery mode",
+    "nl": "Stel batterijmodus in"
+  },
+  "titleFormatted": {
+    "en": "Set battery mode to [[mode]]",
+    "nl": "Stel batterijmodus in op [[mode]]"
+  },
+  "hint": {
+    "en": "Change the battery operating mode.",
+    "nl": "Wijzig de batterijmodus."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "mode",
+      "type": "dropdown",
+      "title": {
+        "en": "Mode",
+        "nl": "Modus"
+      },
+      "values": [
+        {
+          "id": "0",
+          "label": {
+            "en": "Self-Consumption",
+            "nl": "Eigen verbruik"
+          }
+        },
+        {
+          "id": "1",
+          "label": {
+            "en": "Economy",
+            "nl": "Economie"
+          }
+        },
+        {
+          "id": "2",
+          "label": {
+            "en": "Backup",
+            "nl": "Noodstroom"
+          }
+        },
+        {
+          "id": "3",
+          "label": {
+            "en": "Off-Grid",
+            "nl": "Off-Grid"
+          }
+        },
+        {
+          "id": "4",
+          "label": {
+            "en": "Peak Shaving",
+            "nl": "Pieksturing"
+          }
+        },
+        {
+          "id": "5",
+          "label": {
+            "en": "Time of Use",
+            "nl": "Tijdafhankelijk"
+          }
+        }
+      ]
+    }
+  ]
+}

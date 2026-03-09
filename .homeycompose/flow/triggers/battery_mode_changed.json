@@ -1,0 +1,31 @@
+{
+  "id": "battery_mode_changed",
+  "title": {
+    "en": "Battery mode changed",
+    "nl": "Batterijmodus gewijzigd"
+  },
+  "hint": {
+    "en": "Triggers when the battery operating mode changes.",
+    "nl": "Wordt geactiveerd wanneer de batterijmodus verandert."
+  },
+  "tokens": [
+    {
+      "name": "mode",
+      "type": "string",
+      "title": {
+        "en": "Mode",
+        "nl": "Modus"
+      },
+      "example": {
+        "en": "Self-Consumption"
+      }
+    }
+  ],
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

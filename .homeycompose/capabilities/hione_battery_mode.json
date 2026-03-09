@@ -1,0 +1,56 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Battery Mode",
+    "nl": "Batterijmodus"
+  },
+  "values": [
+    {
+      "id": "0",
+      "title": {
+        "en": "Self-Consumption",
+        "nl": "Eigen verbruik"
+      }
+    },
+    {
+      "id": "1",
+      "title": {
+        "en": "Economy",
+        "nl": "Economie"
+      }
+    },
+    {
+      "id": "2",
+      "title": {
+        "en": "Backup",
+        "nl": "Noodstroom"
+      }
+    },
+    {
+      "id": "3",
+      "title": {
+        "en": "Off-Grid",
+        "nl": "Off-Grid"
+      }
+    },
+    {
+      "id": "4",
+      "title": {
+        "en": "Peak Shaving",
+        "nl": "Pieksturing"
+      }
+    },
+    {
+      "id": "5",
+      "title": {
+        "en": "Time of Use",
+        "nl": "Tijdafhankelijk"
+      }
+    }
+  ],
+  "insights": false,
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "icon": "/assets/on-off-button.svg"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "pv_production_started",
+  "title": {
+    "en": "PV production started",
+    "nl": "PV-productie gestart"
+  },
+  "hint": {
+    "en": "Triggers when the solar panels start producing power.",
+    "nl": "Wordt geactiveerd wanneer de zonnepanelen beginnen met stroom opwekken."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

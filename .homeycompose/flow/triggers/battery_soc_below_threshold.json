@@ -1,0 +1,44 @@
+{
+  "id": "battery_soc_below_threshold",
+  "title": {
+    "en": "Battery SoC dropped below threshold",
+    "nl": "Batterij SoC onder drempel gezakt"
+  },
+  "titleFormatted": {
+    "en": "Battery SoC dropped below [[threshold]] %",
+    "nl": "Batterij SoC onder [[threshold]] % gezakt"
+  },
+  "hint": {
+    "en": "Triggers when the battery state of charge drops below the specified threshold.",
+    "nl": "Wordt geactiveerd wanneer het laadniveau onder de opgegeven drempel zakt."
+  },
+  "tokens": [
+    {
+      "name": "value",
+      "type": "number",
+      "title": {
+        "en": "SoC (%)",
+        "nl": "SoC (%)"
+      },
+      "example": 20
+    }
+  ],
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "threshold",
+      "type": "number",
+      "title": {
+        "en": "Threshold (%)",
+        "nl": "Drempel (%)"
+      },
+      "min": 0,
+      "max": 100,
+      "step": 1
+    }
+  ]
+}

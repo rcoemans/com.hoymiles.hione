@@ -1,0 +1,42 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Energy Independence",
+    "nl": "Energieonafhankelijkheid"
+  },
+  "values": [
+    {
+      "id": "self_sufficient",
+      "title": {
+        "en": "Self-Sufficient",
+        "nl": "Zelfvoorzienend"
+      }
+    },
+    {
+      "id": "partly_importing",
+      "title": {
+        "en": "Partly Importing",
+        "nl": "Deels importerend"
+      }
+    },
+    {
+      "id": "battery_supported",
+      "title": {
+        "en": "Battery Supported",
+        "nl": "Batterij ondersteund"
+      }
+    },
+    {
+      "id": "exporting_surplus",
+      "title": {
+        "en": "Exporting Surplus",
+        "nl": "Overschot exporteren"
+      }
+    }
+  ],
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/efficiency.svg"
+}

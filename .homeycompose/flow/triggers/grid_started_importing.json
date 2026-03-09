@@ -1,0 +1,18 @@
+{
+  "id": "grid_started_importing",
+  "title": {
+    "en": "Grid started importing",
+    "nl": "Net begon met importeren"
+  },
+  "hint": {
+    "en": "Triggers when the grid starts importing power.",
+    "nl": "Wordt geactiveerd wanneer het net begint met stroom importeren."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

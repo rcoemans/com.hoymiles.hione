@@ -1,0 +1,18 @@
+{
+  "id": "disable_cloud_fallback",
+  "title": {
+    "en": "Disable cloud fallback",
+    "nl": "Schakel cloud-fallback uit"
+  },
+  "hint": {
+    "en": "Disable automatic fallback to cloud. Only use local connection.",
+    "nl": "Schakel automatische fallback naar cloud uit. Gebruik alleen lokale verbinding."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    }
+  ]
+}

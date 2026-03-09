@@ -1,1 +1,20 @@
-{}
+{
+  "errors": {
+    "poll_failed": "Could not reach the HiOne system. Check your network connection and device settings.",
+    "login_failed": "Login failed. Check your S-Miles Cloud email and password.",
+    "missing_credentials": "Missing credentials. Please re-pair the device.",
+    "local_unreachable": "Local gateway unreachable. Check the IP address in device settings.",
+    "set_mode_failed": "Could not change battery mode. Try again later."
+  },
+  "pair": {
+    "login_title": "Log in to S-Miles Cloud",
+    "login_disclaimer": "This app uses an unofficial API. Your credentials are only sent to hoymiles.com."
+  },
+  "status": {
+    "initializing": "Initializing...",
+    "polling": "Fetching data...",
+    "connected_local": "Connected (local)",
+    "connected_cloud": "Connected (cloud)",
+    "offline": "Offline"
+  }
+}
