@@ -2,5 +2,8 @@
   "1.0.0": {
     "en": "First version!",
     "nl": "Eerste versie!"
+  },
+  "1.0.1": {
+    "en": "Created a vork of another project for internal experiments"
   }
 }
