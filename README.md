@@ -3,9 +3,10 @@
 Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage system (BESS) from Homey.
 
 [![Homey App](https://img.shields.io/badge/Homey-App%20Store-00A94F?logo=homey)](https://homey.app/a/com.hoymiles.hione)
+[![Homey App Test](https://img.shields.io/badge/Homey-Test%20App-FFA500?logo=homey)](https://homey.app/en-nl/app/com.hoymiles.hione/Hoymiles-HiOne/test/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
----
+> App has not yet been submitted for certification but is available via [test](https://homey.app/en-nl/app/com.hoymiles.hione/Hoymiles-HiOne/test/) link.
 
 ## Disclaimer
 
@@ -16,8 +17,6 @@ Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage sy
 > - Hoymiles may change or discontinue these interfaces at any time without notice — app functionality may break as a result.
 > - Your **S-Miles Cloud credentials** are stored securely in Homey's encrypted device store. They are only sent to the official Hoymiles API and never to any third party.
 > - Use at your own risk. The developers accept no liability for data loss, incorrect readings, or unintended battery mode changes.
-
----
 
 ## Features
 
@@ -35,8 +34,6 @@ Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage sy
   - **Cloud only** — via S-Miles Cloud API. Requires a hoymiles.com account.
 - **Connection source indicator**: see whether data comes from local or cloud
 
----
-
 ## Requirements
 
 - Homey Pro (2019 or 2023) with firmware >= 10.0.0
@@ -45,8 +42,6 @@ Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage sy
 - For local mode: the IP address of the HiBox gateway on your LAN
 
 > **Compatibility note**: This app was designed for the HiOne (HiBox-63T-G3 gateway). Other Hoymiles products (DTU, microinverters, HYT series) are *not* supported.
-
----
 
 ## Installation
 
@@ -63,8 +58,6 @@ npm run build
 homey login
 homey app install
 ```
-
----
 
 ## Adding a device
 
@@ -91,8 +84,6 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 - The local connection uses port **10081** (configured automatically)
 
 > **Tip**: For the most reliable experience, choose **Local + Cloud**. The app will use your local network for fast data retrieval, and fall back to the cloud if the gateway is temporarily unreachable.
-
----
 
 ## Data & capabilities
 
@@ -132,8 +123,6 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 | Power Balance | PV + grid + battery - load | W |
 | Energy Independence | Self-sufficient / Partly importing / Battery supported / Exporting surplus | — |
 
----
-
 ## Flow cards
 
 ### Triggers
@@ -170,8 +159,6 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 - **Prefer cloud connection** — switch to cloud API
 - **Enable/disable cloud fallback** — control automatic fallback behaviour
 
----
-
 ## Device settings
 
 | Setting | Description | Default |
@@ -179,8 +166,6 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 | Gateway IP address | Local LAN IP of the HiBox gateway (optional) | — |
 | Cloud API URL | Base URL of the S-Miles Cloud API | `https://neapi.hoymiles.com` |
 | Poll interval | How often to fetch data (30–300 seconds) | 60 |
-
----
 
 ## How it works
 
@@ -202,8 +187,6 @@ For local communication, the app connects to the HiBox-63T-G3 gateway over TCP p
 - Real-time data, energy storage data, and battery mode control are all available locally
 - Polling interval: 60 seconds (aggressive polling below 30s can disrupt cloud connectivity)
 
----
-
 ## Known limitations
 
 | Limitation | Detail |
@@ -214,15 +197,11 @@ For local communication, the app connects to the HiBox-63T-G3 gateway over TCP p
 | Local polling | Intervals below 30 seconds can disrupt cloud and mobile app connectivity |
 | Battery capacity | Battery runtime estimates assume 5 kWh usable capacity |
 
----
-
 ## Security considerations
 
 - **Cloud credentials** are stored in Homey's encrypted device store and are only transmitted to the official Hoymiles S-Miles Cloud API (`neapi.hoymiles.com`). They are never sent to any third party.
 - **Local communication** does not require authentication. Anyone on your local network with access to the HiBox gateway IP can read data and control the battery mode. This is a limitation of the HiBox gateway, not of this app.
 - The password is **MD5-hashed** before being sent to the Hoymiles cloud API (as required by their API).
-
----
 
 ## Credits
 
@@ -237,8 +216,6 @@ Pull requests and issue reports are welcome on [GitHub](https://github.com/rcoem
 This Homey app builds on existing community efforts around the Hoymiles ecosystem.
 
 - **Inspiration:** [Hoymiles HiOne — Homey App](https://github.com/ItsRaYnor/homey-app-hoymiles-hione)
-
----
 
 ## License
 
