@@ -4,7 +4,7 @@ Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage sy
 
 [![Homey App](https://img.shields.io/badge/Homey-App%20Store-00A94F?logo=homey)](https://homey.app/a/com.hoymiles.hione)
 [![Homey App Test](https://img.shields.io/badge/Homey-Test%20App-FFA500?logo=homey)](https://homey.app/en-nl/app/com.hoymiles.hione/Hoymiles-HiOne/test/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 
 > App has not yet been submitted for certification but is available via [test](https://homey.app/en-nl/app/com.hoymiles.hione/Hoymiles-HiOne/test/) link.
 
@@ -216,7 +216,3 @@ Pull requests and issue reports are welcome on [GitHub](https://github.com/rcoem
 This Homey app builds on existing community efforts around the Hoymiles ecosystem.
 
 - **Inspiration:** [Hoymiles HiOne — Homey App](https://github.com/ItsRaYnor/homey-app-hoymiles-hione)
-
-## License
-
-MIT — see [LICENSE](LICENSE)
