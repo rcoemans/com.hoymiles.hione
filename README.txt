@@ -21,14 +21,15 @@ ADDING A DEVICE
 2. Tap + and search for "Hoymiles HiOne"
 3. Select HiOne Station
 4. Choose your connection mode:
-   - Local (LAN): enter the IP address of your HiBox gateway
-   - Local + Cloud: enter the gateway IP, then log in with your S-Miles Cloud credentials
+   - Local (LAN): enter the IP address and port (default 10081) of your HiBox gateway
+   - Local + Cloud: enter the gateway IP and port, then log in with your S-Miles Cloud credentials
    - Cloud only: log in with your S-Miles Cloud email and password
 5. Select your station from the list
 6. Data refreshes every 60 seconds
 
 FINDING YOUR HIBOX IP ADDRESS
 Check your router's admin page under connected devices. Look for a device named DTUBI-... or HiBox.
+The local connection uses TCP port 10081 by default (configurable during pairing and in device settings).
 Tip: use Local + Cloud for the most reliable experience.
 
 FLOW CARDS

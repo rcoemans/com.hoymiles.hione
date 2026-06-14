@@ -21,14 +21,15 @@ APPARAAT TOEVOEGEN
 2. Tik op + en zoek naar "Hoymiles HiOne"
 3. Selecteer HiOne Station
 4. Kies je verbindingsmodus:
-   - Lokaal (LAN): voer het IP-adres van je HiBox gateway in
-   - Lokaal + Cloud: voer het gateway IP in en log daarna in met je S-Miles Cloud inloggegevens
+   - Lokaal (LAN): voer het IP-adres en de poort (standaard 10081) van je HiBox gateway in
+   - Lokaal + Cloud: voer het gateway IP en de poort in en log daarna in met je S-Miles Cloud inloggegevens
    - Alleen Cloud: log in met je S-Miles Cloud e-mail en wachtwoord
 5. Selecteer je station uit de lijst
 6. Data wordt elke 60 seconden vernieuwd
 
 HIBOX IP-ADRES VINDEN
 Controleer de beheerpagina van je router onder verbonden apparaten. Zoek naar een apparaat genaamd DTUBI-... of HiBox.
+De lokale verbinding gebruikt standaard TCP-poort 10081 (configureerbaar tijdens koppeling en in apparaatinstellingen).
 Tip: gebruik Lokaal + Cloud voor de beste ervaring.
 
 FLOW CARDS

@@ -69,8 +69,8 @@ After installing the app, you need to add a device to start monitoring your HiOn
 4. Search for **"Hoymiles HiOne"** or find it under the **Energy** category
 5. Tap **HiOne Station**
 6. Choose your connection mode:
-   - **Local (LAN)** — enter the IP address of your HiBox gateway (find it in your router under connected devices, look for `DTUBI-...` or `HiBox`)
-   - **Local + Cloud** — enter the gateway IP first, then log in with your S-Miles Cloud credentials
+   - **Local (LAN)** — enter the IP address of your HiBox gateway and port (default 10081). Find the IP in your router under connected devices, look for `DTUBI-...` or `HiBox`.
+   - **Local + Cloud** — enter the gateway IP and port first, then log in with your S-Miles Cloud credentials
    - **Cloud only** — log in with your S-Miles Cloud email and password
 7. Select your station from the list
 8. Done — data refreshes every 60 seconds
@@ -81,7 +81,7 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 
 - Check your router's admin page under connected/DHCP devices
 - Look for a device named `DTUBI-...` or `HiBox`
-- The local connection uses port **10081** (configured automatically)
+- The local connection uses TCP port **10081** by default (configurable during pairing and in device settings)
 
 > **Tip**: For the most reliable experience, choose **Local + Cloud**. The app will use your local network for fast data retrieval, and fall back to the cloud if the gateway is temporarily unreachable.
 
@@ -164,6 +164,7 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 | Setting | Description | Default |
 |---|---|---|
 | Gateway IP address | Local LAN IP of the HiBox gateway (optional) | — |
+| Gateway port | TCP port of the HiBox gateway | 10081 |
 | Cloud API URL | Base URL of the S-Miles Cloud API | `https://neapi.hoymiles.com` |
 | Poll interval | How often to fetch data (30–300 seconds) | 60 |
 
@@ -180,11 +181,12 @@ Key endpoints:
 
 ### Local API (HiBox gateway)
 
-For local communication, the app connects to the HiBox-63T-G3 gateway over TCP port 10081 using protobuf-encoded messages. This is the same protocol used by the Hoymiles mobile app on your local network.
+For local communication, the app connects to the HiBox-63T-G3 gateway over TCP (default port 10081) using protobuf-encoded messages. This is the same protocol used by the Hoymiles mobile app on your local network.
 
 - No authentication required on the local network
-- Messages use a binary frame with `HM` header, command ID, sequence number, and CRC16
+- Messages use a binary frame with `HM` header, command ID, sequence number, and CRC-16/ARC checksum
 - Real-time data, energy storage data, and battery mode control are all available locally
+- The port is configurable in device settings (default: 10081)
 - Polling interval: 60 seconds (aggressive polling below 30s can disrupt cloud connectivity)
 
 ## Known limitations
@@ -216,3 +218,6 @@ Pull requests and issue reports are welcome on [GitHub](https://github.com/rcoem
 This Homey app builds on existing community efforts around the Hoymiles ecosystem.
 
 - **Inspiration:** [Hoymiles HiOne — Homey App](https://github.com/ItsRaYnor/homey-app-hoymiles-hione)
+- **Local protocol reference:** [hoymiles-wifi](https://github.com/suaveolent/hoymiles-wifi) — Python library for local DTU communication via protobuf (MIT)
+- **Cloud API reference:** [homeassistant-hoymiles-cloud](https://github.com/Philra94/homeassistant-hoymiles-cloud) — Home Assistant integration for Hoymiles Cloud API
+- **API documentation:** [hoymiles-api](https://github.com/Xinayder/hoymiles-api) — Reverse-engineered Hoymiles API docs
