@@ -49,7 +49,7 @@ module.exports = class HiOneDevice extends Homey.Device {
   }
 
   async onSettings({ newSettings, changedKeys }: { newSettings: any; changedKeys: string[] }) {
-    if (changedKeys.includes('gateway_ip') || changedKeys.includes('cloud_api_url')) {
+    if (changedKeys.includes('gateway_ip') || changedKeys.includes('gateway_port') || changedKeys.includes('cloud_api_url')) {
       this.log('Connection settings changed — reinitialising');
       this._createHybrid();
       this._hybrid.probeLocal().catch(() => {});
@@ -298,15 +298,20 @@ module.exports = class HiOneDevice extends Homey.Device {
     const store     = this.getStore();
     const settings  = this.getSettings();
     const gatewayIp = (settings && settings.gateway_ip) || store.gatewayIp || null;
+    const gatewayPort = (settings && settings.gateway_port) || store.gatewayPort || 10081;
 
     const baseUrl = (settings && settings.cloud_api_url)
       || this.homey.settings.get('cloud_api_url')
       || undefined;
 
+    const email    = store.email    || (this.homey.settings.get('cloud_username') || null);
+    const password = store.password || (this.homey.settings.get('cloud_password') || null);
+
     this._hybrid = new HoymilesHybrid({
       gatewayIp,
-      email:     store.email,
-      password:  store.password,
+      gatewayPort,
+      email,
+      password,
       stationId: this.getData().stationId,
       baseUrl,
       log:       this.log.bind(this),

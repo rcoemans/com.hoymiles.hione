@@ -45,30 +45,38 @@
     <h3 id='t-title'>HiBox gateway IP address</h3>
     <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>NL</button>
   </div>
-  <div class='tip' id='t-tip'>Find the IP in your router under 'connected devices'.<br>Look for <strong>DTUBI-…</strong> or <strong>HiBox</strong>.</div>
+  <div class='tip' id='t-tip'>Find the IP in your router under 'connected devices'.<br>Look for <strong>DTS-…</strong>, <strong>DTUBI-…</strong> or <strong>HiBox</strong>.<br>Tip: give the gateway a <strong>fixed IP address</strong> (DHCP reservation) in your router so the local connection keeps working.</div>
   <label>
-    <span id='t-label-text'>IP address</span>
+    <span id='t-label-ip'>IP address</span>
     <input type='text' id='ip' placeholder='192.168.1.100'>
   </label>
-  <div class='hint' id='t-hint'>Port 10081 is used automatically.</div>
+  <div style='margin-top: 14px;'>
+    <label>
+      <span id='t-label-port'>Port</span>
+      <input type='number' id='port' value='10081' min='1' max='65535' placeholder='10081'>
+    </label>
+    <div class='hint' id='t-hint-port'>TCP port of the HiBox gateway (default: 10081).</div>
+  </div>
   <div class='error' id='error'></div>
   <button class='btn-primary' id='t-next' onclick='proceed()'>Next</button>
   <script>
     var i18n = {
       nl: {
         title: 'IP-adres HiBox gateway',
-        tip: 'Vind het IP in je router onder \'verbonden apparaten\'.<br>Zoek op <strong>DTUBI-\u2026</strong> of <strong>HiBox</strong>.',
-        label: 'IP-adres',
-        hint: 'Poort 10081 wordt automatisch gebruikt.',
+        tip: 'Vind het IP in je router onder \'verbonden apparaten\'.<br>Zoek op <strong>DTS-\u2026</strong>, <strong>DTUBI-\u2026</strong> of <strong>HiBox</strong>.<br>Tip: geef de gateway een <strong>vast IP-adres</strong> (DHCP-reservering) in je router zodat de lokale verbinding blijft werken.',
+        labelIp: 'IP-adres',
+        labelPort: 'Poort',
+        hintPort: 'TCP-poort van de HiBox gateway (standaard: 10081).',
         next: 'Volgende',
         errorEmpty: 'Vul een IP-adres in.',
         errorInvalid: 'Ongeldig IP-adres formaat.'
       },
       en: {
         title: 'HiBox gateway IP address',
-        tip: 'Find the IP in your router under \'connected devices\'.<br>Look for <strong>DTUBI-\u2026</strong> or <strong>HiBox</strong>.',
-        label: 'IP address',
-        hint: 'Port 10081 is used automatically.',
+        tip: 'Find the IP in your router under \'connected devices\'.<br>Look for <strong>DTS-\u2026</strong>, <strong>DTUBI-\u2026</strong> or <strong>HiBox</strong>.<br>Tip: give the gateway a <strong>fixed IP address</strong> (DHCP reservation) in your router so the local connection keeps working.',
+        labelIp: 'IP address',
+        labelPort: 'Port',
+        hintPort: 'TCP port of the HiBox gateway (default: 10081).',
         next: 'Next',
         errorEmpty: 'Please enter an IP address.',
         errorInvalid: 'Invalid IP address format.'
@@ -82,8 +90,9 @@
       var t = i18n[lang] || i18n.en;
       document.getElementById('t-title').textContent = t.title;
       document.getElementById('t-tip').innerHTML = t.tip;
-      document.getElementById('t-label-text').textContent = t.label;
-      document.getElementById('t-hint').textContent = t.hint;
+      document.getElementById('t-label-ip').textContent = t.labelIp;
+      document.getElementById('t-label-port').textContent = t.labelPort;
+      document.getElementById('t-hint-port').textContent = t.hintPort;
       document.getElementById('t-next').textContent = t.next;
       document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'EN' : 'NL';
     }
@@ -92,7 +101,16 @@
       applyLang(_lang === 'nl' ? 'en' : 'nl');
     }
 
-    Homey.getLanguage().then(function(lang) { applyLang(lang); }).catch(function() {});
+    Homey.getLanguage().then(function(lang) {
+      var short = (lang || '').split('-')[0].toLowerCase();
+      if (short === 'nl') applyLang('nl');
+      else applyLang('en');
+    }).catch(function() {});
+
+    Homey.emit('get_defaults').then(function(defaults) {
+      if (defaults && defaults.gatewayIp) document.getElementById('ip').value = defaults.gatewayIp;
+      if (defaults && defaults.gatewayPort) document.getElementById('port').value = defaults.gatewayPort;
+    }).catch(function() {});
 
     function isValidIp(ip) {
       return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) &&
@@ -106,7 +124,8 @@
       errEl.style.display = 'none';
       if (!ip) { errEl.textContent = t.errorEmpty; errEl.style.display = 'block'; return; }
       if (!isValidIp(ip)) { errEl.textContent = t.errorInvalid; errEl.style.display = 'block'; return; }
-      await Homey.emit('set_gateway_ip', { ip });
+      var port = parseInt(document.getElementById('port').value) || 10081;
+      await Homey.emit('set_gateway_ip', { ip: ip, port: port });
       var mode = await Homey.emit('get_connection_mode');
       if (mode === 'local') {
         Homey.showView('list_devices');

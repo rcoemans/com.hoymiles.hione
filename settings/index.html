@@ -47,14 +47,40 @@
   </div>
 
   <div class='disclaimer' id='t-disclaimer'>
-    Only change the API URL if Hoymiles migrates to a different endpoint.
-    The default URL is <strong>https://neapi.hoymiles.com</strong>.
+    Configure app-level defaults below. These settings are used as defaults when pairing new devices.
   </div>
 
-  <label>Cloud API URL
+  <h3 style='font-size:14px; margin-bottom:10px;' id='t-section-local'>Local connection</h3>
+  <label>
+    <span id='t-label-ip'>Gateway IP address</span>
+    <input type='text' id='gateway_ip' placeholder='192.168.1.100'>
+  </label>
+  <div class='hint' id='t-hint-ip'>Local LAN IP address of the HiBox gateway.</div>
+
+  <label style='margin-top:14px;'>
+    <span id='t-label-port'>Gateway port</span>
+    <input type='number' id='gateway_port' value='10081' min='1' max='65535' placeholder='10081'>
+  </label>
+  <div class='hint' id='t-hint-port'>TCP port of the HiBox gateway (default: 10081).</div>
+
+  <h3 style='font-size:14px; margin-top:20px; margin-bottom:10px;' id='t-section-cloud'>S-Miles Cloud</h3>
+  <label>
+    <span id='t-label-username'>S-Miles Cloud username</span>
+    <input type='email' id='cloud_username' placeholder='you@example.com'>
+  </label>
+  <div class='hint' id='t-hint-username'>Email address used to log in at hoymiles.com.</div>
+
+  <label style='margin-top:14px;'>
+    <span id='t-label-password'>S-Miles Cloud password</span>
+    <input type='password' id='cloud_password'>
+  </label>
+  <div class='hint' id='t-hint-password'>Password is stored securely on your Homey.</div>
+
+  <label style='margin-top:14px;'>
+    <span id='t-label-url'>Cloud API URL</span>
     <input type='url' id='cloud_api_url' placeholder='https://neapi.hoymiles.com'>
   </label>
-  <div class='hint' id='t-hint'>Base URL of the S-Miles Cloud API. Leave empty for the default URL.</div>
+  <div class='hint' id='t-hint-url'>Base URL of the S-Miles Cloud API. Leave empty for the default URL.</div>
 
   <button class='btn-primary' id='save'>Save</button>
   <div class='status' id='status'></div>
@@ -63,21 +89,43 @@
     var i18n = {
       nl: {
         title: 'Hoymiles HiOne — Instellingen',
-        disclaimer: 'Wijzig de API URL alleen als Hoymiles naar een ander endpoint migreert. De standaard URL is <strong>https://neapi.hoymiles.com</strong>.',
-        hint: 'Basis-URL van de S-Miles Cloud API. Laat leeg voor de standaard URL.',
+        disclaimer: 'Configureer hieronder de app-brede standaardinstellingen. Deze worden gebruikt als standaard bij het koppelen van nieuwe apparaten.',
+        sectionLocal: 'Lokale verbinding',
+        labelIp: 'Gateway IP-adres',
+        hintIp: 'Lokaal LAN IP-adres van de HiBox gateway.',
+        labelPort: 'Gateway poort',
+        hintPort: 'TCP-poort van de HiBox gateway (standaard: 10081).',
+        sectionCloud: 'S-Miles Cloud',
+        labelUsername: 'S-Miles Cloud gebruikersnaam',
+        hintUsername: 'E-mailadres waarmee je inlogt op hoymiles.com.',
+        labelPassword: 'S-Miles Cloud wachtwoord',
+        hintPassword: 'Wachtwoord wordt veilig opgeslagen op je Homey.',
+        labelUrl: 'Cloud API URL',
+        hintUrl: 'Basis-URL van de S-Miles Cloud API. Laat leeg voor de standaard URL.',
         save: 'Opslaan',
         invalidUrl: 'Ongeldige URL. Gebruik het format https://...',
         saveFailed: 'Opslaan mislukt: ',
-        saveOk: 'Opgeslagen! Bestaande apparaten gebruiken de nieuwe URL na herstart.'
+        saveOk: 'Opgeslagen! Bestaande apparaten gebruiken de nieuwe instellingen na herstart.'
       },
       en: {
         title: 'Hoymiles HiOne — Settings',
-        disclaimer: 'Only change the API URL if Hoymiles migrates to a different endpoint. The default URL is <strong>https://neapi.hoymiles.com</strong>.',
-        hint: 'Base URL of the S-Miles Cloud API. Leave empty for the default URL.',
+        disclaimer: 'Configure app-level defaults below. These settings are used as defaults when pairing new devices.',
+        sectionLocal: 'Local connection',
+        labelIp: 'Gateway IP address',
+        hintIp: 'Local LAN IP address of the HiBox gateway.',
+        labelPort: 'Gateway port',
+        hintPort: 'TCP port of the HiBox gateway (default: 10081).',
+        sectionCloud: 'S-Miles Cloud',
+        labelUsername: 'S-Miles Cloud username',
+        hintUsername: 'Email address used to log in at hoymiles.com.',
+        labelPassword: 'S-Miles Cloud password',
+        hintPassword: 'Password is stored securely on your Homey.',
+        labelUrl: 'Cloud API URL',
+        hintUrl: 'Base URL of the S-Miles Cloud API. Leave empty for the default URL.',
         save: 'Save',
         invalidUrl: 'Invalid URL. Use the format https://...',
         saveFailed: 'Save failed: ',
-        saveOk: 'Saved! Existing devices will use the new URL after restart.'
+        saveOk: 'Saved! Existing devices will use the new settings after restart.'
       }
     };
 
@@ -87,8 +135,19 @@
       _lang = lang;
       var t = i18n[lang] || i18n.en;
       document.getElementById('t-title').textContent = t.title;
-      document.getElementById('t-disclaimer').innerHTML = t.disclaimer;
-      document.getElementById('t-hint').textContent = t.hint;
+      document.getElementById('t-disclaimer').textContent = t.disclaimer;
+      document.getElementById('t-section-local').textContent = t.sectionLocal;
+      document.getElementById('t-label-ip').textContent = t.labelIp;
+      document.getElementById('t-hint-ip').textContent = t.hintIp;
+      document.getElementById('t-label-port').textContent = t.labelPort;
+      document.getElementById('t-hint-port').textContent = t.hintPort;
+      document.getElementById('t-section-cloud').textContent = t.sectionCloud;
+      document.getElementById('t-label-username').textContent = t.labelUsername;
+      document.getElementById('t-hint-username').textContent = t.hintUsername;
+      document.getElementById('t-label-password').textContent = t.labelPassword;
+      document.getElementById('t-hint-password').textContent = t.hintPassword;
+      document.getElementById('t-label-url').textContent = t.labelUrl;
+      document.getElementById('t-hint-url').textContent = t.hintUrl;
       document.getElementById('save').textContent = t.save;
       document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'EN' : 'NL';
     }
@@ -99,13 +158,19 @@
 
     function onHomeyReady(Homey) {
       Homey.getLanguage(function(err, lang) {
-        if (!err && lang) applyLang(lang);
+        if (!err && lang) {
+          var short = (lang || '').split('-')[0].toLowerCase();
+          applyLang(short === 'nl' ? 'nl' : 'en');
+        }
       });
 
-      Homey.get('cloud_api_url', function(err, value) {
-        if (!err && value) {
-          document.getElementById('cloud_api_url').value = value;
-        }
+      var fields = ['gateway_ip', 'gateway_port', 'cloud_username', 'cloud_password', 'cloud_api_url'];
+      fields.forEach(function(key) {
+        Homey.get(key, function(err, value) {
+          if (!err && value != null) {
+            document.getElementById(key).value = value;
+          }
+        });
       });
 
       document.getElementById('save').addEventListener('click', function() {
@@ -122,16 +187,37 @@
           return;
         }
 
-        Homey.set('cloud_api_url', url || null, function(err) {
-          if (err) {
-            statusEl.textContent = t.saveFailed + err.message;
-            statusEl.className = 'status err';
-          } else {
-            statusEl.textContent = t.saveOk;
-            statusEl.className = 'status ok';
-          }
-          statusEl.style.display = 'block';
-        });
+        var ip       = document.getElementById('gateway_ip').value.trim() || null;
+        var port     = parseInt(document.getElementById('gateway_port').value) || 10081;
+        var username = document.getElementById('cloud_username').value.trim() || null;
+        var password = document.getElementById('cloud_password').value || null;
+
+        var pending = 0;
+        var failed = false;
+
+        function saveKey(key, val) {
+          pending++;
+          Homey.set(key, val, function(err) {
+            if (err && !failed) {
+              failed = true;
+              statusEl.textContent = t.saveFailed + err.message;
+              statusEl.className = 'status err';
+              statusEl.style.display = 'block';
+            }
+            pending--;
+            if (pending === 0 && !failed) {
+              statusEl.textContent = t.saveOk;
+              statusEl.className = 'status ok';
+              statusEl.style.display = 'block';
+            }
+          });
+        }
+
+        saveKey('gateway_ip', ip);
+        saveKey('gateway_port', port);
+        saveKey('cloud_username', username);
+        saveKey('cloud_password', password);
+        saveKey('cloud_api_url', url || null);
       });
 
       Homey.ready();

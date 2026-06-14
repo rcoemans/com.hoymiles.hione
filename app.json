@@ -902,7 +902,7 @@
         "en": "HiOne Station",
         "nl": "HiOne Station"
       },
-      "class": "sensor",
+      "class": "solarpanel",
       "capabilities": [
         "measure_battery",
         "measure_power",
@@ -947,6 +947,7 @@
         }
       },
       "energy": {
+        "cumulative": true,
         "batteries": [
           "INTERNAL"
         ]
@@ -983,14 +984,29 @@
           "id": "gateway_ip",
           "type": "text",
           "label": {
-            "en": "HiBox Gateway IP Address (optional)",
-            "nl": "HiBox Gateway IP-adres (optioneel)"
+            "en": "Gateway IP address",
+            "nl": "Gateway IP-adres"
           },
           "hint": {
-            "en": "Local LAN IP of the HiBox gateway for offline access (e.g. 192.168.1.100). Leave empty to use cloud only.",
-            "nl": "Lokaal LAN IP-adres van de HiBox gateway voor offline toegang (bijv. 192.168.1.100). Leeg laten voor cloud only."
+            "en": "Local LAN IP of the HiBox gateway for local access (e.g. 192.168.1.100). Leave empty to use cloud only.",
+            "nl": "Lokaal LAN IP-adres van de HiBox gateway voor lokale toegang (bijv. 192.168.1.100). Leeg laten voor cloud only."
           },
           "value": ""
+        },
+        {
+          "id": "gateway_port",
+          "type": "number",
+          "label": {
+            "en": "Gateway port",
+            "nl": "Gateway poort"
+          },
+          "hint": {
+            "en": "TCP port of the HiBox gateway (default: 10081).",
+            "nl": "TCP-poort van de HiBox gateway (standaard: 10081)."
+          },
+          "value": 10081,
+          "min": 1,
+          "max": 65535
         },
         {
           "id": "cloud_api_url",

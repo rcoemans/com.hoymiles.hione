@@ -16,12 +16,19 @@ module.exports = class HiOneDriver extends Homey.Driver {
     let _email: string | null     = null;
     let _password: string | null  = null;
     let _gatewayIp: string | null = null;
+    let _gatewayPort: number      = 10081;
 
     const _api = new HoymilesApi({
       log:     this.log.bind(this),
       error:   this.error.bind(this),
       baseUrl: this.homey.settings.get('cloud_api_url') || undefined,
     });
+
+    // Read app-level settings as defaults
+    const appIp   = this.homey.settings.get('gateway_ip') || null;
+    const appPort = this.homey.settings.get('gateway_port') || 10081;
+    if (appIp)   _gatewayIp   = appIp;
+    if (appPort) _gatewayPort = Number(appPort) || 10081;
 
     // Step 1: user picks connection mode
     session.setHandler('set_connection_mode', async ({ mode }: { mode: string }) => {
@@ -30,10 +37,11 @@ module.exports = class HiOneDriver extends Homey.Driver {
       return true;
     });
 
-    // Step 2a: local IP
-    session.setHandler('set_gateway_ip', async ({ ip }: { ip: string }) => {
+    // Step 2a: local IP + port
+    session.setHandler('set_gateway_ip', async ({ ip, port }: { ip: string; port?: number }) => {
       _gatewayIp = ip || null;
-      this.log('Gateway IP: ' + (_gatewayIp || 'none'));
+      _gatewayPort = (port && port > 0) ? port : 10081;
+      this.log('Gateway IP: ' + (_gatewayIp || 'none') + ':' + _gatewayPort);
       return true;
     });
 
@@ -53,6 +61,14 @@ module.exports = class HiOneDriver extends Homey.Driver {
     // Let pair views query the chosen connection mode
     session.setHandler('get_connection_mode', async () => _mode);
 
+    // Let pair views get default values from app settings
+    session.setHandler('get_defaults', async () => ({
+      gatewayIp:   _gatewayIp || '',
+      gatewayPort: _gatewayPort,
+      username:    this.homey.settings.get('cloud_username') || '',
+      password:    this.homey.settings.get('cloud_password') || '',
+    }));
+
     // Final step: build device list
     session.setHandler('list_devices', async () => {
       // LOCAL-ONLY: probe the gateway and create a single device
@@ -61,6 +77,7 @@ module.exports = class HiOneDriver extends Homey.Driver {
 
         const local = new HoymilesLocal({
           host:  _gatewayIp,
+          port:  _gatewayPort,
           log:   this.log.bind(this),
           error: this.error.bind(this),
         });
@@ -76,8 +93,8 @@ module.exports = class HiOneDriver extends Homey.Driver {
         return [{
           name,
           data:     { id: _gatewayIp, stationId: null },
-          store:    { email: null, password: null, gatewayIp: _gatewayIp },
-          settings: { gateway_ip: _gatewayIp },
+          store:    { email: null, password: null, gatewayIp: _gatewayIp, gatewayPort: _gatewayPort },
+          settings: { gateway_ip: _gatewayIp, gateway_port: _gatewayPort },
         }];
       }
 
@@ -86,8 +103,8 @@ module.exports = class HiOneDriver extends Homey.Driver {
       return stations.map((s: any) => ({
         name:     s.name,
         data:     { id: s.id, stationId: s.id },
-        store:    { email: _email, password: _password, gatewayIp: _gatewayIp },
-        settings: { gateway_ip: _gatewayIp || '' },
+        store:    { email: _email, password: _password, gatewayIp: _gatewayIp, gatewayPort: _gatewayPort },
+        settings: { gateway_ip: _gatewayIp || '', gateway_port: _gatewayPort },
       }));
     });
   }
