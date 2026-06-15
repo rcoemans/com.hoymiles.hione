@@ -10,7 +10,7 @@ FEATURES
 - Flow actions: set battery mode, refresh data, prefer local/cloud, enable/disable cloud fallback
 - Three connection modes: Local (LAN), Local + Cloud (recommended), or Cloud only
 - Modbus TCP support for DTS-G3 sticks (port 502) — automatic fallback when protobuf is unavailable
-- Homey home battery: charge/discharge power and energy count towards Homey Energy
+- Homey Energy integration: battery charge/discharge power and cumulative energy count towards Homey Energy
 - Cloud login hardening: backoff after failed attempts (up to 12h for account lockout) to protect your S-Miles account
 - Register scan diagnostic: discover available Modbus registers from the app settings page
 
@@ -59,7 +59,7 @@ Conditions:
 - Connection is/is not local (LAN)
 
 NOTE
-Existing devices must be removed and re-added to benefit from the new home battery device class (Homey Energy integration).
+Existing devices may need to be removed and re-added if new capabilities are missing after an update.
 
 DISCLAIMER
 This is an unofficial, community-developed integration. Not affiliated with or endorsed by Hoymiles Power Electronics Inc. Uses the reverse-engineered S-Miles Cloud API and/or local DTU communication. Hoymiles may change these interfaces at any time. Use at your own risk.

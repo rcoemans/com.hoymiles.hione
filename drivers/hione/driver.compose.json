@@ -3,7 +3,7 @@
     "en": "HiOne Station",
     "nl": "HiOne Station"
   },
-  "class": "homebattery",
+  "class": "solarpanel",
   "capabilities": [
     "measure_battery",
     "measure_power",

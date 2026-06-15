@@ -33,7 +33,7 @@ Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage sy
   - **Local + Cloud** — local as primary, S-Miles Cloud as fallback. Best reliability.
   - **Cloud only** — via S-Miles Cloud API. Requires a hoymiles.com account.
 - **Modbus TCP support** for DTS-G3 sticks — automatic fallback when protobuf is unavailable
-- **Homey home battery** — the device is registered as a Homey `homebattery`, so charge/discharge power and energy count towards **Homey Energy**
+- **Homey Energy integration** — battery charge/discharge power and cumulative energy are reported to Homey Energy via the device’s energy configuration
 - **Cloud login hardening** — exponential backoff after failed login attempts (up to 12 hours for account lockout) to protect your S-Miles account
 - **Register scan diagnostic** — discover available Modbus registers on your DTS-G3 stick from the app settings page
 - **Connection source indicator**: see whether data comes from local or cloud
@@ -248,7 +248,7 @@ To protect your S-Miles Cloud account from repeated failed login attempts (which
 |---|---|
 | Unofficial API | May break if Hoymiles updates their backend or local protocol |
 | Write operations | Only battery mode can be changed; charge limits and schedules are not yet supported |
-| Device class change | Existing devices must be removed and re-added to benefit from the new `homebattery` device class (Homey Energy integration) |
+| Device re-pair | Existing devices may need to be removed and re-added if new capabilities are missing after an update |
 | HiOne only | Not tested with DTU, micro-inverters, or HYT series |
 | Local polling | Intervals below 30 seconds can disrupt cloud and mobile app connectivity |
 | Battery capacity | Battery runtime estimates assume 5 kWh usable capacity |

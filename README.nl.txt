@@ -10,7 +10,7 @@ FUNCTIES
 - Flow acties: batterijmodus instellen, data vernieuwen, voorkeur lokaal/cloud, cloud-fallback in-/uitschakelen
 - Drie verbindingsmodi: Lokaal (LAN), Lokaal + Cloud (aanbevolen), of alleen Cloud
 - Modbus TCP-ondersteuning voor DTS-G3 sticks (poort 502) — automatische terugval wanneer protobuf niet beschikbaar is
-- Homey-thuisbatterij: laad-/ontlaadvermogen en energie tellen mee in Homey Energy
+- Homey Energy integratie: batterij laad-/ontlaadvermogen en cumulatieve energie tellen mee in Homey Energy
 - Cloud-login afgehard: wachttijd na mislukte pogingen (tot 12 uur bij accountblokkade) om je S-Miles-account te beschermen
 - Register-scan diagnose: ontdek beschikbare Modbus-registers vanuit de app-instellingen
 
@@ -59,7 +59,7 @@ Condities:
 - Verbinding is/is niet lokaal (LAN)
 
 LET OP
-Bestaande apparaten moeten verwijderd en opnieuw toegevoegd worden voor het nieuwe thuisbatterij-apparaattype (Homey Energy integratie).
+Bestaande apparaten moeten mogelijk verwijderd en opnieuw toegevoegd worden als nieuwe mogelijkheden ontbreken na een update.
 
 DISCLAIMER
 Dit is een onofficiële, door de community ontwikkelde integratie. Niet gelieerd aan of goedgekeurd door Hoymiles Power Electronics Inc. Maakt gebruik van de reverse-engineered S-Miles Cloud API en/of lokale DTU-communicatie. Hoymiles kan deze interfaces op elk moment wijzigen. Gebruik op eigen risico.

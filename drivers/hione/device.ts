@@ -146,8 +146,9 @@ module.exports = class HiOneDevice extends Homey.Device {
       this._appLog('DEV', 'Polling...');
       const rawData = await this._hybrid.getData();
       this.log('Raw data received (source: ' + (rawData?.source || 'unknown') + ')');
-      this._appLog('DEV', 'Raw data: pv=' + rawData?.pvPower + ' bat=' + rawData?.batteryPower + ' soc=' + rawData?.batterySoc + ' grid=' + rawData?.gridPower + ' load=' + rawData?.loadPower);
+      this._appLog('DEV', 'Raw data: pv=' + rawData?.pvPower + ' bat=' + rawData?.batteryPower + ' soc=' + rawData?.batterySoc + ' grid=' + rawData?.gridPower + ' load=' + rawData?.loadPower + ' daily=' + rawData?.dailyEnergy + ' total=' + rawData?.totalEnergy + ' mode=' + rawData?.batteryMode);
       const data = HioneMapper.normalize(rawData);
+      this._appLog('DEV', 'Mapped: pv=' + data.pvPower + ' bat=' + data.batteryPower + ' soc=' + data.batterySoc + ' grid=' + data.gridPower + ' load=' + data.loadPower + ' chg=' + data.batteryChargePower + ' dis=' + data.batteryDischargePower + ' daily=' + data.dailyEnergy + ' total=' + data.totalEnergy);
 
       // ── Core capabilities ────────────────────────────────────────────
 
