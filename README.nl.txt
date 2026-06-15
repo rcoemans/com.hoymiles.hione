@@ -36,8 +36,14 @@ Controleer de beheerpagina van je router onder verbonden apparaten. Zoek naar ee
 De lokale verbinding gebruikt standaard TCP-poort 10081 (configureerbaar tijdens koppeling en in apparaatinstellingen).
 Tip: gebruik Lokaal + Cloud voor de beste ervaring.
 
+APPARAATNAAM
+De apparaatnaam weerspiegelt de verbindingsmodus:
+  Lokaal:  {Plantnaam} (Local {IP})    bijv. Coemans (Local 192.168.1.116)
+  Hybride: {Plantnaam} (Hybrid {IP})   bijv. Coemans (Hybrid 192.168.1.116)
+  Cloud:   {Plantnaam} (Cloud)          bijv. Coemans (Cloud)
+
 APPARAATINSTELLINGEN
-Na het koppelen kun je de verbindingsmodus (Lokaal, Hybride of alleen Cloud), S-Miles Cloud e-mail en wachtwoord, gateway IP/poort en poll-interval bekijken en wijzigen in het apparaatinstellingen-scherm — opnieuw koppelen is niet nodig. De verbindingsmodus bepaalt welke databron het apparaat gebruikt. Gateway-info (serienummer, firmware-, hardwareversie) wordt alleen-lezen weergegeven. Het apparaat tolereert tot 2 opeenvolgende fouten voordat het als niet-beschikbaar wordt gemarkeerd (met de specifieke foutreden), en herstelt automatisch wanneer de verbinding terugkomt.
+Na het koppelen kun je de verbindingsmodus (Lokaal, Hybride of alleen Cloud), S-Miles Cloud e-mail en wachtwoord, gateway IP/poort en poll-interval bekijken en wijzigen in het apparaatinstellingen-scherm — opnieuw koppelen is niet nodig. De verbindingsmodus bepaalt welke databron het apparaat gebruikt. Apparaatinfo-secties (DTU, Omvormer, Gateway/HiBox, Batterij) tonen serienummer, model, firmware- en hardwareversie (alleen-lezen, gevuld vanuit cloud API en/of lokale gateway). Het apparaat tolereert tot 2 opeenvolgende fouten voordat het als niet-beschikbaar wordt gemarkeerd (met de specifieke foutreden), en herstelt automatisch wanneer de verbinding terugkomt.
 
 APP-INSTELLINGEN
 De app-instellingenpagina (Homey > Apps > Hoymiles HiOne > Instellingen) laat je app-brede standaardinstellingen configureren en diagnostische logs bekijken. De logging-sectie toont de laatste 200 logregels met knoppen om te vernieuwen, kopiëren en wissen. De diagnostiek-sectie bevat een Modbus TCP register-scan (gebruikt het app-niveau Gateway IP) om beschikbare datapunten te ontdekken, met kopieer- en wisknoppen.
@@ -46,8 +52,9 @@ CLOUD DATA MAPPING
 De S-Miles Cloud API retourneert realtime data in reflux_station_data:
   pv_power = PV-vermogen (W), bms_power = Batterijvermogen (W), bms_soc = Batterij SoC (%),
   grid_power = Netvermogen (W), load_power = Huisbelasting (W).
-Energie: today_eq = Dagelijkse energie (kWh), total_eq = Totale energie (kWh).
-Batterijmodus: tou_mode (0=Eigen verbruik, 1=Economie, 2=Noodstroom, enz).
+Energie: today_eq = Dagelijkse energie (Wh geheel getal → kWh), total_eq = Totale energie (Wh geheel getal → kWh).
+Batterijmodus: tou_mode (0=Eigen verbruik, 1=Economie, 2=Noodstroom, 3=Off-Grid, 4=Pieksturing, 5=Tijdafhankelijk).
+Apparatenlijst: /pvm/api/0/dev/select_by_page geeft DTU, omvormer, gateway en batterij-info per station.
 
 FLOW CARDS
 Acties:

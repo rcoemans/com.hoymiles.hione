@@ -198,8 +198,8 @@
     {
       "type": "group",
       "label": {
-        "en": "Gateway info",
-        "nl": "Gateway info"
+        "en": "DTU info",
+        "nl": "DTU info"
       },
       "children": [
         {
@@ -212,7 +212,7 @@
           "value": "-"
         },
         {
-          "id": "firmware_version",
+          "id": "dtu_firmware",
           "type": "label",
           "label": {
             "en": "Firmware version",
@@ -221,11 +221,128 @@
           "value": "-"
         },
         {
-          "id": "hardware_version",
+          "id": "dtu_hardware",
           "type": "label",
           "label": {
             "en": "Hardware version",
             "nl": "Hardwareversie"
+          },
+          "value": "-"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Inverter info",
+        "nl": "Omvormer info"
+      },
+      "children": [
+        {
+          "id": "inverter_serial",
+          "type": "label",
+          "label": {
+            "en": "Serial number",
+            "nl": "Serienummer"
+          },
+          "value": "-"
+        },
+        {
+          "id": "inverter_model",
+          "type": "label",
+          "label": {
+            "en": "Model",
+            "nl": "Model"
+          },
+          "value": "-"
+        },
+        {
+          "id": "inverter_firmware",
+          "type": "label",
+          "label": {
+            "en": "Firmware version",
+            "nl": "Firmwareversie"
+          },
+          "value": "-"
+        },
+        {
+          "id": "inverter_hardware",
+          "type": "label",
+          "label": {
+            "en": "Hardware version",
+            "nl": "Hardwareversie"
+          },
+          "value": "-"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Gateway info (HiBox)",
+        "nl": "Gateway info (HiBox)"
+      },
+      "children": [
+        {
+          "id": "gateway_serial",
+          "type": "label",
+          "label": {
+            "en": "Serial number",
+            "nl": "Serienummer"
+          },
+          "value": "-"
+        },
+        {
+          "id": "gateway_model",
+          "type": "label",
+          "label": {
+            "en": "Model",
+            "nl": "Model"
+          },
+          "value": "-"
+        },
+        {
+          "id": "gateway_firmware",
+          "type": "label",
+          "label": {
+            "en": "Firmware version",
+            "nl": "Firmwareversie"
+          },
+          "value": "-"
+        },
+        {
+          "id": "gateway_hardware",
+          "type": "label",
+          "label": {
+            "en": "Hardware version",
+            "nl": "Hardwareversie"
+          },
+          "value": "-"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Battery info",
+        "nl": "Batterij info"
+      },
+      "children": [
+        {
+          "id": "battery_model",
+          "type": "label",
+          "label": {
+            "en": "Model",
+            "nl": "Model"
+          },
+          "value": "-"
+        },
+        {
+          "id": "battery_count",
+          "type": "label",
+          "label": {
+            "en": "Number of batteries",
+            "nl": "Aantal batterijen"
           },
           "value": "-"
         }

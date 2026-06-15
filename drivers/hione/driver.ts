@@ -85,13 +85,14 @@ module.exports = class HiOneDriver extends Homey.Driver {
           error: this.error.bind(this),
         });
 
-        let name = 'HiOne (' + _gatewayIp + ')';
+        let plantName = '';
         try {
           const info = await local.getGatewayInfo();
-          if (info.dtuSn) name = 'HiOne ' + info.dtuSn;
+          if (info.dtuSn) plantName = info.dtuSn;
         } catch (_) {
-          this.log('Could not fetch gateway info — using IP as name');
+          this.log('Could not fetch gateway info');
         }
+        const name = (plantName || 'HiOne') + ' (Local ' + _gatewayIp + ')';
 
         return [{
           name,
@@ -103,12 +104,22 @@ module.exports = class HiOneDriver extends Homey.Driver {
 
       // CLOUD or BOTH: fetch stations from S-Miles Cloud
       const stations = await _api.getStations();
-      return stations.map((s: any) => ({
-        name:     s.name,
-        data:     { id: s.id, stationId: s.id },
-        store:    { email: _email, password: _password, gatewayIp: _gatewayIp, gatewayPort: _gatewayPort, connectionMode: _mode },
-        settings: { connection_mode: _mode, cloud_username: _email || '', cloud_password: _password || '', gateway_ip: _gatewayIp || '', gateway_port: _gatewayPort },
-      }));
+      return stations.map((s: any) => {
+        let name: string;
+        if (_mode === 'both' && _gatewayIp) {
+          name = (s.name || 'HiOne') + ' (Hybrid ' + _gatewayIp + ')';
+        } else if (_mode === 'cloud') {
+          name = (s.name || 'HiOne') + ' (Cloud)';
+        } else {
+          name = s.name || 'HiOne';
+        }
+        return {
+          name,
+          data:     { id: s.id, stationId: s.id },
+          store:    { email: _email, password: _password, gatewayIp: _gatewayIp, gatewayPort: _gatewayPort, connectionMode: _mode },
+          settings: { connection_mode: _mode, cloud_username: _email || '', cloud_password: _password || '', gateway_ip: _gatewayIp || '', gateway_port: _gatewayPort },
+        };
+      });
     });
   }
 

@@ -45,9 +45,9 @@ module.exports = class HiOneDevice extends Homey.Device {
 
     this._createHybrid();
     if (this._hybrid._mode !== 'cloud') {
-      this._hybrid.probeLocal().then(() => this._fetchGatewayInfo()).catch(() => {});
+      this._hybrid.probeLocal().then(() => this._fetchDeviceInfo()).catch(() => {});
     } else {
-      this._fetchGatewayInfo();
+      this._fetchDeviceInfo();
     }
 
     this.registerCapabilityListener('hione_battery_mode', async (value: string) => {
@@ -341,41 +341,78 @@ module.exports = class HiOneDevice extends Homey.Device {
     this._prevConnectionSource = source;
   }
 
-  // ── Gateway info ────────────────────────────────────────────────────────
+  // ── Device info ────────────────────────────────────────────────────────
 
-  private async _fetchGatewayInfo() {
+  private async _fetchDeviceInfo() {
+    const updates: Record<string, string> = {};
+
+    // 1) Try local gateway info (protobuf)
     try {
-      // Try local gateway first
       const info = await this._hybrid.getGatewayInfo();
       if (info) {
-        const updates: Record<string, string> = {};
         if (info.dtuSn)       updates.dtu_serial       = info.dtuSn;
-        if (info.softwareVer) updates.firmware_version  = info.softwareVer;
-        if (info.deviceVer)   updates.hardware_version  = info.deviceVer;
-        if (Object.keys(updates).length > 0) {
-          await this.setSettings(updates);
-          this.log('Gateway info updated (local): ' + JSON.stringify(updates));
-        }
-        return;
+        if (info.softwareVer) updates.dtu_firmware      = info.softwareVer;
+        if (info.deviceVer)   updates.dtu_hardware      = info.deviceVer;
+        this.log('DTU info from local protobuf: ' + JSON.stringify(updates));
       }
     } catch (err: any) {
       this.log('Local gateway info failed: ' + err.message);
     }
-    // Try cloud station info as fallback
+
+    // 2) Try cloud device listing (DTU + inverter + gateway + batteries)
     try {
-      const stationInfo = await this._hybrid.getStationInfo();
-      if (stationInfo) {
-        const updates: Record<string, string> = {};
-        if (stationInfo.sn)              updates.dtu_serial      = stationInfo.sn;
-        if (stationInfo.firmwareVersion) updates.firmware_version = stationInfo.firmwareVersion;
-        if (stationInfo.hardwareVersion) updates.hardware_version = stationInfo.hardwareVersion;
-        if (Object.keys(updates).length > 0) {
-          await this.setSettings(updates);
-          this.log('Gateway info updated (cloud): ' + JSON.stringify(updates));
+      const devices = await this._hybrid.getDevices();
+      if (devices) {
+        if (devices.dtu) {
+          if (devices.dtu.sn && !updates.dtu_serial) updates.dtu_serial = devices.dtu.sn;
+          if (devices.dtu.firmwareVersion) updates.dtu_firmware = devices.dtu.firmwareVersion;
+          if (devices.dtu.hardwareVersion) updates.dtu_hardware = devices.dtu.hardwareVersion;
         }
+        if (devices.inverter) {
+          if (devices.inverter.sn) updates.inverter_serial = devices.inverter.sn;
+          if (devices.inverter.model) updates.inverter_model = devices.inverter.model;
+          if (devices.inverter.firmwareVersion) updates.inverter_firmware = devices.inverter.firmwareVersion;
+          if (devices.inverter.hardwareVersion) updates.inverter_hardware = devices.inverter.hardwareVersion;
+        }
+        if (devices.gateway) {
+          if (devices.gateway.sn) updates.gateway_serial = devices.gateway.sn;
+          if (devices.gateway.model) updates.gateway_model = devices.gateway.model;
+          if (devices.gateway.firmwareVersion) updates.gateway_firmware = devices.gateway.firmwareVersion;
+          if (devices.gateway.hardwareVersion) updates.gateway_hardware = devices.gateway.hardwareVersion;
+        }
+        if (devices.batteries && devices.batteries.length > 0) {
+          updates.battery_count = String(devices.batteries.length);
+          const first = devices.batteries[0];
+          if (first.model) updates.battery_model = first.model;
+        }
+        this.log('Cloud device info: ' + JSON.stringify(updates));
       }
     } catch (err: any) {
-      this.log('Cloud station info failed: ' + err.message);
+      this.log('Cloud device listing failed: ' + err.message);
+    }
+
+    // 3) Fallback: station info (limited)
+    if (!updates.dtu_serial) {
+      try {
+        const stationInfo = await this._hybrid.getStationInfo();
+        if (stationInfo) {
+          if (stationInfo.sn)              updates.dtu_serial  = stationInfo.sn;
+          if (stationInfo.firmwareVersion) updates.dtu_firmware = stationInfo.firmwareVersion;
+          if (stationInfo.hardwareVersion) updates.dtu_hardware = stationInfo.hardwareVersion;
+        }
+      } catch (err: any) {
+        this.log('Station info fallback failed: ' + err.message);
+      }
+    }
+
+    // Apply all updates
+    if (Object.keys(updates).length > 0) {
+      try {
+        await this.setSettings(updates);
+        this.log('Device info settings updated: ' + Object.keys(updates).join(', '));
+      } catch (err: any) {
+        this.log('Failed to save device info settings: ' + err.message);
+      }
     }
   }
 

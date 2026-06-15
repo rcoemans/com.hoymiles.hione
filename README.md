@@ -79,6 +79,13 @@ After installing the app, you need to add a device to start monitoring your HiOn
 7. Select your station from the list
 8. Done — data refreshes every 60 seconds
 
+### Device naming
+
+The device name reflects the connection mode:
+- **Local**: `{Plant name} (Local {IP})` — e.g. *Coemans (Local 192.168.1.116)*
+- **Hybrid**: `{Plant name} (Hybrid {IP})` — e.g. *Coemans (Hybrid 192.168.1.116)*
+- **Cloud only**: `{Plant name} (Cloud)` — e.g. *Coemans (Cloud)*
+
 ### Finding your HiBox IP address
 
 The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find its IP:
@@ -179,7 +186,12 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 | Gateway port | TCP port of the HiBox gateway | 10081 |
 | Cloud API URL | Base URL of the S-Miles Cloud API | `https://neapi.hoymiles.com` |
 | Poll interval | How often to fetch data (30–300 seconds) | 60 |
-| Gateway info | Serial number, firmware version, hardware version (read-only) | — |
+| DTU info | Serial number, firmware version, hardware version (read-only) | — |
+| Inverter info | Serial number, model, firmware version, hardware version (read-only) | — |
+| Gateway info (HiBox) | Serial number, model, firmware version, hardware version (read-only) | — |
+| Battery info | Model, number of batteries (read-only) | — |
+
+Device info (DTU, Inverter, Gateway, Battery) is populated automatically from the S-Miles Cloud API device listing endpoint and/or the local protobuf gateway.
 
 The connection mode determines which data source the device uses. You can change this after pairing without re-adding the device. Cloud credentials can also be viewed and changed in the device settings screen. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
 
@@ -224,9 +236,11 @@ Cloud data field mapping (based on verified API structure):
 - `data.reflux_station_data.bms_soc` → Battery SoC (%)
 - `data.reflux_station_data.grid_power` → Grid power (W, + import / − export)
 - `data.reflux_station_data.load_power` → Home load (W)
-- `data.today_eq` → Daily energy (kWh)
-- `data.total_eq` → Total energy (kWh)
-- `data.tou_mode` → Battery work mode
+- `data.today_eq` → Daily energy (Wh integer → converted to kWh)
+- `data.total_eq` → Total energy (Wh integer → converted to kWh)
+- `data.tou_mode` → Battery work mode (0=Self-Consumption, 1=Economy, 2=Backup, 3=Off-Grid, 4=Peak Shaving, 5=Time of Use)
+
+Device listing endpoint (`/pvm/api/0/dev/select_by_page`) returns DTU, inverter, gateway, and battery info (serial, model, firmware, hardware) per station.
 
 ### Local API (HiBox gateway)
 
