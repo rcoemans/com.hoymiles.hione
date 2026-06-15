@@ -20,6 +20,7 @@ module.exports = class HiOneDevice extends Homey.Device {
   private _prevPvProducing: boolean | null = null;
   private _prevGatewayOnline: boolean | null = null;
   private _prevConnectionSource: string | null = null;
+  private _consecutiveFailures: number = 0;
 
   async onInit() {
     this.log('HiOne device initialising...');
@@ -30,6 +31,10 @@ module.exports = class HiOneDevice extends Homey.Device {
     this._prevPvProducing = null;
     this._prevGatewayOnline = null;
     this._prevConnectionSource = null;
+    this._consecutiveFailures = 0;
+
+    // Sync store credentials → device settings (for devices paired before credential settings existed)
+    await this._syncStoreToSettings();
 
     this._createHybrid();
     this._hybrid.probeLocal().then(() => this._fetchGatewayInfo()).catch(() => {});
@@ -49,10 +54,24 @@ module.exports = class HiOneDevice extends Homey.Device {
   }
 
   async onSettings({ newSettings, changedKeys }: { newSettings: any; changedKeys: string[] }) {
-    if (changedKeys.includes('gateway_ip') || changedKeys.includes('gateway_port') || changedKeys.includes('cloud_api_url')) {
+    const needsReinit = changedKeys.includes('gateway_ip')
+      || changedKeys.includes('gateway_port')
+      || changedKeys.includes('cloud_api_url')
+      || changedKeys.includes('cloud_username')
+      || changedKeys.includes('cloud_password');
+
+    if (needsReinit) {
+      // Keep device store in sync with settings
+      if (changedKeys.includes('cloud_username') || changedKeys.includes('cloud_password')) {
+        await this.setStoreValue('email', newSettings.cloud_username || null).catch(() => {});
+        await this.setStoreValue('password', newSettings.cloud_password || null).catch(() => {});
+        this.log('Cloud credentials updated via settings');
+      }
       this.log('Connection settings changed — reinitialising');
       this._createHybrid();
+      this._consecutiveFailures = 0;
       this._hybrid.probeLocal().catch(() => {});
+      await this._poll();
     }
     if (changedKeys.includes('poll_interval')) {
       this.log('Poll interval changed to ' + newSettings.poll_interval + 's');
@@ -177,11 +196,20 @@ module.exports = class HiOneDevice extends Homey.Device {
       // ── Alarm ─────────────────────────────────────────────────────────
       await this.setCapabilityValue('alarm_generic', false);
 
+      if (this._consecutiveFailures > 0) {
+        this.log('Poll recovered after ' + this._consecutiveFailures + ' consecutive failure(s)');
+      }
+      this._consecutiveFailures = 0;
+
       if (!this.getAvailable()) await this.setAvailable();
     } catch (err: any) {
-      this.error('Poll failed: ' + err.message);
-      await this.setCapabilityValue('alarm_generic', true).catch(() => {});
-      await this.setUnavailable(this.homey.__('errors.poll_failed'));
+      this._consecutiveFailures++;
+      this.error('Poll failed (' + this._consecutiveFailures + '/3): ' + err.message);
+
+      if (this._consecutiveFailures >= 3) {
+        await this.setCapabilityValue('alarm_generic', true).catch(() => {});
+        await this.setUnavailable(this.homey.__('errors.poll_failed'));
+      }
     }
   }
 
@@ -305,6 +333,22 @@ module.exports = class HiOneDevice extends Homey.Device {
 
   // ── Hybrid instance ─────────────────────────────────────────────────────
 
+  private async _syncStoreToSettings() {
+    try {
+      const store = this.getStore();
+      const settings = this.getSettings() || {};
+      const updates: Record<string, any> = {};
+      if (store.email && !settings.cloud_username) updates.cloud_username = store.email;
+      if (store.password && !settings.cloud_password) updates.cloud_password = store.password;
+      if (Object.keys(updates).length > 0) {
+        await this.setSettings(updates);
+        this.log('Synced store credentials to device settings');
+      }
+    } catch (err: any) {
+      this.log('Could not sync store to settings: ' + err.message);
+    }
+  }
+
   private _createHybrid() {
     const store     = this.getStore();
     const settings  = this.getSettings();
@@ -315,8 +359,9 @@ module.exports = class HiOneDevice extends Homey.Device {
       || this.homey.settings.get('cloud_api_url')
       || undefined;
 
-    const email    = store.email    || (this.homey.settings.get('cloud_username') || null);
-    const password = store.password || (this.homey.settings.get('cloud_password') || null);
+    // Prefer settings (editable by user) over store (set during pairing)
+    const email    = (settings && settings.cloud_username) || store.email    || (this.homey.settings.get('cloud_username') || null);
+    const password = (settings && settings.cloud_password) || store.password || (this.homey.settings.get('cloud_password') || null);
 
     this._hybrid = new HoymilesHybrid({
       gatewayIp,

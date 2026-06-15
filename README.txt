@@ -32,6 +32,9 @@ Check your router's admin page under connected devices. Look for a device named 
 The local connection uses TCP port 10081 by default (configurable during pairing and in device settings).
 Tip: use Local + Cloud for the most reliable experience.
 
+DEVICE SETTINGS
+After pairing, you can view and change your S-Miles Cloud email and password in the device settings screen — no need to re-pair the device. The device tolerates up to 3 consecutive poll failures before marking itself unavailable, and automatically recovers when the connection is restored.
+
 FLOW CARDS
 Actions:
 - Set battery mode (Self-Consumption, Economy, Backup, Off-Grid, Peak Shaving, Time of Use)

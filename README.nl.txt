@@ -32,6 +32,9 @@ Controleer de beheerpagina van je router onder verbonden apparaten. Zoek naar ee
 De lokale verbinding gebruikt standaard TCP-poort 10081 (configureerbaar tijdens koppeling en in apparaatinstellingen).
 Tip: gebruik Lokaal + Cloud voor de beste ervaring.
 
+APPARAATINSTELLINGEN
+Na het koppelen kun je je S-Miles Cloud e-mail en wachtwoord bekijken en wijzigen in het apparaatinstellingen-scherm — opnieuw koppelen is niet nodig. Het apparaat tolereert tot 3 opeenvolgende fouten voordat het als niet-beschikbaar wordt gemarkeerd, en herstelt automatisch wanneer de verbinding terugkomt.
+
 FLOW CARDS
 Acties:
 - Batterijmodus instellen (Eigen verbruik, Economie, Noodstroom, Off-Grid, Pieksturing, Tijdafhankelijk)

@@ -168,10 +168,14 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 
 | Setting | Description | Default |
 |---|---|---|
+| Email | S-Miles Cloud login email (editable after pairing) | — |
+| Password | S-Miles Cloud password (stored securely on Homey) | — |
 | Gateway IP address | Local LAN IP of the HiBox gateway (optional) | — |
 | Gateway port | TCP port of the HiBox gateway | 10081 |
 | Cloud API URL | Base URL of the S-Miles Cloud API | `https://neapi.hoymiles.com` |
 | Poll interval | How often to fetch data (30–300 seconds) | 60 |
+
+Cloud credentials can be viewed and changed in the device settings screen after pairing — no need to re-pair the device to update your password. The device tolerates up to 3 consecutive poll failures before marking itself unavailable, and automatically recovers when the connection is restored.
 
 ## How it works
 

@@ -107,7 +107,7 @@ module.exports = class HiOneDriver extends Homey.Driver {
         name:     s.name,
         data:     { id: s.id, stationId: s.id },
         store:    { email: _email, password: _password, gatewayIp: _gatewayIp, gatewayPort: _gatewayPort },
-        settings: { gateway_ip: _gatewayIp || '', gateway_port: _gatewayPort },
+        settings: { cloud_username: _email || '', cloud_password: _password || '', gateway_ip: _gatewayIp || '', gateway_port: _gatewayPort },
       }));
     });
   }
