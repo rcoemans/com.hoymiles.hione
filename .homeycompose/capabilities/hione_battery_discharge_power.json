@@ -1,0 +1,15 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Battery Discharge Power",
+    "nl": "Batterij ontlaadvermogen"
+  },
+  "units": "W",
+  "insights": true,
+  "decimals": 0,
+  "min": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/power.svg"
+}

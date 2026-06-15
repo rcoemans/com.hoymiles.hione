@@ -1,0 +1,15 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Grid Export Power",
+    "nl": "Net exportvermogen"
+  },
+  "units": "W",
+  "insights": true,
+  "decimals": 0,
+  "min": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/graph.svg"
+}
