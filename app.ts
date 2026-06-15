@@ -8,35 +8,32 @@ const LOG_MAX = 200;
 
 module.exports = class HoymilesHiOneApp extends Homey.App {
 
-  private _logBuffer: string[] = [];
-
-  appendLog(level: string, ...args: any[]) {
-    const ts = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    const msg = `[${ts}] [${level}] ${args.map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' ')}`;
-    this._logBuffer.push(msg);
-    if (this._logBuffer.length > LOG_MAX) this._logBuffer.splice(0, this._logBuffer.length - LOG_MAX);
-    this.homey.settings.set('app_log', this._logBuffer);
-  }
-
-  clearLog() {
-    this._logBuffer = [];
-    this.homey.settings.set('app_log', []);
-  }
-
   async onInit() {
-    this._logBuffer = this.homey.settings.get('app_log') || [];
     this.log('Hoymiles HiOne app started');
 
-    // Intercept log & error to capture into ring buffer
-    const origLog = this.log.bind(this);
-    const origError = this.error.bind(this);
-    (this as any).log = (...args: any[]) => { origLog(...args); this.appendLog('INFO', ...args); };
-    (this as any).error = (...args: any[]) => { origError(...args); this.appendLog('ERROR', ...args); };
+    // ── App-level log ring buffer (safe: no class fields, no log interception) ──
+    const logBuf: string[] = this.homey.settings.get('app_log') || [];
+    const self = this;
+
+    (this as any).appendLog = function (level: string, ...args: any[]) {
+      try {
+        const ts = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        const msg = `[${ts}] [${level}] ${args.map((a: any) => typeof a === 'string' ? a : JSON.stringify(a)).join(' ')}`;
+        logBuf.push(msg);
+        if (logBuf.length > LOG_MAX) logBuf.splice(0, logBuf.length - LOG_MAX);
+        self.homey.settings.set('app_log', logBuf);
+      } catch (_) { /* never crash the app for logging */ }
+    };
+
+    (this as any).clearLog = function () {
+      logBuf.length = 0;
+      self.homey.settings.set('app_log', []);
+    };
 
     // Shared API instance; drivers can access via this.homey.app.api
     (this as any).api = new HoymilesApi({
-      log:   (...args: any[]) => (this as any).log(...args),
-      error: (...args: any[]) => (this as any).error(...args),
+      log:   (...args: any[]) => { this.log(...args); (this as any).appendLog('INFO', ...args); },
+      error: (...args: any[]) => { this.error(...args); (this as any).appendLog('ERROR', ...args); },
     });
 
     // ── Action cards ──────────────────────────────────────────────────────

@@ -22,16 +22,14 @@ module.exports = class HiOneDevice extends Homey.Device {
   private _prevConnectionSource: string | null = null;
   private _consecutiveFailures: number = 0;
 
-  async onInit() {
-    // Forward device logs to app-level log buffer for settings page visibility
-    const app = this.homey.app as any;
-    if (app && typeof app.appendLog === 'function') {
-      const origLog = this.log.bind(this);
-      const origError = this.error.bind(this);
-      (this as any).log = (...args: any[]) => { origLog(...args); app.appendLog('DEV', ...args); };
-      (this as any).error = (...args: any[]) => { origError(...args); app.appendLog('DEV-ERR', ...args); };
-    }
+  private _appLog(level: string, ...args: any[]) {
+    try {
+      const app = this.homey.app as any;
+      if (app && typeof app.appendLog === 'function') app.appendLog(level, ...args);
+    } catch (_) {}
+  }
 
+  async onInit() {
     this.log('HiOne device initialising...');
     this._prevBatteryMode = null;
     this._prevBatteryState = null;
@@ -145,8 +143,10 @@ module.exports = class HiOneDevice extends Homey.Device {
   private async _poll() {
     try {
       this.log('Polling...');
+      this._appLog('DEV', 'Polling...');
       const rawData = await this._hybrid.getData();
       this.log('Raw data received (source: ' + (rawData?.source || 'unknown') + ')');
+      this._appLog('DEV', 'Raw data: pv=' + rawData?.pvPower + ' bat=' + rawData?.batteryPower + ' soc=' + rawData?.batterySoc + ' grid=' + rawData?.gridPower + ' load=' + rawData?.loadPower);
       const data = HioneMapper.normalize(rawData);
 
       // ── Core capabilities ────────────────────────────────────────────
@@ -226,6 +226,7 @@ module.exports = class HiOneDevice extends Homey.Device {
     } catch (err: any) {
       this._consecutiveFailures++;
       this.error('Poll failed (' + this._consecutiveFailures + '/2): ' + err.message);
+      this._appLog('DEV-ERR', 'Poll failed (' + this._consecutiveFailures + '/2): ' + err.message);
 
       if (this._consecutiveFailures >= 2) {
         await this.setCapabilityValue('alarm_generic', true).catch(() => {});
