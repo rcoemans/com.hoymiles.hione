@@ -181,14 +181,14 @@ Cloud credentials can be viewed and changed in the device settings screen after 
 
 ### S-Miles Cloud API
 
-The app communicates with the Hoymiles cloud via the REST API at `neapi.hoymiles.com` using a built-in HTTP client (Node.js `https` module) for maximum runtime compatibility. Authentication uses an automatic multi-profile strategy:
+The app communicates with the Hoymiles cloud via the REST API at `neapi.hoymiles.com` using a built-in HTTP client (Node.js `https` module) with automatic redirect following for maximum runtime compatibility. Authentication uses an automatic multi-profile strategy:
 
 1. **v3 Web** — pre-inspection + credential hash without app-version headers (tried first)
 2. **v3 S-Miles Installer** — same v3 flow with S-Miles Installer app headers
 3. **v3 S-Miles Home** — same v3 flow via EU consumer gateway (`euapi.hoymiles.com`) with genuine S-Miles Home app identity
 4. **Legacy v0** — MD5-hashed password (fallback for older accounts)
 
-The app tries each method in order and uses the first one that succeeds. The token is valid for 2 hours and refreshes automatically. If all methods fail, the error message shows the outcome of every attempt for easy debugging.
+The app tries each method in order and uses the first one that succeeds. The token is valid for 2 hours and refreshes automatically. If a data request fails with an authentication error, the app automatically re-authenticates and retries the request. If all methods fail, the error message shows the outcome of every attempt for easy debugging.
 
 Accounts that require Argon2id (salted v3) are fully supported — the app uses the `hash-wasm` library for WASM-based Argon2id key derivation (time_cost=3, memory_cost=32768, parallelism=1). If the pre-inspection response includes a salt, the app decodes it (hex or base64) and computes the credential hash accordingly.
 
