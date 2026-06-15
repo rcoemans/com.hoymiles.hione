@@ -902,7 +902,7 @@
         "en": "HiOne Station",
         "nl": "HiOne Station"
       },
-      "class": "solarpanel",
+      "class": "homebattery",
       "capabilities": [
         "measure_battery",
         "measure_power",

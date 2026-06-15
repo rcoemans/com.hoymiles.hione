@@ -3,7 +3,7 @@
     "en": "HiOne Station",
     "nl": "HiOne Station"
   },
-  "class": "solarpanel",
+  "class": "homebattery",
   "capabilities": [
     "measure_battery",
     "measure_power",
@@ -15,8 +15,13 @@
     "hione_battery_mode",
     "hione_daily_energy",
     "hione_total_energy",
+    "hione_battery_charge_power",
+    "hione_battery_discharge_power",
+    "hione_grid_import_power",
+    "hione_grid_export_power",
     "hione_battery_state",
     "hione_grid_state",
+    "alarm_generic",
     "hione_self_powered_pct",
     "hione_battery_runtime_hours",
     "hione_time_to_full_hours",

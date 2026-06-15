@@ -165,6 +165,40 @@ module.exports = class HoymilesHiOneApp extends Homey.App {
         const soc = device.getCapabilityValue('measure_battery') ?? 0;
         return soc > threshold;
       });
+
+    // ── Settings API: Modbus register scan diagnostic ───────────────────
+    this.homey.settings.on('set', (key: string) => {
+      if (key === 'run_modbus_scan') {
+        this._runModbusScan().catch(() => {});
+      }
+    });
+  }
+
+  private async _runModbusScan() {
+    try {
+      (this as any).appendLog?.('INFO', 'Modbus register scan requested...');
+      const driver = this.homey.drivers.getDriver('hione') as any;
+      if (!driver) {
+        this.homey.settings.set('modbus_scan_result', { error: 'Driver not found' });
+        return;
+      }
+      const devices = driver.getDevices() as any[];
+      if (!devices || devices.length === 0) {
+        this.homey.settings.set('modbus_scan_result', { error: 'No devices found' });
+        return;
+      }
+      const device = devices[0];
+      if (!device._hybrid || typeof device._hybrid.scanModbusRegisters !== 'function') {
+        this.homey.settings.set('modbus_scan_result', { error: 'No Modbus TCP connection configured' });
+        return;
+      }
+      const result = await device._hybrid.scanModbusRegisters();
+      this.homey.settings.set('modbus_scan_result', result || { error: 'No Modbus data returned' });
+      (this as any).appendLog?.('INFO', 'Modbus scan completed: ' + JSON.stringify(result).substring(0, 500));
+    } catch (err: any) {
+      this.homey.settings.set('modbus_scan_result', { error: err.message });
+      (this as any).appendLog?.('ERROR', 'Modbus scan failed: ' + err.message);
+    }
   }
 
 }

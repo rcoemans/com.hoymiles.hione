@@ -29,9 +29,13 @@ Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage sy
 - **Flow conditions**: battery is/is not charging, battery is/is not discharging, SoC above/below threshold, PV power above threshold, load power above threshold, grid is/is not importing, grid is/is not exporting, battery mode is/is not, gateway is/is not online, connection is/is not local
 - **Flow actions**: set battery mode, refresh data, prefer local/cloud connection, enable/disable cloud fallback
 - **Three connection modes**:
-  - **Local (LAN)** — direct connection to the HiBox gateway via IP (port 10081, protobuf). No cloud account needed. Works offline.
+  - **Local (LAN)** — direct connection to the HiBox gateway via IP. Supports protobuf (port 10081) and **Modbus TCP** (port 502, for DTS-G3 sticks). No cloud account needed. Works offline.
   - **Local + Cloud** — local as primary, S-Miles Cloud as fallback. Best reliability.
   - **Cloud only** — via S-Miles Cloud API. Requires a hoymiles.com account.
+- **Modbus TCP support** for DTS-G3 sticks — automatic fallback when protobuf is unavailable
+- **Homey home battery** — the device is registered as a Homey `homebattery`, so charge/discharge power and energy count towards **Homey Energy**
+- **Cloud login hardening** — exponential backoff after failed login attempts (up to 12 hours for account lockout) to protect your S-Miles account
+- **Register scan diagnostic** — discover available Modbus registers on your DTS-G3 stick from the app settings page
 - **Connection source indicator**: see whether data comes from local or cloud
 
 ## Requirements
@@ -218,12 +222,33 @@ For local communication, the app connects to the HiBox-63T-G3 gateway over TCP (
 - The port is configurable in device settings (default: 10081)
 - Polling interval: 60 seconds (aggressive polling below 30s can disrupt cloud connectivity)
 
+### Modbus TCP (DTS-G3 stick)
+
+As an alternative to the protobuf protocol, the app supports **Modbus TCP** communication on port 502. This is primarily used by the **DTS-G3** data transfer stick and other Hoymiles DTU devices that support the Modbus TCP interface.
+
+- FC03 (Read Holding Registers) and FC04 (Read Input Registers) are supported
+- Micro-inverter data is read from registers starting at 0x1000 (40 registers per PV port)
+- Plant aggregate data (total power, daily/total energy) is read from registers at 0x2000
+- ESS/battery data register addresses are firmware-dependent — use the **register scan diagnostic** in app settings to discover available data points
+- If protobuf communication fails, the app automatically falls back to Modbus TCP
+
+### Cloud login hardening
+
+To protect your S-Miles Cloud account from repeated failed login attempts (which can trigger account lockout by Hoymiles), the app implements an exponential backoff strategy:
+
+- **First failure**: 30-second wait before next attempt
+- **Subsequent failures**: wait time doubles each time (30s → 60s → 120s → ...)
+- **Account lockout detected**: 12-hour cooldown to prevent further damage
+- **Successful login**: backoff resets immediately
+- Backoff is also reset when you change credentials in device settings
+
 ## Known limitations
 
 | Limitation | Detail |
 |---|---|
 | Unofficial API | May break if Hoymiles updates their backend or local protocol |
 | Write operations | Only battery mode can be changed; charge limits and schedules are not yet supported |
+| Device class change | Existing devices must be removed and re-added to benefit from the new `homebattery` device class (Homey Energy integration) |
 | HiOne only | Not tested with DTU, micro-inverters, or HYT series |
 | Local polling | Intervals below 30 seconds can disrupt cloud and mobile app connectivity |
 | Battery capacity | Battery runtime estimates assume 5 kWh usable capacity |
@@ -261,3 +286,5 @@ This Homey app builds on existing community efforts around the Hoymiles ecosyste
 - **Local protocol reference:** [hoymiles-wifi](https://github.com/suaveolent/hoymiles-wifi) — Python library for local DTU communication via protobuf (MIT)
 - **Cloud API reference:** [homeassistant-hoymiles-cloud](https://github.com/Philra94/homeassistant-hoymiles-cloud) — Home Assistant integration for Hoymiles Cloud API
 - **API documentation:** [hoymiles-api](https://github.com/Xinayder/hoymiles-api) — Reverse-engineered Hoymiles API docs
+- **Modbus TCP reference:** [Hoymiles-Plant-DTU-Pro](https://github.com/ArekKubacki/Hoymiles-Plant-DTU-Pro) — Hoymiles DTU-Pro Modbus TCP integration
+- **Modbus TCP reference:** [ha-hoymiles-modbus-tcp](https://github.com/wil-lem/ha-hoymiles-modbus-tcp) — Hoymiles Modbus TCP integration for Home Assistant

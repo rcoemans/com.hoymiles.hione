@@ -55,8 +55,16 @@
     .btn-log.copy:hover { background: #1565c0; }
     .btn-log.refresh { background: #61BA1A; color: #fff; }
     .btn-log.refresh:hover { background: #52a014; }
+    .btn-log.scan { background: #ff9800; color: #fff; }
+    .btn-log.scan:hover { background: #f57c00; }
     .copy-toast {
       display: none; font-size: 12px; color: #2e7d32; margin-left: 8px; align-self: center;
+    }
+    .scan-result {
+      width: 100%; max-height: 200px; overflow-y: auto; background: #1e1e1e; color: #d4d4d4;
+      font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; line-height: 1.5;
+      padding: 12px; border-radius: 10px; border: 2px solid #333; white-space: pre-wrap; word-break: break-all;
+      margin-top: 8px; display: none;
     }
   </style>
 </head>
@@ -116,6 +124,15 @@
     </div>
   </div>
 
+  <div class='log-section'>
+    <h3 style='font-size:14px; margin-bottom:10px;' id='t-section-diag'>Diagnostics</h3>
+    <div class='hint' id='t-hint-diag'>Scan Modbus TCP registers on the DTS-G3 stick to discover available data points.</div>
+    <div class='log-buttons' style='margin-top:8px;'>
+      <button class='btn-log scan' id='btn-modbus-scan' onclick='runModbusScan()'>Modbus Register Scan</button>
+    </div>
+    <div class='scan-result' id='scan-result'></div>
+  </div>
+
   <script>
     var i18n = {
       nl: {
@@ -142,7 +159,12 @@
         copyLog: 'Kopieer',
         clearLog: 'Wissen',
         copied: 'Gekopieerd!',
-        logCleared: 'Log gewist.'
+        logCleared: 'Log gewist.',
+        sectionDiag: 'Diagnostiek',
+        hintDiag: 'Scan Modbus TCP-registers op de DTS-G3 stick om beschikbare datapunten te ontdekken.',
+        modbusScan: 'Modbus Register Scan',
+        scanning: 'Scannen...',
+        scanError: 'Scan mislukt: '
       },
       en: {
         title: 'Hoymiles HiOne — Settings',
@@ -168,7 +190,12 @@
         copyLog: 'Copy',
         clearLog: 'Clear',
         copied: 'Copied!',
-        logCleared: 'Log cleared.'
+        logCleared: 'Log cleared.',
+        sectionDiag: 'Diagnostics',
+        hintDiag: 'Scan Modbus TCP registers on the DTS-G3 stick to discover available data points.',
+        modbusScan: 'Modbus Register Scan',
+        scanning: 'Scanning...',
+        scanError: 'Scan failed: '
       }
     };
 
@@ -197,6 +224,9 @@
       if (document.getElementById('btn-refresh-log')) document.getElementById('btn-refresh-log').textContent = t.refreshLog || 'Refresh';
       if (document.getElementById('btn-copy-log')) document.getElementById('btn-copy-log').textContent = t.copyLog || 'Copy';
       if (document.getElementById('btn-clear-log')) document.getElementById('btn-clear-log').textContent = t.clearLog || 'Clear';
+      if (document.getElementById('t-section-diag')) document.getElementById('t-section-diag').textContent = t.sectionDiag || 'Diagnostics';
+      if (document.getElementById('t-hint-diag')) document.getElementById('t-hint-diag').textContent = t.hintDiag || '';
+      if (document.getElementById('btn-modbus-scan')) document.getElementById('btn-modbus-scan').textContent = t.modbusScan || 'Modbus Register Scan';
     }
 
     function toggleLang() {
@@ -255,6 +285,47 @@
       if (!_homeyRef) return;
       _homeyRef.set('app_log', [], function(err) {
         document.getElementById('log-box').textContent = '(no log entries)';
+      });
+    }
+
+    function runModbusScan() {
+      if (!_homeyRef) return;
+      var t = i18n[_lang] || i18n.en;
+      var btn = document.getElementById('btn-modbus-scan');
+      var resultBox = document.getElementById('scan-result');
+      btn.textContent = t.scanning || 'Scanning...';
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      resultBox.style.display = 'block';
+      resultBox.textContent = t.scanning || 'Scanning...';
+
+      // Trigger the scan by setting a key
+      _homeyRef.set('run_modbus_scan', Date.now(), function(err) {
+        if (err) {
+          resultBox.textContent = (t.scanError || 'Scan failed: ') + err.message;
+          btn.textContent = t.modbusScan || 'Modbus Register Scan';
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          return;
+        }
+        // Poll for result
+        var polls = 0;
+        var poller = setInterval(function() {
+          polls++;
+          _homeyRef.get('modbus_scan_result', function(err2, result) {
+            if (result || polls > 30) {
+              clearInterval(poller);
+              btn.textContent = t.modbusScan || 'Modbus Register Scan';
+              btn.disabled = false;
+              btn.style.opacity = '1';
+              if (result) {
+                resultBox.textContent = JSON.stringify(result, null, 2);
+              } else {
+                resultBox.textContent = 'Timeout — no result received.';
+              }
+            }
+          });
+        }, 2000);
       });
     }
 

@@ -9,10 +9,14 @@ FUNCTIES
 - Flow condities: batterij laden/ontladen, SoC boven/onder drempel, PV-/belastingsvermogen drempels, net importeren/exporteren, batterijmodus, gateway online, verbinding lokaal
 - Flow acties: batterijmodus instellen, data vernieuwen, voorkeur lokaal/cloud, cloud-fallback in-/uitschakelen
 - Drie verbindingsmodi: Lokaal (LAN), Lokaal + Cloud (aanbevolen), of alleen Cloud
+- Modbus TCP-ondersteuning voor DTS-G3 sticks (poort 502) — automatische terugval wanneer protobuf niet beschikbaar is
+- Homey-thuisbatterij: laad-/ontlaadvermogen en energie tellen mee in Homey Energy
+- Cloud-login afgehard: wachttijd na mislukte pogingen (tot 12 uur bij accountblokkade) om je S-Miles-account te beschermen
+- Register-scan diagnose: ontdek beschikbare Modbus-registers vanuit de app-instellingen
 
 VEREISTEN
 - Homey Pro (2019 of 2023) met firmware >= 10.0.0
-- Hoymiles HiOne all-in-one BESS met HiBox-63T-G3 gateway
+- Hoymiles HiOne all-in-one BESS met HiBox-63T-G3 gateway (of DTS-G3 stick voor Modbus TCP)
 - Voor cloud/hybride modus: een actief S-Miles Cloud account
 - Voor lokale modus: het IP-adres van de HiBox gateway op je LAN
 
@@ -36,7 +40,7 @@ APPARAATINSTELLINGEN
 Na het koppelen kun je je S-Miles Cloud e-mail en wachtwoord bekijken en wijzigen in het apparaatinstellingen-scherm — opnieuw koppelen is niet nodig. Het apparaat tolereert tot 2 opeenvolgende fouten voordat het als niet-beschikbaar wordt gemarkeerd (met de specifieke foutreden), en herstelt automatisch wanneer de verbinding terugkomt.
 
 APP-INSTELLINGEN
-De app-instellingenpagina (Homey > Apps > Hoymiles HiOne > Instellingen) laat je app-brede standaardinstellingen configureren en diagnostische logs bekijken. De logging-sectie toont de laatste 200 logregels met knoppen om te vernieuwen, kopiëren en wissen.
+De app-instellingenpagina (Homey > Apps > Hoymiles HiOne > Instellingen) laat je app-brede standaardinstellingen configureren en diagnostische logs bekijken. De logging-sectie toont de laatste 200 logregels met knoppen om te vernieuwen, kopiëren en wissen. De diagnostiek-sectie bevat een Modbus TCP register-scan om beschikbare datapunten op je DTS-G3 stick te ontdekken.
 
 FLOW CARDS
 Acties:
@@ -53,6 +57,9 @@ Condities:
 - Batterijmodus is/is niet een specifieke modus
 - Gateway is/is niet online
 - Verbinding is/is niet lokaal (LAN)
+
+LET OP
+Bestaande apparaten moeten verwijderd en opnieuw toegevoegd worden voor het nieuwe thuisbatterij-apparaattype (Homey Energy integratie).
 
 DISCLAIMER
 Dit is een onofficiële, door de community ontwikkelde integratie. Niet gelieerd aan of goedgekeurd door Hoymiles Power Electronics Inc. Maakt gebruik van de reverse-engineered S-Miles Cloud API en/of lokale DTU-communicatie. Hoymiles kan deze interfaces op elk moment wijzigen. Gebruik op eigen risico.

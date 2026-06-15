@@ -9,10 +9,14 @@ FEATURES
 - Flow conditions: battery charging/discharging, SoC above/below threshold, PV/load power thresholds, grid importing/exporting, battery mode, gateway online, connection local
 - Flow actions: set battery mode, refresh data, prefer local/cloud, enable/disable cloud fallback
 - Three connection modes: Local (LAN), Local + Cloud (recommended), or Cloud only
+- Modbus TCP support for DTS-G3 sticks (port 502) — automatic fallback when protobuf is unavailable
+- Homey home battery: charge/discharge power and energy count towards Homey Energy
+- Cloud login hardening: backoff after failed attempts (up to 12h for account lockout) to protect your S-Miles account
+- Register scan diagnostic: discover available Modbus registers from the app settings page
 
 REQUIREMENTS
 - Homey Pro (2019 or 2023) with firmware >= 10.0.0
-- Hoymiles HiOne all-in-one BESS with HiBox-63T-G3 gateway
+- Hoymiles HiOne all-in-one BESS with HiBox-63T-G3 gateway (or DTS-G3 stick for Modbus TCP)
 - For cloud/hybrid mode: an active S-Miles Cloud account
 - For local mode: the IP address of the HiBox gateway on your LAN
 
@@ -36,7 +40,7 @@ DEVICE SETTINGS
 After pairing, you can view and change your S-Miles Cloud email and password in the device settings screen — no need to re-pair the device. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
 
 APP SETTINGS
-The app settings page (Homey > Apps > Hoymiles HiOne > Settings) lets you configure app-level defaults and view diagnostic logs. The logging section shows the last 200 log entries with buttons to refresh, copy, and clear.
+The app settings page (Homey > Apps > Hoymiles HiOne > Settings) lets you configure app-level defaults and view diagnostic logs. The logging section shows the last 200 log entries with buttons to refresh, copy, and clear. The diagnostics section includes a Modbus TCP register scan to discover available data points on your DTS-G3 stick.
 
 FLOW CARDS
 Actions:
@@ -53,6 +57,9 @@ Conditions:
 - Battery mode is/is not a specific mode
 - Gateway is/is not online
 - Connection is/is not local (LAN)
+
+NOTE
+Existing devices must be removed and re-added to benefit from the new home battery device class (Homey Energy integration).
 
 DISCLAIMER
 This is an unofficial, community-developed integration. Not affiliated with or endorsed by Hoymiles Power Electronics Inc. Uses the reverse-engineered S-Miles Cloud API and/or local DTU communication. Hoymiles may change these interfaces at any time. Use at your own risk.
