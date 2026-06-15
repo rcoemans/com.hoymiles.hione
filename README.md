@@ -184,7 +184,9 @@ The app communicates with the Hoymiles cloud via the REST API at `neapi.hoymiles
 3. **v3 Web** — same v3 flow without app-version headers
 4. **Legacy v0** — MD5-hashed password (fallback for older accounts)
 
-The app tries each method in order and uses the first one that succeeds. The token is valid for 2 hours and refreshes automatically. If all methods fail, the error message shows the outcome of every attempt for easy debugging. If an account requires Argon2id (salted v3), the app will report this explicitly.
+The app tries each method in order and uses the first one that succeeds. The token is valid for 2 hours and refreshes automatically. If all methods fail, the error message shows the outcome of every attempt for easy debugging.
+
+Accounts that require Argon2id (salted v3) are fully supported — the app uses the `hash-wasm` library for WASM-based Argon2id key derivation. If the pre-inspection response includes a salt, the app parses Argon2id parameters (from PHC format if present, otherwise defaults) and computes the credential hash accordingly.
 
 Key endpoints:
 - Login and authentication (v3 pre-inspection + login, or legacy v0)
@@ -216,7 +218,7 @@ For local communication, the app connects to the HiBox-63T-G3 gateway over TCP (
 
 - **Cloud credentials** are stored in Homey's encrypted device store and are only transmitted to the official Hoymiles S-Miles Cloud API (`neapi.hoymiles.com`). They are never sent to any third party.
 - **Local communication** does not require authentication. Anyone on your local network with access to the HiBox gateway IP can read data and control the battery mode. This is a limitation of the HiBox gateway, not of this app.
-- The password is hashed (SHA-256 or MD5, depending on the authentication profile) before being sent to the Hoymiles cloud API. The raw password is never transmitted.
+- The password is hashed (Argon2id, SHA-256 or MD5, depending on the authentication profile) before being sent to the Hoymiles cloud API. The raw password is never transmitted.
 
 ### Signed power conventions
 

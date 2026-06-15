@@ -43,7 +43,7 @@
 <body>
   <div class='header'>
     <h3 id='t-title'>HiBox gateway IP address</h3>
-    <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>NL</button>
+    <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>EN</button>
   </div>
   <div class='tip' id='t-tip'>Find the IP in your router under 'connected devices'.<br>Look for <strong>DTS-…</strong>, <strong>DTUBI-…</strong> or <strong>HiBox</strong>.<br>Tip: give the gateway a <strong>fixed IP address</strong> (DHCP reservation) in your router so the local connection keeps working.</div>
   <label>
@@ -94,7 +94,7 @@
       document.getElementById('t-label-port').textContent = t.labelPort;
       document.getElementById('t-hint-port').textContent = t.hintPort;
       document.getElementById('t-next').textContent = t.next;
-      document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'EN' : 'NL';
+      document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'NL' : 'EN';
     }
 
     function toggleLang() {

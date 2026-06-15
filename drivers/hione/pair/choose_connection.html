@@ -39,7 +39,7 @@
 <body>
   <div class='header'>
     <h3 id='t-title'>How do you want to connect?</h3>
-    <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>NL</button>
+    <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>EN</button>
   </div>
   <p class='compat' id='t-compat'>Compatible with all HiOne systems (single-phase &amp; three-phase).</p>
 
@@ -105,7 +105,7 @@
       document.getElementById('t-cloud-desc').textContent = t.cloudDesc;
       document.getElementById('t-next').textContent = t.next;
       document.getElementById('t-disclaimer').textContent = t.disclaimer;
-      document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'EN' : 'NL';
+      document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'NL' : 'EN';
     }
 
     function toggleLang() {
