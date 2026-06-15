@@ -37,10 +37,10 @@ The local connection uses TCP port 10081 by default (configurable during pairing
 Tip: use Local + Cloud for the most reliable experience.
 
 DEVICE SETTINGS
-After pairing, you can view and change your S-Miles Cloud email and password in the device settings screen — no need to re-pair the device. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
+After pairing, you can view and change your connection mode (Local, Hybrid, or Cloud only), S-Miles Cloud email and password, gateway IP/port, and poll interval in the device settings screen — no need to re-pair the device. The connection mode determines which data source the device uses. Gateway info (serial number, firmware, hardware version) is displayed read-only. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
 
 APP SETTINGS
-The app settings page (Homey > Apps > Hoymiles HiOne > Settings) lets you configure app-level defaults and view diagnostic logs. The logging section shows the last 200 log entries with buttons to refresh, copy, and clear. The diagnostics section includes a Modbus TCP register scan to discover available data points on your DTS-G3 stick.
+The app settings page (Homey > Apps > Hoymiles HiOne > Settings) lets you configure app-level defaults and view diagnostic logs. The logging section shows the last 200 log entries with buttons to refresh, copy, and clear. The diagnostics section includes a Modbus TCP register scan to discover available data points on your DTS-G3 stick, with copy and clear buttons.
 
 FLOW CARDS
 Actions:

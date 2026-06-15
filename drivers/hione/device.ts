@@ -44,7 +44,11 @@ module.exports = class HiOneDevice extends Homey.Device {
     await this._syncStoreToSettings();
 
     this._createHybrid();
-    this._hybrid.probeLocal().then(() => this._fetchGatewayInfo()).catch(() => {});
+    if (this._hybrid._mode !== 'cloud') {
+      this._hybrid.probeLocal().then(() => this._fetchGatewayInfo()).catch(() => {});
+    } else {
+      this._fetchGatewayInfo();
+    }
 
     this.registerCapabilityListener('hione_battery_mode', async (value: string) => {
       await this._hybrid.setBatteryMode(value);
@@ -65,7 +69,8 @@ module.exports = class HiOneDevice extends Homey.Device {
       || changedKeys.includes('gateway_port')
       || changedKeys.includes('cloud_api_url')
       || changedKeys.includes('cloud_username')
-      || changedKeys.includes('cloud_password');
+      || changedKeys.includes('cloud_password')
+      || changedKeys.includes('connection_mode');
 
     if (needsReinit) {
       // Keep device store in sync with settings
@@ -340,18 +345,37 @@ module.exports = class HiOneDevice extends Homey.Device {
 
   private async _fetchGatewayInfo() {
     try {
+      // Try local gateway first
       const info = await this._hybrid.getGatewayInfo();
-      if (!info) return;
-      const updates: Record<string, string> = {};
-      if (info.dtuSn)       updates.dtu_serial       = info.dtuSn;
-      if (info.softwareVer) updates.firmware_version  = info.softwareVer;
-      if (info.deviceVer)   updates.hardware_version  = info.deviceVer;
-      if (Object.keys(updates).length > 0) {
-        await this.setSettings(updates);
-        this.log('Gateway info updated: ' + JSON.stringify(updates));
+      if (info) {
+        const updates: Record<string, string> = {};
+        if (info.dtuSn)       updates.dtu_serial       = info.dtuSn;
+        if (info.softwareVer) updates.firmware_version  = info.softwareVer;
+        if (info.deviceVer)   updates.hardware_version  = info.deviceVer;
+        if (Object.keys(updates).length > 0) {
+          await this.setSettings(updates);
+          this.log('Gateway info updated (local): ' + JSON.stringify(updates));
+        }
+        return;
       }
     } catch (err: any) {
-      this.log('Could not fetch gateway info: ' + err.message);
+      this.log('Local gateway info failed: ' + err.message);
+    }
+    // Try cloud station info as fallback
+    try {
+      const stationInfo = await this._hybrid.getStationInfo();
+      if (stationInfo) {
+        const updates: Record<string, string> = {};
+        if (stationInfo.sn)              updates.dtu_serial      = stationInfo.sn;
+        if (stationInfo.firmwareVersion) updates.firmware_version = stationInfo.firmwareVersion;
+        if (stationInfo.hardwareVersion) updates.hardware_version = stationInfo.hardwareVersion;
+        if (Object.keys(updates).length > 0) {
+          await this.setSettings(updates);
+          this.log('Gateway info updated (cloud): ' + JSON.stringify(updates));
+        }
+      }
+    } catch (err: any) {
+      this.log('Cloud station info failed: ' + err.message);
     }
   }
 
@@ -364,9 +388,13 @@ module.exports = class HiOneDevice extends Homey.Device {
       const updates: Record<string, any> = {};
       if (store.email && !settings.cloud_username) updates.cloud_username = store.email;
       if (store.password && !settings.cloud_password) updates.cloud_password = store.password;
+      // Migrate connection mode from store for devices paired before the setting existed
+      if (store.connectionMode && (!settings.connection_mode || settings.connection_mode === 'both')) {
+        updates.connection_mode = store.connectionMode;
+      }
       if (Object.keys(updates).length > 0) {
         await this.setSettings(updates);
-        this.log('Synced store credentials to device settings');
+        this.log('Synced store to device settings: ' + Object.keys(updates).join(', '));
       }
     } catch (err: any) {
       this.log('Could not sync store to settings: ' + err.message);
@@ -390,6 +418,17 @@ module.exports = class HiOneDevice extends Homey.Device {
     const stationId = this.getData().stationId;
     this.log(`[_createHybrid] email=${email ? '***' : 'null'}, stationId=${stationId}, gatewayIp=${gatewayIp || 'none'}, baseUrl=${baseUrl || 'default'}`);
 
+    // Determine connection mode: explicit setting > store > infer from device data
+    let connectionMode = (settings && settings.connection_mode) || store.connectionMode || null;
+    if (!connectionMode) {
+      // Infer for devices paired before connection_mode existed
+      const hasCloud = !!(email && password);
+      const hasLocal = !!gatewayIp;
+      connectionMode = hasCloud && hasLocal ? 'both' : hasCloud ? 'cloud' : hasLocal ? 'local' : 'cloud';
+      this.log(`[_createHybrid] inferred mode=${connectionMode} (no explicit setting)`);
+    }
+    this.log(`[_createHybrid] mode=${connectionMode}`);
+
     this._hybrid = new HoymilesHybrid({
       gatewayIp,
       gatewayPort,
@@ -397,6 +436,7 @@ module.exports = class HiOneDevice extends Homey.Device {
       password,
       stationId,
       baseUrl,
+      mode:      connectionMode,
       log:       this.log.bind(this),
       error:     this.error.bind(this),
     });

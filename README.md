@@ -172,14 +172,16 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 
 | Setting | Description | Default |
 |---|---|---|
+| Connection mode | How the device connects: Local (LAN), Hybrid (local + cloud), or Cloud only | Hybrid |
 | Email | S-Miles Cloud login email (editable after pairing) | — |
 | Password | S-Miles Cloud password (stored securely on Homey) | — |
 | Gateway IP address | Local LAN IP of the HiBox gateway (optional) | — |
 | Gateway port | TCP port of the HiBox gateway | 10081 |
 | Cloud API URL | Base URL of the S-Miles Cloud API | `https://neapi.hoymiles.com` |
 | Poll interval | How often to fetch data (30–300 seconds) | 60 |
+| Gateway info | Serial number, firmware version, hardware version (read-only) | — |
 
-Cloud credentials can be viewed and changed in the device settings screen after pairing — no need to re-pair the device to update your password. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
+The connection mode determines which data source the device uses. You can change this after pairing without re-adding the device. Cloud credentials can also be viewed and changed in the device settings screen. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
 
 The "Last update" timestamp uses the Homey's configured timezone so it always matches your local time.
 
@@ -190,6 +192,10 @@ The app settings page (Homey > Apps > Hoymiles HiOne > Settings) allows you to c
 ### Logging
 
 The app captures all API and device log messages in a ring buffer (last 200 entries). Open the app settings page to view, copy, or clear the log. This is useful for diagnosing cloud API issues, authentication failures, and data retrieval problems.
+
+### Diagnostics
+
+The diagnostics section includes a **Modbus Register Scan** button to discover available data points on a connected DTS-G3 stick. Scan results can be copied to clipboard or cleared using the dedicated buttons.
 
 ## How it works
 

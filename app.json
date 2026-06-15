@@ -986,6 +986,24 @@
       ],
       "settings": [
         {
+          "id": "connection_mode",
+          "type": "dropdown",
+          "label": {
+            "en": "Connection mode",
+            "nl": "Verbindingsmodus"
+          },
+          "hint": {
+            "en": "How the device connects: Local only (LAN), Hybrid (local + cloud fallback), or Cloud only.",
+            "nl": "Hoe het apparaat verbindt: alleen Lokaal (LAN), Hybride (lokaal + cloud fallback), of alleen Cloud."
+          },
+          "value": "both",
+          "values": [
+            { "id": "local", "label": { "en": "Local (LAN)", "nl": "Lokaal (LAN)" } },
+            { "id": "both", "label": { "en": "Hybrid (local + cloud)", "nl": "Hybride (lokaal + cloud)" } },
+            { "id": "cloud", "label": { "en": "Cloud only", "nl": "Alleen Cloud" } }
+          ]
+        },
+        {
           "type": "group",
           "label": {
             "en": "S-Miles Cloud account",

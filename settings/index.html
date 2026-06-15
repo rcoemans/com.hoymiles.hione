@@ -129,6 +129,9 @@
     <div class='hint' id='t-hint-diag'>Scan Modbus TCP registers on the DTS-G3 stick to discover available data points.</div>
     <div class='log-buttons' style='margin-top:8px;'>
       <button class='btn-log scan' id='btn-modbus-scan' onclick='runModbusScan()'>Modbus Register Scan</button>
+      <button class='btn-log copy' id='btn-copy-scan' onclick='copyScan()'>Copy</button>
+      <button class='btn-log clear' id='btn-clear-scan' onclick='clearScan()'>Clear</button>
+      <span class='copy-toast' id='scan-copy-toast'>Copied!</span>
     </div>
     <div class='scan-result' id='scan-result'></div>
   </div>
@@ -164,7 +167,9 @@
         hintDiag: 'Scan Modbus TCP-registers op de DTS-G3 stick om beschikbare datapunten te ontdekken.',
         modbusScan: 'Modbus Register Scan',
         scanning: 'Scannen...',
-        scanError: 'Scan mislukt: '
+        scanError: 'Scan mislukt: ',
+        copyScan: 'Kopieer',
+        clearScan: 'Wissen'
       },
       en: {
         title: 'Hoymiles HiOne — Settings',
@@ -195,7 +200,9 @@
         hintDiag: 'Scan Modbus TCP registers on the DTS-G3 stick to discover available data points.',
         modbusScan: 'Modbus Register Scan',
         scanning: 'Scanning...',
-        scanError: 'Scan failed: '
+        scanError: 'Scan failed: ',
+        copyScan: 'Copy',
+        clearScan: 'Clear'
       }
     };
 
@@ -227,6 +234,8 @@
       if (document.getElementById('t-section-diag')) document.getElementById('t-section-diag').textContent = t.sectionDiag || 'Diagnostics';
       if (document.getElementById('t-hint-diag')) document.getElementById('t-hint-diag').textContent = t.hintDiag || '';
       if (document.getElementById('btn-modbus-scan')) document.getElementById('btn-modbus-scan').textContent = t.modbusScan || 'Modbus Register Scan';
+      if (document.getElementById('btn-copy-scan')) document.getElementById('btn-copy-scan').textContent = t.copyScan || 'Copy';
+      if (document.getElementById('btn-clear-scan')) document.getElementById('btn-clear-scan').textContent = t.clearScan || 'Clear';
     }
 
     function toggleLang() {
@@ -286,6 +295,32 @@
       _homeyRef.set('app_log', [], function(err) {
         document.getElementById('log-box').textContent = '(no log entries)';
       });
+    }
+
+    function copyScan() {
+      var box = document.getElementById('scan-result');
+      var text = box.textContent || '';
+      if (!text) return;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+          var toast = document.getElementById('scan-copy-toast');
+          var t = i18n[_lang] || i18n.en;
+          toast.textContent = t.copied || 'Copied!';
+          toast.style.display = 'inline';
+          setTimeout(function() { toast.style.display = 'none'; }, 2000);
+        });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+    }
+
+    function clearScan() {
+      var resultBox = document.getElementById('scan-result');
+      resultBox.textContent = '';
+      resultBox.style.display = 'none';
+      if (_homeyRef) _homeyRef.set('modbus_scan_result', null, function() {});
     }
 
     function runModbusScan() {
