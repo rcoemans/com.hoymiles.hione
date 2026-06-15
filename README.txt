@@ -33,7 +33,7 @@ The local connection uses TCP port 10081 by default (configurable during pairing
 Tip: use Local + Cloud for the most reliable experience.
 
 DEVICE SETTINGS
-After pairing, you can view and change your S-Miles Cloud email and password in the device settings screen — no need to re-pair the device. The device tolerates up to 3 consecutive poll failures before marking itself unavailable, and automatically recovers when the connection is restored.
+After pairing, you can view and change your S-Miles Cloud email and password in the device settings screen — no need to re-pair the device. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
 
 FLOW CARDS
 Actions:

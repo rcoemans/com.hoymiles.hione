@@ -125,30 +125,40 @@ module.exports = class HiOneDevice extends Homey.Device {
     }
   }
 
+  private async _safeCap(id: string, value: any) {
+    try {
+      await this.setCapabilityValue(id, value);
+    } catch (err: any) {
+      this.error(`setCapabilityValue(${id}) failed: ${err.message}`);
+    }
+  }
+
   private async _poll() {
     try {
+      this.log('Polling...');
       const rawData = await this._hybrid.getData();
+      this.log('Raw data received (source: ' + (rawData?.source || 'unknown') + ')');
       const data = HioneMapper.normalize(rawData);
 
       // ── Core capabilities ────────────────────────────────────────────
 
-      await this.setCapabilityValue('measure_power', data.pvPower);
-      await this.setCapabilityValue('measure_battery', data.batterySoc);
-      await this.setCapabilityValue('meter_power', data.totalEnergy);
-      await this.setCapabilityValue('hione_pv_power', data.pvPower);
-      await this.setCapabilityValue('hione_battery_power', data.batteryPower);
-      await this.setCapabilityValue('hione_grid_power', data.gridPower);
-      await this.setCapabilityValue('hione_load_power', data.loadPower);
-      await this.setCapabilityValue('hione_battery_mode', data.batteryMode);
-      await this.setCapabilityValue('hione_daily_energy', data.dailyEnergy);
-      await this.setCapabilityValue('hione_total_energy', data.totalEnergy);
+      await this._safeCap('measure_power', data.pvPower);
+      await this._safeCap('measure_battery', data.batterySoc);
+      await this._safeCap('meter_power', data.totalEnergy);
+      await this._safeCap('hione_pv_power', data.pvPower);
+      await this._safeCap('hione_battery_power', data.batteryPower);
+      await this._safeCap('hione_grid_power', data.gridPower);
+      await this._safeCap('hione_load_power', data.loadPower);
+      await this._safeCap('hione_battery_mode', data.batteryMode);
+      await this._safeCap('hione_daily_energy', data.dailyEnergy);
+      await this._safeCap('hione_total_energy', data.totalEnergy);
 
       // ── Split power capabilities ──────────────────────────────────────
 
-      await this.setCapabilityValue('hione_battery_charge_power', data.batteryChargePower);
-      await this.setCapabilityValue('hione_battery_discharge_power', data.batteryDischargePower);
-      await this.setCapabilityValue('hione_grid_import_power', data.gridImportPower);
-      await this.setCapabilityValue('hione_grid_export_power', data.gridExportPower);
+      await this._safeCap('hione_battery_charge_power', data.batteryChargePower);
+      await this._safeCap('hione_battery_discharge_power', data.batteryDischargePower);
+      await this._safeCap('hione_grid_import_power', data.gridImportPower);
+      await this._safeCap('hione_grid_export_power', data.gridExportPower);
 
       // ── Calculated capabilities ──────────────────────────────────────
 
@@ -158,11 +168,11 @@ module.exports = class HiOneDevice extends Homey.Device {
       const powerBalance = HioneCalculator.powerBalance(data.pvPower, data.gridPower, data.batteryPower, data.loadPower);
       const energyState = HioneCalculator.energyState(data.pvPower, data.gridPower, data.batteryPower, data.loadPower);
 
-      await this.setCapabilityValue('hione_battery_state', batteryState);
-      await this.setCapabilityValue('hione_grid_state', gridState);
-      await this.setCapabilityValue('hione_self_powered_pct', selfPoweredPct);
-      await this.setCapabilityValue('hione_power_balance', powerBalance);
-      await this.setCapabilityValue('hione_energy_state', energyState);
+      await this._safeCap('hione_battery_state', batteryState);
+      await this._safeCap('hione_grid_state', gridState);
+      await this._safeCap('hione_self_powered_pct', selfPoweredPct);
+      await this._safeCap('hione_power_balance', powerBalance);
+      await this._safeCap('hione_energy_state', energyState);
 
       // Runtime estimates
       const dischargePower = data.batteryPower < 0 ? Math.abs(data.batteryPower) : 0;
@@ -170,18 +180,18 @@ module.exports = class HiOneDevice extends Homey.Device {
       const runtimeHours = HioneCalculator.batteryRuntimeHours(data.batterySoc, dischargePower);
       const timeToFull = HioneCalculator.timeToFullHours(data.batterySoc, chargePower);
 
-      await this.setCapabilityValue('hione_battery_runtime_hours', runtimeHours ?? 0);
-      await this.setCapabilityValue('hione_time_to_full_hours', timeToFull ?? 0);
+      await this._safeCap('hione_battery_runtime_hours', runtimeHours ?? 0);
+      await this._safeCap('hione_time_to_full_hours', timeToFull ?? 0);
 
       // ── Status capabilities ──────────────────────────────────────────
 
       const systemState = data.source === 'local' ? 'online_local' : 'online_cloud';
       const gatewayOnline = data.source === 'local' || this._hybrid.connectionMode === 'local';
 
-      await this.setCapabilityValue('hione_system_state', systemState);
-      await this.setCapabilityValue('hione_connection_source', data.source);
-      await this.setCapabilityValue('hione_gateway_online', gatewayOnline);
-      await this.setCapabilityValue('hione_last_update', new Date().toLocaleTimeString());
+      await this._safeCap('hione_system_state', systemState);
+      await this._safeCap('hione_connection_source', data.source);
+      await this._safeCap('hione_gateway_online', gatewayOnline);
+      await this._safeCap('hione_last_update', new Date().toLocaleTimeString());
 
       // ── Flow triggers ────────────────────────────────────────────────
 
@@ -194,7 +204,7 @@ module.exports = class HiOneDevice extends Homey.Device {
       this._checkConnectionSourceTrigger(data.source);
 
       // ── Alarm ─────────────────────────────────────────────────────────
-      await this.setCapabilityValue('alarm_generic', false);
+      await this._safeCap('alarm_generic', false);
 
       if (this._consecutiveFailures > 0) {
         this.log('Poll recovered after ' + this._consecutiveFailures + ' consecutive failure(s)');
@@ -204,11 +214,12 @@ module.exports = class HiOneDevice extends Homey.Device {
       if (!this.getAvailable()) await this.setAvailable();
     } catch (err: any) {
       this._consecutiveFailures++;
-      this.error('Poll failed (' + this._consecutiveFailures + '/3): ' + err.message);
+      this.error('Poll failed (' + this._consecutiveFailures + '/2): ' + err.message);
 
-      if (this._consecutiveFailures >= 3) {
+      if (this._consecutiveFailures >= 2) {
         await this.setCapabilityValue('alarm_generic', true).catch(() => {});
-        await this.setUnavailable(this.homey.__('errors.poll_failed'));
+        const reason = err.message ? ` (${err.message})` : '';
+        await this.setUnavailable(this.homey.__('errors.poll_failed') + reason);
       }
     }
   }
@@ -363,12 +374,15 @@ module.exports = class HiOneDevice extends Homey.Device {
     const email    = (settings && settings.cloud_username) || store.email    || (this.homey.settings.get('cloud_username') || null);
     const password = (settings && settings.cloud_password) || store.password || (this.homey.settings.get('cloud_password') || null);
 
+    const stationId = this.getData().stationId;
+    this.log(`[_createHybrid] email=${email ? '***' : 'null'}, stationId=${stationId}, gatewayIp=${gatewayIp || 'none'}, baseUrl=${baseUrl || 'default'}`);
+
     this._hybrid = new HoymilesHybrid({
       gatewayIp,
       gatewayPort,
       email,
       password,
-      stationId: this.getData().stationId,
+      stationId,
       baseUrl,
       log:       this.log.bind(this),
       error:     this.error.bind(this),

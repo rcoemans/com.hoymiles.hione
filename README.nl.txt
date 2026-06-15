@@ -33,7 +33,7 @@ De lokale verbinding gebruikt standaard TCP-poort 10081 (configureerbaar tijdens
 Tip: gebruik Lokaal + Cloud voor de beste ervaring.
 
 APPARAATINSTELLINGEN
-Na het koppelen kun je je S-Miles Cloud e-mail en wachtwoord bekijken en wijzigen in het apparaatinstellingen-scherm — opnieuw koppelen is niet nodig. Het apparaat tolereert tot 3 opeenvolgende fouten voordat het als niet-beschikbaar wordt gemarkeerd, en herstelt automatisch wanneer de verbinding terugkomt.
+Na het koppelen kun je je S-Miles Cloud e-mail en wachtwoord bekijken en wijzigen in het apparaatinstellingen-scherm — opnieuw koppelen is niet nodig. Het apparaat tolereert tot 2 opeenvolgende fouten voordat het als niet-beschikbaar wordt gemarkeerd (met de specifieke foutreden), en herstelt automatisch wanneer de verbinding terugkomt.
 
 FLOW CARDS
 Acties:

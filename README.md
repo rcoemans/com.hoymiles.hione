@@ -175,7 +175,7 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 | Cloud API URL | Base URL of the S-Miles Cloud API | `https://neapi.hoymiles.com` |
 | Poll interval | How often to fetch data (30–300 seconds) | 60 |
 
-Cloud credentials can be viewed and changed in the device settings screen after pairing — no need to re-pair the device to update your password. The device tolerates up to 3 consecutive poll failures before marking itself unavailable, and automatically recovers when the connection is restored.
+Cloud credentials can be viewed and changed in the device settings screen after pairing — no need to re-pair the device to update your password. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
 
 ## How it works
 
