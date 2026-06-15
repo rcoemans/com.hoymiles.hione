@@ -39,7 +39,7 @@
 <body>
   <div class='header'>
     <h3 id='t-title'>How do you want to connect?</h3>
-    <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>EN</button>
+    <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>NL</button>
   </div>
   <p class='compat' id='t-compat'>Compatible with all HiOne systems (single-phase &amp; three-phase).</p>
 
@@ -105,7 +105,8 @@
       document.getElementById('t-cloud-desc').textContent = t.cloudDesc;
       document.getElementById('t-next').textContent = t.next;
       document.getElementById('t-disclaimer').textContent = t.disclaimer;
-      document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'NL' : 'EN';
+      document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'EN' : 'NL';
+      try { sessionStorage.setItem('hione_pair_lang', lang); } catch(_) {}
     }
 
     function toggleLang() {
@@ -114,11 +115,17 @@
 
     var _mode = 'local';
     select('local');
-    Homey.getLanguage().then(function(lang) {
-      var short = (lang || '').split('-')[0].toLowerCase();
-      if (short === 'nl') applyLang('nl');
-      else applyLang('en');
-    }).catch(function() {});
+    var _saved = null;
+    try { _saved = sessionStorage.getItem('hione_pair_lang'); } catch(_) {}
+    if (_saved === 'nl' || _saved === 'en') {
+      applyLang(_saved);
+    } else {
+      Homey.getLanguage().then(function(lang) {
+        var short = (lang || '').split('-')[0].toLowerCase();
+        if (short === 'nl') applyLang('nl');
+        else applyLang('en');
+      }).catch(function() {});
+    }
 
     function select(mode) {
       _mode = mode;
