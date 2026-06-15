@@ -20,7 +20,7 @@ Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage sy
 
 ## Features
 
-- **Real-time monitoring**: PV power, battery state-of-charge, battery charge/discharge power, grid import/export, home load
+- **Real-time monitoring**: PV power, battery state-of-charge, battery charge/discharge power, grid import/export (signed and split), home load
 - **Energy totals**: daily yield and lifetime total
 - **Calculated insights**: self-powered percentage, battery runtime estimate, time-to-full estimate, power balance, energy independence state
 - **Battery mode control** via Flows:
@@ -101,7 +101,11 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 |---|---|---|
 | PV Power | Current solar panel output | W |
 | Battery Power | Battery charge (+) / discharge (-) power | W |
+| Battery Charge Power | Charge power (positive split value) | W |
+| Battery Discharge Power | Discharge power (positive split value) | W |
 | Grid Power | Grid import (+) / export (-) power | W |
+| Grid Import Power | Import power (positive split value) | W |
+| Grid Export Power | Export power (positive split value) | W |
 | Load Power | Current home consumption | W |
 | Daily Energy | Energy produced today | kWh |
 | Total Energy | Lifetime energy produced | kWh |
@@ -111,6 +115,7 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 | Connection Source | Local (LAN) or Cloud | — |
 | Gateway Online | Whether the local gateway is reachable | — |
 | System State | Online (local/cloud) / Degraded / Offline / Syncing / Error | — |
+| System Alarm | Active when polling fails or system is offline | — |
 | Last Update | Timestamp of the last successful poll | — |
 
 ### Calculated capabilities
@@ -172,7 +177,7 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 
 ### S-Miles Cloud API
 
-The app communicates with the Hoymiles cloud via the REST API at `neapi.hoymiles.com`. Authentication uses an automatic multi-profile strategy:
+The app communicates with the Hoymiles cloud via the REST API at `neapi.hoymiles.com` using a built-in HTTP client (Node.js `https` module) for maximum runtime compatibility. Authentication uses an automatic multi-profile strategy:
 
 1. **v3 Web login** — pre-inspection + SHA-256-derived credential hash
 2. **v3 Installer login** — same flow with S-Miles Installer app-version headers
@@ -211,6 +216,17 @@ For local communication, the app connects to the HiBox-63T-G3 gateway over TCP (
 - **Cloud credentials** are stored in Homey's encrypted device store and are only transmitted to the official Hoymiles S-Miles Cloud API (`neapi.hoymiles.com`). They are never sent to any third party.
 - **Local communication** does not require authentication. Anyone on your local network with access to the HiBox gateway IP can read data and control the battery mode. This is a limitation of the HiBox gateway, not of this app.
 - The password is hashed (SHA-256 or MD5, depending on the authentication profile) before being sent to the Hoymiles cloud API. The raw password is never transmitted.
+
+### Signed power conventions
+
+| Value | Meaning |
+|---:|---|
+| `battery_power > 0` | Battery charging |
+| `battery_power < 0` | Battery discharging |
+| `grid_power > 0` | Importing from grid |
+| `grid_power < 0` | Exporting to grid |
+
+Split positive values (`battery_charge_power`, `battery_discharge_power`, `grid_import_power`, `grid_export_power`) are derived from the signed values for easier use in Flows.
 
 ## Credits
 

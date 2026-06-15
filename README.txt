@@ -1,7 +1,7 @@
 Monitor and control your Hoymiles HiOne all-in-one battery storage system from Homey.
 
 FEATURES
-- Real-time monitoring: PV power, battery state-of-charge, battery charge/discharge power, grid import/export and home load
+- Real-time monitoring: PV power, battery state-of-charge, battery charge/discharge power, grid import/export (signed and split), home load, system alarm
 - Energy totals: daily yield and lifetime total
 - Calculated insights: self-powered percentage, battery runtime/time-to-full estimates, power balance, energy independence
 - Battery mode control via Flows: Self-Consumption, Economy, Backup, Off-Grid, Peak Shaving, Time of Use

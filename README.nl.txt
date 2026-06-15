@@ -1,7 +1,7 @@
 Monitor en bedien je Hoymiles HiOne all-in-one batterijopslagsysteem vanuit Homey.
 
 FUNCTIES
-- Realtime monitoring: PV-vermogen, batterij laadniveau, batterij laad-/ontlaadvermogen, netimport/-export en thuisverbruik
+- Realtime monitoring: PV-vermogen, batterij laadniveau, batterij laad-/ontlaadvermogen, netimport/-export (gesigneerd en gesplitst), thuisverbruik, systeemalarmen
 - Energietotalen: dagopbrengst en totaalopbrengst
 - Berekende inzichten: zelfvoorzieningspercentage, batterijlooptijd/laadtijd-schattingen, vermogensbalans, energieonafhankelijkheid
 - Batterijmodusbesturing via Flows: Eigen verbruik, Economie, Noodstroom, Off-Grid, Pieksturing, Tijdafhankelijk

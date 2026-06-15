@@ -124,6 +124,13 @@ module.exports = class HiOneDevice extends Homey.Device {
       await this.setCapabilityValue('hione_daily_energy', data.dailyEnergy);
       await this.setCapabilityValue('hione_total_energy', data.totalEnergy);
 
+      // ── Split power capabilities ──────────────────────────────────────
+
+      await this.setCapabilityValue('hione_battery_charge_power', data.batteryChargePower);
+      await this.setCapabilityValue('hione_battery_discharge_power', data.batteryDischargePower);
+      await this.setCapabilityValue('hione_grid_import_power', data.gridImportPower);
+      await this.setCapabilityValue('hione_grid_export_power', data.gridExportPower);
+
       // ── Calculated capabilities ──────────────────────────────────────
 
       const batteryState = HioneCalculator.batteryDirection(data.batteryPower);
@@ -167,9 +174,13 @@ module.exports = class HiOneDevice extends Homey.Device {
       this._checkGatewayTriggers(gatewayOnline);
       this._checkConnectionSourceTrigger(data.source);
 
+      // ── Alarm ─────────────────────────────────────────────────────────
+      await this.setCapabilityValue('alarm_generic', false);
+
       if (!this.getAvailable()) await this.setAvailable();
     } catch (err: any) {
       this.error('Poll failed: ' + err.message);
+      await this.setCapabilityValue('alarm_generic', true).catch(() => {});
       await this.setUnavailable(this.homey.__('errors.poll_failed'));
     }
   }

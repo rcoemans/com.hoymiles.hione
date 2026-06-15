@@ -1,5 +1,11 @@
 # Solution Design: Hoymiles HiOne-16T-G3 + HiBox-63T-G3 Data Integration for a Homey App
 
+After your latest changes after giving username and password I am getting the error: 'Hoymiles: Pre-inspection request failed: Network error: fetch is not defined'. Also it shows the error message: 'pairsession_not_found'.
+Please analyze and fix the issue.
+Furthermore analyze this change request document in full detail and change the codebase accordingly.
+If images are needed, please take them from what we already have e.g. the current device.
+Also update README.md, README.txt and README.nl.txt files accordingly.
+
 **Author:** ChatGPT  
 **Prepared for:** Robert Coemans  
 **Date:** 2026-06-15  

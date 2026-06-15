@@ -914,8 +914,13 @@
         "hione_battery_mode",
         "hione_daily_energy",
         "hione_total_energy",
+        "hione_battery_charge_power",
+        "hione_battery_discharge_power",
+        "hione_grid_import_power",
+        "hione_grid_export_power",
         "hione_battery_state",
         "hione_grid_state",
+        "alarm_generic",
         "hione_self_powered_pct",
         "hione_battery_runtime_hours",
         "hione_time_to_full_hours",
@@ -1133,6 +1138,36 @@
       "uiComponent": "picker",
       "icon": "/assets/on-off-button.svg"
     },
+    "hione_battery_charge_power": {
+      "type": "number",
+      "title": {
+        "en": "Battery Charge Power",
+        "nl": "Batterij laadvermogen"
+      },
+      "units": "W",
+      "insights": true,
+      "decimals": 0,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/power.svg"
+    },
+    "hione_battery_discharge_power": {
+      "type": "number",
+      "title": {
+        "en": "Battery Discharge Power",
+        "nl": "Batterij ontlaadvermogen"
+      },
+      "units": "W",
+      "insights": true,
+      "decimals": 0,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/power.svg"
+    },
     "hione_battery_power": {
       "type": "number",
       "title": {
@@ -1312,6 +1347,36 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/on-off-button.svg"
+    },
+    "hione_grid_export_power": {
+      "type": "number",
+      "title": {
+        "en": "Grid Export Power",
+        "nl": "Net exportvermogen"
+      },
+      "units": "W",
+      "insights": true,
+      "decimals": 0,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/graph.svg"
+    },
+    "hione_grid_import_power": {
+      "type": "number",
+      "title": {
+        "en": "Grid Import Power",
+        "nl": "Net importvermogen"
+      },
+      "units": "W",
+      "insights": true,
+      "decimals": 0,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/graph.svg"
     },
     "hione_grid_power": {
       "type": "number",

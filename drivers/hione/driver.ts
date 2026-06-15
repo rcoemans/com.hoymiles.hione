@@ -52,19 +52,12 @@ module.exports = class HiOneDriver extends Homey.Driver {
       try {
         const result = await _api.authenticate(_email, _password, { mode: 'auto' });
         this.log('Auth succeeded via ' + result.mode + '/' + result.profile);
-
-        // Validate login by calling user/me
-        try {
-          await _api.getCurrentUser();
-        } catch (_) {
-          this.log('user/me call failed — proceeding anyway');
-        }
-
         return true;
       } catch (err: any) {
         const summary = _api.getSanitizedAuthSummary?.() || [];
         this.error('Login failed: ' + err.message, JSON.stringify(summary));
-        throw new Error(err.message || 'Authentication failed');
+        // Return error message string — do NOT throw, as that can kill the pairing session
+        return err.message || 'Authentication failed';
       }
     });
 
