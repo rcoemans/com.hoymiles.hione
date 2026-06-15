@@ -35,6 +35,9 @@ Tip: gebruik Lokaal + Cloud voor de beste ervaring.
 APPARAATINSTELLINGEN
 Na het koppelen kun je je S-Miles Cloud e-mail en wachtwoord bekijken en wijzigen in het apparaatinstellingen-scherm — opnieuw koppelen is niet nodig. Het apparaat tolereert tot 2 opeenvolgende fouten voordat het als niet-beschikbaar wordt gemarkeerd (met de specifieke foutreden), en herstelt automatisch wanneer de verbinding terugkomt.
 
+APP-INSTELLINGEN
+De app-instellingenpagina (Homey > Apps > Hoymiles HiOne > Instellingen) laat je app-brede standaardinstellingen configureren en diagnostische logs bekijken. De logging-sectie toont de laatste 200 logregels met knoppen om te vernieuwen, kopiëren en wissen.
+
 FLOW CARDS
 Acties:
 - Batterijmodus instellen (Eigen verbruik, Economie, Noodstroom, Off-Grid, Pieksturing, Tijdafhankelijk)

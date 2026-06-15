@@ -35,6 +35,9 @@ Tip: use Local + Cloud for the most reliable experience.
 DEVICE SETTINGS
 After pairing, you can view and change your S-Miles Cloud email and password in the device settings screen — no need to re-pair the device. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
 
+APP SETTINGS
+The app settings page (Homey > Apps > Hoymiles HiOne > Settings) lets you configure app-level defaults and view diagnostic logs. The logging section shows the last 200 log entries with buttons to refresh, copy, and clear.
+
 FLOW CARDS
 Actions:
 - Set battery mode (Self-Consumption, Economy, Backup, Off-Grid, Peak Shaving, Time of Use)

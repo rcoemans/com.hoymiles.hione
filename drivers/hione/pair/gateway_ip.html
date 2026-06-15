@@ -33,11 +33,11 @@
       margin-top: 10px; font-size: 13px; display: none;
     }
     .lang-toggle {
-      font-size: 11px; font-weight: 600; cursor: pointer; color: #666;
-      border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px;
-      background: #f5f5f5; transition: all 0.15s;
+      font-size: 11px; font-weight: 600; cursor: pointer; color: #fff;
+      border: 1px solid #52a014; border-radius: 6px; padding: 4px 10px;
+      background: #61BA1A; transition: all 0.15s;
     }
-    .lang-toggle:hover { background: #e8e8e8; color: #333; }
+    .lang-toggle:hover { background: #52a014; color: #fff; }
   </style>
 </head>
 <body>
@@ -48,7 +48,7 @@
   <div class='tip' id='t-tip'>Find the IP in your router under 'connected devices'.<br>Look for <strong>DTS-…</strong>, <strong>DTUBI-…</strong> or <strong>HiBox</strong>.<br>Tip: give the gateway a <strong>fixed IP address</strong> (DHCP reservation) in your router so the local connection keeps working.</div>
   <label>
     <span id='t-label-ip'>IP address</span>
-    <input type='text' id='ip' placeholder='192.168.1.100'>
+    <input type='text' id='ip' placeholder='192.168.1.100' oninput='updateNextButton()' onchange='updateNextButton()'>
   </label>
   <div style='margin-top: 14px;'>
     <label>
@@ -59,6 +59,18 @@
   </div>
   <div class='error' id='error'></div>
   <button class='btn-primary' id='t-next' onclick='proceed()'>Next</button>
+  <script>
+    function updateNextButton() {
+      var ip = document.getElementById('ip').value.trim();
+      var btn = document.getElementById('t-next');
+      var ready = !!ip;
+      btn.disabled = !ready;
+      btn.style.background = ready ? '#61BA1A' : '#ccc';
+      btn.style.color = ready ? '#fff' : '#888';
+      btn.style.cursor = ready ? 'pointer' : 'not-allowed';
+      btn.style.opacity = ready ? '1' : '0.6';
+    }
+  </script>
   <script>
     var i18n = {
       nl: {
@@ -117,7 +129,13 @@
     Homey.emit('get_defaults').then(function(defaults) {
       if (defaults && defaults.gatewayIp) document.getElementById('ip').value = defaults.gatewayIp;
       if (defaults && defaults.gatewayPort) document.getElementById('port').value = defaults.gatewayPort;
-    }).catch(function() {});
+      updateNextButton();
+    }).catch(function() {
+      updateNextButton();
+    });
+
+    // Set initial button state
+    updateNextButton();
 
     function isValidIp(ip) {
       return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) &&

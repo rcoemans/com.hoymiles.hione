@@ -23,6 +23,15 @@ module.exports = class HiOneDevice extends Homey.Device {
   private _consecutiveFailures: number = 0;
 
   async onInit() {
+    // Forward device logs to app-level log buffer for settings page visibility
+    const app = this.homey.app as any;
+    if (app && typeof app.appendLog === 'function') {
+      const origLog = this.log.bind(this);
+      const origError = this.error.bind(this);
+      (this as any).log = (...args: any[]) => { origLog(...args); app.appendLog('DEV', ...args); };
+      (this as any).error = (...args: any[]) => { origError(...args); app.appendLog('DEV-ERR', ...args); };
+    }
+
     this.log('HiOne device initialising...');
     this._prevBatteryMode = null;
     this._prevBatteryState = null;
@@ -191,7 +200,9 @@ module.exports = class HiOneDevice extends Homey.Device {
       await this._safeCap('hione_system_state', systemState);
       await this._safeCap('hione_connection_source', data.source);
       await this._safeCap('hione_gateway_online', gatewayOnline);
-      await this._safeCap('hione_last_update', new Date().toLocaleTimeString());
+      const tz = this.homey.clock.getTimezone();
+      const timeStr = new Date().toLocaleTimeString('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      await this._safeCap('hione_last_update', timeStr);
 
       // ── Flow triggers ────────────────────────────────────────────────
 

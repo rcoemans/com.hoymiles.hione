@@ -33,11 +33,31 @@
     .status.ok { color: #2e7d32; background: #f0faf4; }
     .status.err { color: #d32f2f; background: #fef2f2; }
     .lang-toggle {
-      font-size: 11px; font-weight: 600; cursor: pointer; color: #666;
-      border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px;
-      background: #f5f5f5; transition: all 0.15s;
+      font-size: 11px; font-weight: 600; cursor: pointer; color: #fff;
+      border: 1px solid #52a014; border-radius: 6px; padding: 4px 10px;
+      background: #61BA1A; transition: all 0.15s;
     }
-    .lang-toggle:hover { background: #e8e8e8; color: #333; }
+    .lang-toggle:hover { background: #52a014; color: #fff; }
+    .log-section { margin-top: 28px; }
+    .log-box {
+      width: 100%; height: 260px; overflow-y: auto; background: #1e1e1e; color: #d4d4d4;
+      font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; line-height: 1.5;
+      padding: 12px; border-radius: 10px; border: 2px solid #333; white-space: pre-wrap; word-break: break-all;
+    }
+    .log-buttons { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-log {
+      padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; border-radius: 8px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-log.clear { background: #f44336; color: #fff; }
+    .btn-log.clear:hover { background: #d32f2f; }
+    .btn-log.copy { background: #1976d2; color: #fff; }
+    .btn-log.copy:hover { background: #1565c0; }
+    .btn-log.refresh { background: #61BA1A; color: #fff; }
+    .btn-log.refresh:hover { background: #52a014; }
+    .copy-toast {
+      display: none; font-size: 12px; color: #2e7d32; margin-left: 8px; align-self: center;
+    }
   </style>
 </head>
 <body>
@@ -85,6 +105,17 @@
   <button class='btn-primary' id='save'>Save</button>
   <div class='status' id='status'></div>
 
+  <div class='log-section'>
+    <h3 style='font-size:14px; margin-bottom:10px;' id='t-section-log'>Logging</h3>
+    <div class='log-box' id='log-box'></div>
+    <div class='log-buttons'>
+      <button class='btn-log refresh' id='btn-refresh-log' onclick='refreshLog()'>Refresh</button>
+      <button class='btn-log copy' id='btn-copy-log' onclick='copyLog()'>Copy</button>
+      <button class='btn-log clear' id='btn-clear-log' onclick='clearLog()'>Clear</button>
+      <span class='copy-toast' id='copy-toast'>Copied!</span>
+    </div>
+  </div>
+
   <script>
     var i18n = {
       nl: {
@@ -105,7 +136,13 @@
         save: 'Opslaan',
         invalidUrl: 'Ongeldige URL. Gebruik het format https://...',
         saveFailed: 'Opslaan mislukt: ',
-        saveOk: 'Opgeslagen! Bestaande apparaten gebruiken de nieuwe instellingen na herstart.'
+        saveOk: 'Opgeslagen! Bestaande apparaten gebruiken de nieuwe instellingen na herstart.',
+        sectionLog: 'Logging',
+        refreshLog: 'Vernieuwen',
+        copyLog: 'Kopieer',
+        clearLog: 'Wissen',
+        copied: 'Gekopieerd!',
+        logCleared: 'Log gewist.'
       },
       en: {
         title: 'Hoymiles HiOne — Settings',
@@ -125,7 +162,13 @@
         save: 'Save',
         invalidUrl: 'Invalid URL. Use the format https://...',
         saveFailed: 'Save failed: ',
-        saveOk: 'Saved! Existing devices will use the new settings after restart.'
+        saveOk: 'Saved! Existing devices will use the new settings after restart.',
+        sectionLog: 'Logging',
+        refreshLog: 'Refresh',
+        copyLog: 'Copy',
+        clearLog: 'Clear',
+        copied: 'Copied!',
+        logCleared: 'Log cleared.'
       }
     };
 
@@ -150,13 +193,74 @@
       document.getElementById('t-hint-url').textContent = t.hintUrl;
       document.getElementById('save').textContent = t.save;
       document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'EN' : 'NL';
+      if (document.getElementById('t-section-log')) document.getElementById('t-section-log').textContent = t.sectionLog || 'Logging';
+      if (document.getElementById('btn-refresh-log')) document.getElementById('btn-refresh-log').textContent = t.refreshLog || 'Refresh';
+      if (document.getElementById('btn-copy-log')) document.getElementById('btn-copy-log').textContent = t.copyLog || 'Copy';
+      if (document.getElementById('btn-clear-log')) document.getElementById('btn-clear-log').textContent = t.clearLog || 'Clear';
     }
 
     function toggleLang() {
       applyLang(_lang === 'nl' ? 'en' : 'nl');
     }
 
+    function updateSaveButton() {
+      var ip = document.getElementById('gateway_ip').value.trim();
+      var user = document.getElementById('cloud_username').value.trim();
+      var pass = document.getElementById('cloud_password').value;
+      var btn = document.getElementById('save');
+      var ready = !!(ip || user || pass);
+      btn.style.background = ready ? '#61BA1A' : '#ccc';
+      btn.style.color = ready ? '#fff' : '#888';
+      btn.style.cursor = ready ? 'pointer' : 'not-allowed';
+      btn.style.opacity = ready ? '1' : '0.6';
+    }
+
+    var _homeyRef = null;
+
+    function refreshLog() {
+      if (!_homeyRef) return;
+      _homeyRef.get('app_log', function(err, logs) {
+        var box = document.getElementById('log-box');
+        if (err || !logs || !logs.length) {
+          box.textContent = '(no log entries)';
+          return;
+        }
+        box.textContent = logs.join('\n');
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+
+    function copyLog() {
+      var box = document.getElementById('log-box');
+      var text = box.textContent || '';
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() { showCopyToast(); });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        showCopyToast();
+      }
+    }
+
+    function showCopyToast() {
+      var t = i18n[_lang] || i18n.en;
+      var toast = document.getElementById('copy-toast');
+      toast.textContent = t.copied || 'Copied!';
+      toast.style.display = 'inline';
+      setTimeout(function() { toast.style.display = 'none'; }, 2000);
+    }
+
+    function clearLog() {
+      if (!_homeyRef) return;
+      _homeyRef.set('app_log', [], function(err) {
+        document.getElementById('log-box').textContent = '(no log entries)';
+      });
+    }
+
     function onHomeyReady(Homey) {
+      _homeyRef = Homey;
+
       Homey.getLanguage(function(err, lang) {
         if (!err && lang) {
           var short = (lang || '').split('-')[0].toLowerCase();
@@ -165,13 +269,25 @@
       });
 
       var fields = ['gateway_ip', 'gateway_port', 'cloud_username', 'cloud_password', 'cloud_api_url'];
+      var loaded = 0;
       fields.forEach(function(key) {
         Homey.get(key, function(err, value) {
           if (!err && value != null) {
             document.getElementById(key).value = value;
           }
+          loaded++;
+          if (loaded >= fields.length) updateSaveButton();
         });
       });
+
+      // Wire up input listeners for Save button
+      ['gateway_ip', 'cloud_username', 'cloud_password'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.addEventListener('input', updateSaveButton); el.addEventListener('change', updateSaveButton); }
+      });
+
+      // Load logs
+      refreshLog();
 
       document.getElementById('save').addEventListener('click', function() {
         var url = document.getElementById('cloud_api_url').value.trim();
@@ -220,6 +336,7 @@
         saveKey('cloud_api_url', url || null);
       });
 
+      updateSaveButton();
       Homey.ready();
     }
   </script>
