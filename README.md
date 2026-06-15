@@ -172,10 +172,17 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 
 ### S-Miles Cloud API
 
-The app communicates with the Hoymiles cloud via the REST API at `neapi.hoymiles.com`. Authentication uses your S-Miles Cloud email and an MD5-hashed password. The token is valid for 24 hours and refreshes automatically.
+The app communicates with the Hoymiles cloud via the REST API at `neapi.hoymiles.com`. Authentication uses an automatic multi-profile strategy:
+
+1. **v3 Web login** — pre-inspection + SHA-256-derived credential hash
+2. **v3 Installer login** — same flow with S-Miles Installer app-version headers
+3. **Legacy v0 login** — MD5-hashed password (fallback for older accounts)
+
+The app tries each method in order and uses the first one that succeeds. The token is valid for 2 hours and refreshes automatically. If an account requires Argon2id (salted v3), the app will report this explicitly — try using S-Miles Installer credentials instead.
 
 Key endpoints:
-- Login and authentication
+- Login and authentication (v3 pre-inspection + login, or legacy v0)
+- User validation (`/iam/api/1/user/me`)
 - Station listing and real-time data (power flows, SoC, energy totals)
 - Battery mode read/write
 
@@ -203,7 +210,7 @@ For local communication, the app connects to the HiBox-63T-G3 gateway over TCP (
 
 - **Cloud credentials** are stored in Homey's encrypted device store and are only transmitted to the official Hoymiles S-Miles Cloud API (`neapi.hoymiles.com`). They are never sent to any third party.
 - **Local communication** does not require authentication. Anyone on your local network with access to the HiBox gateway IP can read data and control the battery mode. This is a limitation of the HiBox gateway, not of this app.
-- The password is **MD5-hashed** before being sent to the Hoymiles cloud API (as required by their API).
+- The password is hashed (SHA-256 or MD5, depending on the authentication profile) before being sent to the Hoymiles cloud API. The raw password is never transmitted.
 
 ## Credits
 

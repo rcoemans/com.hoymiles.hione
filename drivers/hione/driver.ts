@@ -45,16 +45,26 @@ module.exports = class HiOneDriver extends Homey.Driver {
       return true;
     });
 
-    // Step 2b: cloud login
+    // Step 2b: cloud login — uses auth matrix (v3 web, v3 installer, legacy v0)
     session.setHandler('login', async ({ username, password }: { username: string; password: string }) => {
       _email    = username;
       _password = password;
       try {
-        await _api.login(_email, _password);
+        const result = await _api.authenticate(_email, _password, { mode: 'auto' });
+        this.log('Auth succeeded via ' + result.mode + '/' + result.profile);
+
+        // Validate login by calling user/me
+        try {
+          await _api.getCurrentUser();
+        } catch (_) {
+          this.log('user/me call failed — proceeding anyway');
+        }
+
         return true;
       } catch (err: any) {
-        this.error('Login failed: ' + err.message);
-        return false;
+        const summary = _api.getSanitizedAuthSummary?.() || [];
+        this.error('Login failed: ' + err.message, JSON.stringify(summary));
+        throw new Error(err.message || 'Authentication failed');
       }
     });
 
