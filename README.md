@@ -218,6 +218,16 @@ Key endpoints:
 - Station listing and real-time data (power flows, SoC, energy totals)
 - Battery mode read/write
 
+Cloud data field mapping (based on verified API structure):
+- `data.reflux_station_data.pv_power` → PV power (W)
+- `data.reflux_station_data.bms_power` → Battery power (W)
+- `data.reflux_station_data.bms_soc` → Battery SoC (%)
+- `data.reflux_station_data.grid_power` → Grid power (W, + import / − export)
+- `data.reflux_station_data.load_power` → Home load (W)
+- `data.today_eq` → Daily energy (kWh)
+- `data.total_eq` → Total energy (kWh)
+- `data.tou_mode` → Battery work mode
+
 ### Local API (HiBox gateway)
 
 For local communication, the app connects to the HiBox-63T-G3 gateway over TCP (default port 10081) using protobuf-encoded messages. This is the same protocol used by the Hoymiles mobile app on your local network.

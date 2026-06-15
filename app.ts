@@ -2,7 +2,8 @@
 
 import Homey from 'homey';
 
-const HoymilesApi = require('./lib/HoymilesApi');
+const HoymilesApi      = require('./lib/HoymilesApi');
+const ModbusTcpClient  = require('./lib/ModbusTcpClient');
 
 const LOG_MAX = 200;
 
@@ -177,26 +178,32 @@ module.exports = class HoymilesHiOneApp extends Homey.App {
   private async _runModbusScan() {
     try {
       (this as any).appendLog?.('INFO', 'Modbus register scan requested...');
-      const driver = this.homey.drivers.getDriver('hione') as any;
-      if (!driver) {
-        this.homey.settings.set('modbus_scan_result', { error: 'Driver not found' });
+
+      // Use app-level gateway IP directly — independent of device connection mode
+      const gatewayIp = this.homey.settings.get('gateway_ip');
+      if (!gatewayIp) {
+        this.homey.settings.set('modbus_scan_result', { error: 'No gateway IP configured in app settings. Set the Gateway IP address first.' });
         return;
       }
-      const devices = driver.getDevices() as any[];
-      if (!devices || devices.length === 0) {
-        this.homey.settings.set('modbus_scan_result', { error: 'No devices found' });
-        return;
+
+      const client = new ModbusTcpClient({
+        host: gatewayIp,
+        log:   (...args: any[]) => { this.log(...args); (this as any).appendLog?.('INFO', ...args); },
+        error: (...args: any[]) => { this.error(...args); (this as any).appendLog?.('ERROR', ...args); },
+      });
+
+      (this as any).appendLog?.('INFO', `Scanning Modbus registers at ${gatewayIp}:502...`);
+      const result = await client.scanKnownBlocks();
+
+      if (result && Object.keys(result).length > 0) {
+        this.homey.settings.set('modbus_scan_result', result);
+        (this as any).appendLog?.('INFO', 'Modbus scan completed: ' + JSON.stringify(result).substring(0, 500));
+      } else {
+        this.homey.settings.set('modbus_scan_result', { error: 'No data returned from Modbus scan. The gateway at ' + gatewayIp + ' may not support Modbus TCP on port 502.' });
+        (this as any).appendLog?.('INFO', 'Modbus scan completed but no data returned');
       }
-      const device = devices[0];
-      if (!device._hybrid || typeof device._hybrid.scanModbusRegisters !== 'function') {
-        this.homey.settings.set('modbus_scan_result', { error: 'No Modbus TCP connection configured' });
-        return;
-      }
-      const result = await device._hybrid.scanModbusRegisters();
-      this.homey.settings.set('modbus_scan_result', result || { error: 'No Modbus data returned' });
-      (this as any).appendLog?.('INFO', 'Modbus scan completed: ' + JSON.stringify(result).substring(0, 500));
     } catch (err: any) {
-      this.homey.settings.set('modbus_scan_result', { error: err.message });
+      this.homey.settings.set('modbus_scan_result', { error: 'Scan failed: ' + err.message });
       (this as any).appendLog?.('ERROR', 'Modbus scan failed: ' + err.message);
     }
   }

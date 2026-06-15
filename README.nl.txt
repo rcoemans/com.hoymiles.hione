@@ -40,7 +40,14 @@ APPARAATINSTELLINGEN
 Na het koppelen kun je de verbindingsmodus (Lokaal, Hybride of alleen Cloud), S-Miles Cloud e-mail en wachtwoord, gateway IP/poort en poll-interval bekijken en wijzigen in het apparaatinstellingen-scherm — opnieuw koppelen is niet nodig. De verbindingsmodus bepaalt welke databron het apparaat gebruikt. Gateway-info (serienummer, firmware-, hardwareversie) wordt alleen-lezen weergegeven. Het apparaat tolereert tot 2 opeenvolgende fouten voordat het als niet-beschikbaar wordt gemarkeerd (met de specifieke foutreden), en herstelt automatisch wanneer de verbinding terugkomt.
 
 APP-INSTELLINGEN
-De app-instellingenpagina (Homey > Apps > Hoymiles HiOne > Instellingen) laat je app-brede standaardinstellingen configureren en diagnostische logs bekijken. De logging-sectie toont de laatste 200 logregels met knoppen om te vernieuwen, kopiëren en wissen. De diagnostiek-sectie bevat een Modbus TCP register-scan om beschikbare datapunten op je DTS-G3 stick te ontdekken, met kopieer- en wisknoppen.
+De app-instellingenpagina (Homey > Apps > Hoymiles HiOne > Instellingen) laat je app-brede standaardinstellingen configureren en diagnostische logs bekijken. De logging-sectie toont de laatste 200 logregels met knoppen om te vernieuwen, kopiëren en wissen. De diagnostiek-sectie bevat een Modbus TCP register-scan (gebruikt het app-niveau Gateway IP) om beschikbare datapunten te ontdekken, met kopieer- en wisknoppen.
+
+CLOUD DATA MAPPING
+De S-Miles Cloud API retourneert realtime data in reflux_station_data:
+  pv_power = PV-vermogen (W), bms_power = Batterijvermogen (W), bms_soc = Batterij SoC (%),
+  grid_power = Netvermogen (W), load_power = Huisbelasting (W).
+Energie: today_eq = Dagelijkse energie (kWh), total_eq = Totale energie (kWh).
+Batterijmodus: tou_mode (0=Eigen verbruik, 1=Economie, 2=Noodstroom, enz).
 
 FLOW CARDS
 Acties:

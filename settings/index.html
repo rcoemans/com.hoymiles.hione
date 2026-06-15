@@ -270,24 +270,9 @@
     }
 
     function copyLog() {
-      var box = document.getElementById('log-box');
-      var text = box.textContent || '';
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(function() { showCopyToast(); });
-      } else {
-        var ta = document.createElement('textarea');
-        ta.value = text; document.body.appendChild(ta); ta.select();
-        document.execCommand('copy'); document.body.removeChild(ta);
-        showCopyToast();
-      }
-    }
-
-    function showCopyToast() {
-      var t = i18n[_lang] || i18n.en;
-      var toast = document.getElementById('copy-toast');
-      toast.textContent = t.copied || 'Copied!';
-      toast.style.display = 'inline';
-      setTimeout(function() { toast.style.display = 'none'; }, 2000);
+      var text = document.getElementById('log-box').textContent || '';
+      if (!text) return;
+      _copyText(text, 'copy-toast');
     }
 
     function clearLog() {
@@ -301,19 +286,44 @@
       var box = document.getElementById('scan-result');
       var text = box.textContent || '';
       if (!text) return;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(function() {
-          var toast = document.getElementById('scan-copy-toast');
-          var t = i18n[_lang] || i18n.en;
+      _copyText(text, 'scan-copy-toast');
+    }
+
+    function _copyText(text, toastId) {
+      var t = i18n[_lang] || i18n.en;
+      function showToast() {
+        var toast = document.getElementById(toastId);
+        if (toast) {
           toast.textContent = t.copied || 'Copied!';
           toast.style.display = 'inline';
           setTimeout(function() { toast.style.display = 'none'; }, 2000);
-        });
-      } else {
-        var ta = document.createElement('textarea');
-        ta.value = text; document.body.appendChild(ta); ta.select();
-        document.execCommand('copy'); document.body.removeChild(ta);
+        }
       }
+      // Try modern clipboard API first, then fall back
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showToast).catch(function() {
+            _fallbackCopy(text); showToast();
+          });
+          return;
+        }
+      } catch (e) { /* ignore */ }
+      _fallbackCopy(text);
+      showToast();
+    }
+
+    function _fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+      document.body.removeChild(ta);
     }
 
     function clearScan() {
@@ -334,6 +344,8 @@
       resultBox.style.display = 'block';
       resultBox.textContent = t.scanning || 'Scanning...';
 
+      // Clear previous result before starting scan
+      _homeyRef.set('modbus_scan_result', null, function() {});
       // Trigger the scan by setting a key
       _homeyRef.set('run_modbus_scan', Date.now(), function(err) {
         if (err) {
