@@ -179,11 +179,12 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 
 The app communicates with the Hoymiles cloud via the REST API at `neapi.hoymiles.com` using a built-in HTTP client (Node.js `https` module) for maximum runtime compatibility. Authentication uses an automatic multi-profile strategy:
 
-1. **v3 Web login** — pre-inspection + SHA-256-derived credential hash
-2. **v3 Installer login** — same flow with S-Miles Installer app-version headers
-3. **Legacy v0 login** — MD5-hashed password (fallback for older accounts)
+1. **v3 S-Miles Home** — pre-inspection + credential hash with S-Miles Home app headers (tried first, most end-users)
+2. **v3 S-Miles Installer** — same v3 flow with S-Miles Installer app headers
+3. **v3 Web** — same v3 flow without app-version headers
+4. **Legacy v0** — MD5-hashed password (fallback for older accounts)
 
-The app tries each method in order and uses the first one that succeeds. The token is valid for 2 hours and refreshes automatically. If an account requires Argon2id (salted v3), the app will report this explicitly — try using S-Miles Installer credentials instead.
+The app tries each method in order and uses the first one that succeeds. The token is valid for 2 hours and refreshes automatically. If all methods fail, the error message shows the outcome of every attempt for easy debugging. If an account requires Argon2id (salted v3), the app will report this explicitly.
 
 Key endpoints:
 - Login and authentication (v3 pre-inspection + login, or legacy v0)
