@@ -2,15 +2,17 @@ Monitor and control your Hoymiles HiOne all-in-one battery storage system from H
 
 FEATURES
 - Real-time monitoring: PV power, battery state-of-charge, battery charge/discharge power, grid import/export (signed and split), home load, system alarm
-- Energy totals: daily yield and lifetime total
+- Energy totals: daily, monthly, yearly, and lifetime total
+- Financial & environmental: profit today/total, CO2 reduction
+- Settable battery parameters: Reserve SoC, Max SoC, Max Power, Grid Limit sliders on device card
 - Calculated insights: self-powered percentage, battery runtime/time-to-full estimates, power balance, energy independence
-- Battery mode control via Flows: Self-Consumption, Economy, Backup, Off-Grid, Peak Shaving, Time of Use
+- Battery mode control via Flows: Self-Consumption, Economy, Backup, Off-Grid, Self-Consumption + Max Power, Backup + Max Power, Peak Shaving, Time of Use
 - Flow triggers: battery charging/discharging state changes, SoC thresholds, grid state changes, PV production, gateway status, connection source changes
 - Flow conditions: battery charging/discharging, SoC above/below threshold, PV/load power thresholds, grid importing/exporting, battery mode, gateway online, connection local
-- Flow actions: set battery mode, refresh data, prefer local/cloud, enable/disable cloud fallback
+- Flow actions: set battery mode, set reserve SoC, set max SoC, set max power, set grid limit, set peak shaving, set time-of-use period, set power limit, set inverter state, set relay, refresh data, prefer local/cloud, enable/disable cloud fallback
 - Three connection modes: Local (LAN), Local + Cloud (recommended), or Cloud only
 - Modbus TCP support for DTS-G3 sticks (port 502) — automatic fallback when protobuf is unavailable (PV power + validated energy only; ESS registers not mapped, unreliable data skipped to preserve cloud values)
-- Homey Energy integration: battery charge/discharge power and cumulative energy count towards Homey Energy
+- Homey Energy integration: homeBattery with meter_power.charged and meter_power.discharged for battery energy tracking
 - Cloud login hardening: backoff after failed attempts (up to 12h for account lockout) to protect your S-Miles account
 - Diagnostics: Quick Scan (known blocks), Deep Scan (full 0x0000–0xFFFF), ESS Probe (experimental battery register discovery)
 
@@ -57,12 +59,18 @@ The S-Miles Cloud API returns real-time data in reflux_station_data:
   pv_power → PV power (W), bms_power → Battery power (W), bms_soc → Battery SoC (%),
   grid_power → Grid power (W), load_power → Home load (W).
 Energy: today_eq → Daily energy (Wh integer → kWh), total_eq → Total energy (Wh integer → kWh).
-Battery mode: tou_mode (0=Self-Consumption, 1=Economy, 2=Backup, 3=Off-Grid, 4=Peak Shaving, 5=Time of Use).
+Battery mode: tou_mode (1=Self-Consumption, 2=Economy, 3=Backup, 4=Off-Grid, 5=Self-Consumption + Max Power, 6=Backup + Max Power, 7=Peak Shaving, 8=Time of Use).
 Device listing: /pvm/api/0/dev/select_by_page returns DTU, inverter, gateway, battery info per station.
 
 FLOW CARDS
 Actions:
-- Set battery mode (Self-Consumption, Economy, Backup, Off-Grid, Peak Shaving, Time of Use)
+- Set battery mode (Self-Consumption, Economy, Backup, Off-Grid, Self-Consumption + Max Power, Backup + Max Power, Peak Shaving, Time of Use)
+- Set reserve SoC, max SoC, max power, grid limit
+- Set peak shaving parameters (reserve SoC + max SoC + grid limit)
+- Set time-of-use period (charge schedule)
+- Set inverter power limit (2-100%, EEPROM write)
+- Set inverter state (on/off)
+- Set relay (enable/disable dry contact output)
 - Refresh data now
 - Prefer local/cloud connection
 - Enable/disable cloud fallback
@@ -77,7 +85,7 @@ Conditions:
 - Connection is/is not local (LAN)
 
 NOTE
-Existing devices may need to be removed and re-added if new capabilities are missing after an update.
+Existing devices automatically migrate new capabilities on app update. Re-pairing is only needed if the device class changes.
 
 DISCLAIMER
 This is an unofficial, community-developed integration. Not affiliated with or endorsed by Hoymiles Power Electronics Inc. Uses the reverse-engineered S-Miles Cloud API and/or local DTU communication. Hoymiles may change these interfaces at any time. Use at your own risk.

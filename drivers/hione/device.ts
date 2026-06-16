@@ -8,6 +8,7 @@ const HioneCalculator = require('../../lib/HioneCalculator');
 const { BATTERY_MODES } = require('../../lib/HoymilesApi');
 
 const DEFAULT_POLL_MS = 60_000;
+const EXTENDED_DATA_INTERVAL = 10; // fetch extended data every N polls
 
 module.exports = class HiOneDevice extends Homey.Device {
 
@@ -21,6 +22,9 @@ module.exports = class HiOneDevice extends Homey.Device {
   private _prevGatewayOnline: boolean | null = null;
   private _prevConnectionSource: string | null = null;
   private _consecutiveFailures: number = 0;
+  private _pollCount: number = 0;
+  private _chargedTotal: number = 0;
+  private _dischargedTotal: number = 0;
 
   private _appLog(level: string, ...args: any[]) {
     try {
@@ -39,9 +43,15 @@ module.exports = class HiOneDevice extends Homey.Device {
     this._prevGatewayOnline = null;
     this._prevConnectionSource = null;
     this._consecutiveFailures = 0;
+    this._pollCount = 0;
+    this._chargedTotal = 0;
+    this._dischargedTotal = 0;
 
     // Sync store credentials → device settings (for devices paired before credential settings existed)
     await this._syncStoreToSettings();
+
+    // Capability migration: add new capabilities if missing
+    await this._migrateCapabilities();
 
     this._createHybrid();
     if (this._hybrid._mode !== 'cloud') {
@@ -52,6 +62,22 @@ module.exports = class HiOneDevice extends Homey.Device {
 
     this.registerCapabilityListener('hione_battery_mode', async (value: string) => {
       await this._hybrid.setBatteryMode(value);
+    });
+
+    this.registerCapabilityListener('hione_reserve_soc', async (value: number) => {
+      await this._hybrid.writeBatterySettings({ reserveSoc: value });
+    });
+
+    this.registerCapabilityListener('hione_max_soc', async (value: number) => {
+      await this._hybrid.writeBatterySettings({ maxSoc: value });
+    });
+
+    this.registerCapabilityListener('hione_max_power', async (value: number) => {
+      await this._hybrid.writeBatterySettings({ maxPower: value });
+    });
+
+    this.registerCapabilityListener('hione_grid_limit', async (value: number) => {
+      await this._hybrid.writeBatterySettings({ gridLimit: value });
     });
 
     this._startPolling();
@@ -91,11 +117,81 @@ module.exports = class HiOneDevice extends Homey.Device {
     }
   }
 
+  // ── Capability migration ─────────────────────────────────────────────────
+
+  private async _migrateCapabilities() {
+    const needed = [
+      'meter_power.charged', 'meter_power.discharged',
+      'hione_reserve_soc', 'hione_max_soc', 'hione_max_power', 'hione_grid_limit',
+      'hione_monthly_energy', 'hione_yearly_energy',
+      'hione_co2_reduction', 'hione_profit_today', 'hione_profit_total',
+    ];
+    for (const cap of needed) {
+      if (!this.hasCapability(cap)) {
+        try {
+          await this.addCapability(cap);
+          this.log(`[Migration] Added capability: ${cap}`);
+        } catch (err: any) {
+          this.log(`[Migration] Failed to add ${cap}: ${err.message}`);
+        }
+      }
+    }
+  }
+
   // ── Public methods for flow actions ─────────────────────────────────────
 
   async setBatteryMode(mode: string) {
     await this._hybrid.setBatteryMode(mode);
     await this.setCapabilityValue('hione_battery_mode', String(mode));
+  }
+
+  async setReserveSoc(soc: number) {
+    await this._hybrid.writeBatterySettings({ reserveSoc: soc });
+    await this._safeCap('hione_reserve_soc', soc);
+  }
+
+  async setMaxSoc(soc: number) {
+    await this._hybrid.writeBatterySettings({ maxSoc: soc });
+    await this._safeCap('hione_max_soc', soc);
+  }
+
+  async setMaxPower(power: number) {
+    await this._hybrid.writeBatterySettings({ maxPower: power });
+    await this._safeCap('hione_max_power', power);
+  }
+
+  async setGridLimit(limit: number) {
+    await this._hybrid.writeBatterySettings({ gridLimit: limit });
+    await this._safeCap('hione_grid_limit', limit);
+  }
+
+  async setPeakShaving(reserveSoc: number, maxSoc: number, gridLimit: number) {
+    await this._hybrid.setBatteryModeWithParams(7, {
+      reserve_soc: reserveSoc, max_soc: maxSoc, grid_limit: gridLimit,
+    });
+    await this._safeCap('hione_battery_mode', '7');
+    await this._safeCap('hione_reserve_soc', reserveSoc);
+    await this._safeCap('hione_max_soc', maxSoc);
+    await this._safeCap('hione_grid_limit', gridLimit);
+  }
+
+  async setTouPeriod(chargeFrom: string, chargeTo: string, chargePower: number) {
+    await this._hybrid.setBatteryModeWithParams(8, {
+      charge_from: chargeFrom, charge_to: chargeTo, charge_power: chargePower,
+    });
+    await this._safeCap('hione_battery_mode', '8');
+  }
+
+  async setPowerLimit(limitPct: number) {
+    await this._hybrid.setPowerLimit(limitPct);
+  }
+
+  async setInverterState(on: boolean) {
+    await this._hybrid.setInverterState(on);
+  }
+
+  async setRelay(enabled: boolean) {
+    await this._hybrid.setRelay(enabled);
   }
 
   async pollNow() {
@@ -169,9 +265,9 @@ module.exports = class HiOneDevice extends Homey.Device {
 
       // ── Core capabilities ────────────────────────────────────────────
 
-      await this._safeCap('measure_power', data.pvPower);
       await this._safeCap('hione_pv_power', data.pvPower);
       if (essConfirmed) {
+        await this._safeCap('measure_power', data.batteryPower);
         await this._safeCap('measure_battery', data.batterySoc);
         await this._safeCap('hione_battery_power', data.batteryPower);
         await this._safeCap('hione_grid_power', data.gridPower);
@@ -237,6 +333,25 @@ module.exports = class HiOneDevice extends Homey.Device {
       this._checkBatteryModeTrigger(data.batteryMode);
       this._checkGatewayTriggers(gatewayOnline);
       this._checkConnectionSourceTrigger(data.source);
+
+      // ── Homey Energy: meter_power charged / discharged ──────────────
+      if (essConfirmed) {
+        const chargePowerW = data.batteryChargePower || 0;
+        const dischargePowerW = data.batteryDischargePower || 0;
+        const pollSec = this._getPollMs() / 1000;
+        this._chargedTotal += (chargePowerW * pollSec) / 3_600_000; // W·s → kWh
+        this._dischargedTotal += (dischargePowerW * pollSec) / 3_600_000;
+        await this._safeCap('meter_power.charged', Math.round(this._chargedTotal * 100) / 100);
+        await this._safeCap('meter_power.discharged', Math.round(this._dischargedTotal * 100) / 100);
+      }
+
+      // ── Extended data (less frequent) ────────────────────────────────
+      this._pollCount++;
+      if (this._pollCount % EXTENDED_DATA_INTERVAL === 0) {
+        this._fetchExtendedData().catch((err: any) =>
+          this.log('[Poll] Extended data fetch failed: ' + err.message)
+        );
+      }
 
       // ── Alarm ─────────────────────────────────────────────────────────
       await this._safeCap('alarm_generic', false);
@@ -357,6 +472,45 @@ module.exports = class HiOneDevice extends Homey.Device {
         .catch((err: Error) => this.error('Trigger failed: ' + err.message));
     }
     this._prevConnectionSource = source;
+  }
+
+  // ── Extended data (monthly/yearly energy, profit, settings) ────────────
+
+  private async _fetchExtendedData() {
+    this.log('[ExtendedData] Fetching...');
+
+    // Monthly / yearly energy
+    try {
+      const monthly = await this._hybrid.getMonthlyEnergy();
+      const yearly = await this._hybrid.getYearlyEnergy();
+      await this._safeCap('hione_monthly_energy', monthly);
+      await this._safeCap('hione_yearly_energy', yearly);
+    } catch (err: any) {
+      this.log('[ExtendedData] Energy period fetch failed: ' + err.message);
+    }
+
+    // EPS profit + CO2
+    try {
+      const profit = await this._hybrid.getEpsProfit();
+      await this._safeCap('hione_profit_today', profit.profitToday);
+      await this._safeCap('hione_profit_total', profit.profitTotal);
+      await this._safeCap('hione_co2_reduction', profit.co2Reduction);
+    } catch (err: any) {
+      this.log('[ExtendedData] EPS profit fetch failed: ' + err.message);
+    }
+
+    // Battery settings refresh
+    try {
+      const settings = await this._hybrid.readBatterySettings();
+      if (settings) {
+        await this._safeCap('hione_reserve_soc', settings.reserveSoc);
+        await this._safeCap('hione_max_soc', settings.maxSoc);
+        await this._safeCap('hione_max_power', settings.maxPower);
+        await this._safeCap('hione_grid_limit', settings.gridLimit);
+      }
+    } catch (err: any) {
+      this.log('[ExtendedData] Battery settings refresh failed: ' + err.message);
+    }
   }
 
   // ── Device info ────────────────────────────────────────────────────────

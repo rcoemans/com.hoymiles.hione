@@ -2,15 +2,17 @@ Monitor en bedien je Hoymiles HiOne all-in-one batterijopslagsysteem vanuit Home
 
 FUNCTIES
 - Realtime monitoring: PV-vermogen, batterij laadniveau, batterij laad-/ontlaadvermogen, netimport/-export (gesigneerd en gesplitst), thuisverbruik, systeemalarmen
-- Energietotalen: dagopbrengst en totaalopbrengst
+- Energietotalen: dag-, maand-, jaaropbrengst en totaalopbrengst
+- Financieel & milieu: winst vandaag/totaal, CO2-reductie
+- Instelbare batterijparameters: Reserve SoC, Max SoC, Max vermogen, Netlimiet schuifregelaars op apparaatkaart
 - Berekende inzichten: zelfvoorzieningspercentage, batterijlooptijd/laadtijd-schattingen, vermogensbalans, energieonafhankelijkheid
-- Batterijmodusbesturing via Flows: Eigen verbruik, Economie, Noodstroom, Off-Grid, Pieksturing, Tijdafhankelijk
+- Batterijmodusbesturing via Flows: Eigen verbruik, Economie, Noodstroom, Off-Grid, Eigen verbruik + Max vermogen, Noodstroom + Max vermogen, Pieksturing, Tijdafhankelijk
 - Flow triggers: batterij laden/ontladen statuswijzigingen, SoC-drempels, netstatus wijzigingen, PV-productie, gatewaystatus, verbindingsbron wijzigingen
 - Flow condities: batterij laden/ontladen, SoC boven/onder drempel, PV-/belastingsvermogen drempels, net importeren/exporteren, batterijmodus, gateway online, verbinding lokaal
-- Flow acties: batterijmodus instellen, data vernieuwen, voorkeur lokaal/cloud, cloud-fallback in-/uitschakelen
+- Flow acties: batterijmodus instellen, reserve SoC, max SoC, max vermogen, netlimiet, pieksturing, tijdafhankelijke periode, vermogenslimiet, omvormerstatus, relais, data vernieuwen, voorkeur lokaal/cloud, cloud-fallback in-/uitschakelen
 - Drie verbindingsmodi: Lokaal (LAN), Lokaal + Cloud (aanbevolen), of alleen Cloud
 - Modbus TCP-ondersteuning voor DTS-G3 sticks (poort 502) — automatische terugval wanneer protobuf niet beschikbaar is (alleen PV-vermogen + gevalideerde energie; ESS-registers niet in kaart gebracht, onbetrouwbare data wordt overgeslagen om cloudwaarden te behouden)
-- Homey Energy integratie: batterij laad-/ontlaadvermogen en cumulatieve energie tellen mee in Homey Energy
+- Homey Energy integratie: homeBattery met meter_power.charged en meter_power.discharged voor batterij-energietracking
 - Cloud-login afgehard: wachttijd na mislukte pogingen (tot 12 uur bij accountblokkade) om je S-Miles-account te beschermen
 - Diagnostiek: Quick Scan (bekende blokken), Deep Scan (volledig 0x0000–0xFFFF), ESS Probe (experimentele batterijregister-ontdekking)
 
@@ -57,12 +59,18 @@ De S-Miles Cloud API retourneert realtime data in reflux_station_data:
   pv_power = PV-vermogen (W), bms_power = Batterijvermogen (W), bms_soc = Batterij SoC (%),
   grid_power = Netvermogen (W), load_power = Huisbelasting (W).
 Energie: today_eq = Dagelijkse energie (Wh geheel getal → kWh), total_eq = Totale energie (Wh geheel getal → kWh).
-Batterijmodus: tou_mode (0=Eigen verbruik, 1=Economie, 2=Noodstroom, 3=Off-Grid, 4=Pieksturing, 5=Tijdafhankelijk).
+Batterijmodus: tou_mode (1=Eigen verbruik, 2=Economie, 3=Noodstroom, 4=Off-Grid, 5=Eigen verbruik + Max vermogen, 6=Noodstroom + Max vermogen, 7=Pieksturing, 8=Tijdafhankelijk).
 Apparatenlijst: /pvm/api/0/dev/select_by_page geeft DTU, omvormer, gateway en batterij-info per station.
 
 FLOW CARDS
 Acties:
-- Batterijmodus instellen (Eigen verbruik, Economie, Noodstroom, Off-Grid, Pieksturing, Tijdafhankelijk)
+- Batterijmodus instellen (Eigen verbruik, Economie, Noodstroom, Off-Grid, Eigen verbruik + Max vermogen, Noodstroom + Max vermogen, Pieksturing, Tijdafhankelijk)
+- Reserve SoC, max SoC, max vermogen, netlimiet instellen
+- Pieksturing parameters instellen (reserve SoC + max SoC + netlimiet)
+- Tijdafhankelijke periode instellen (laadschema)
+- Omvormer vermogenslimiet instellen (2-100%, EEPROM-schrijfbewerking)
+- Omvormerstatus instellen (aan/uit)
+- Relais instellen (droogcontact in-/uitschakelen)
 - Data nu vernieuwen
 - Voorkeur lokaal/cloud verbinding
 - Cloud-fallback in-/uitschakelen
@@ -77,7 +85,7 @@ Condities:
 - Verbinding is/is niet lokaal (LAN)
 
 LET OP
-Bestaande apparaten moeten mogelijk verwijderd en opnieuw toegevoegd worden als nieuwe mogelijkheden ontbreken na een update.
+Bestaande apparaten migreren automatisch nieuwe mogelijkheden bij een app-update. Opnieuw koppelen is alleen nodig als de apparaatklasse wijzigt.
 
 DISCLAIMER
 Dit is een onofficiële, door de community ontwikkelde integratie. Niet gelieerd aan of goedgekeurd door Hoymiles Power Electronics Inc. Maakt gebruik van de reverse-engineered S-Miles Cloud API en/of lokale DTU-communicatie. Hoymiles kan deze interfaces op elk moment wijzigen. Gebruik op eigen risico.

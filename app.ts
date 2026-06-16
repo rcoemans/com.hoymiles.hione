@@ -75,6 +75,60 @@ module.exports = class HoymilesHiOneApp extends Homey.App {
         return device.setCloudFallback(false);
       });
 
+    this.homey.flow
+      .getActionCard('set_reserve_soc')
+      .registerRunListener(async ({ device, soc }: any) => {
+        return device.setReserveSoc(Number(soc));
+      });
+
+    this.homey.flow
+      .getActionCard('set_max_soc')
+      .registerRunListener(async ({ device, soc }: any) => {
+        return device.setMaxSoc(Number(soc));
+      });
+
+    this.homey.flow
+      .getActionCard('set_max_power')
+      .registerRunListener(async ({ device, power }: any) => {
+        return device.setMaxPower(Number(power));
+      });
+
+    this.homey.flow
+      .getActionCard('set_grid_limit')
+      .registerRunListener(async ({ device, limit }: any) => {
+        return device.setGridLimit(Number(limit));
+      });
+
+    this.homey.flow
+      .getActionCard('set_peak_shaving')
+      .registerRunListener(async ({ device, reserve_soc, max_soc, grid_limit }: any) => {
+        return device.setPeakShaving(Number(reserve_soc), Number(max_soc), Number(grid_limit));
+      });
+
+    this.homey.flow
+      .getActionCard('set_tou_period')
+      .registerRunListener(async ({ device, charge_from, charge_to, charge_power }: any) => {
+        return device.setTouPeriod(charge_from, charge_to, Number(charge_power));
+      });
+
+    this.homey.flow
+      .getActionCard('set_power_limit')
+      .registerRunListener(async ({ device, limit }: any) => {
+        return device.setPowerLimit(Number(limit));
+      });
+
+    this.homey.flow
+      .getActionCard('set_inverter_state')
+      .registerRunListener(async ({ device, state }: any) => {
+        return device.setInverterState(state === 'on');
+      });
+
+    this.homey.flow
+      .getActionCard('set_relay')
+      .registerRunListener(async ({ device, state }: any) => {
+        return device.setRelay(state === 'on');
+      });
+
     // ── Condition cards ───────────────────────────────────────────────────
 
     this.homey.flow

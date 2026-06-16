@@ -21,19 +21,21 @@ Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage sy
 ## Features
 
 - **Real-time monitoring**: PV power, battery state-of-charge, battery charge/discharge power, grid import/export (signed and split), home load
-- **Energy totals**: daily yield and lifetime total
+- **Energy totals**: daily, monthly, yearly, and lifetime total
 - **Calculated insights**: self-powered percentage, battery runtime estimate, time-to-full estimate, power balance, energy independence state
+- **Financial & environmental**: profit today/total, CO₂ reduction
+- **Settable battery parameters**: Reserve SoC, Max SoC, Max Power, Grid Limit sliders on the device card
 - **Battery mode control** via Flows:
-  - Self-Consumption, Economy, Backup, Off-Grid, Peak Shaving, Time of Use
+  - Self-Consumption, Economy, Backup, Off-Grid, Self-Consumption + Max Power, Backup + Max Power, Peak Shaving, Time of Use
 - **Flow triggers**: battery started/stopped charging, battery started/stopped discharging, SoC changed, SoC crossed threshold, grid started importing/exporting, PV production started/stopped, gateway online/offline, connection source changed, battery mode changed
 - **Flow conditions**: battery is/is not charging, battery is/is not discharging, SoC above/below threshold, PV power above threshold, load power above threshold, grid is/is not importing, grid is/is not exporting, battery mode is/is not, gateway is/is not online, connection is/is not local
-- **Flow actions**: set battery mode, refresh data, prefer local/cloud connection, enable/disable cloud fallback
+- **Flow actions**: set battery mode, set reserve SoC, set max SoC, set max power, set grid limit, set peak shaving parameters, set time-of-use period, set inverter power limit, set inverter on/off, set relay, refresh data, prefer local/cloud connection, enable/disable cloud fallback
 - **Three connection modes**:
   - **Local (LAN)** — direct connection to the HiBox gateway via IP. Supports protobuf (port 10081) and **Modbus TCP** (port 502, for DTS-G3 sticks). No cloud account needed. Works offline.
   - **Local + Cloud** — local as primary, S-Miles Cloud as fallback. Best reliability.
   - **Cloud only** — via S-Miles Cloud API. Requires a hoymiles.com account.
 - **Modbus TCP support** for DTS-G3 sticks — automatic fallback when protobuf is unavailable
-- **Homey Energy integration** — battery charge/discharge power and cumulative energy are reported to Homey Energy via the device’s energy configuration
+- **Homey Energy integration** — `homeBattery` with `meter_power.charged` and `meter_power.discharged` for proper battery energy tracking in Homey's Energy dashboard
 - **Cloud login hardening** — exponential backoff after failed login attempts (up to 12 hours for account lockout) to protect your S-Miles account
 - **Register scan diagnostic** — discover available Modbus registers on your DTS-G3 stick from the app settings page
 - **Connection source indicator**: see whether data comes from local or cloud
@@ -119,7 +121,16 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 | Grid Export Power | Export power (positive split value) | W |
 | Load Power | Current home consumption | W |
 | Daily Energy | Energy produced today | kWh |
+| Monthly Energy | Energy produced this month | kWh |
+| Yearly Energy | Energy produced this year | kWh |
 | Total Energy | Lifetime energy produced | kWh |
+| CO₂ Reduction | Carbon dioxide reduction | kg |
+| Profit Today | Financial savings today | currency |
+| Profit Total | Financial savings total | currency |
+| Reserve SoC | Minimum battery level (settable) | % |
+| Max SoC | Maximum battery level (settable) | % |
+| Max Power | Max charge/discharge power (settable) | % |
+| Grid Limit | Grid power limit for Peak Shaving (settable) | W |
 | Battery Mode | Current operating mode | — |
 | Battery State | Charging / Discharging / Idle / Standby / Fault | — |
 | Grid State | Importing / Exporting / Neutral | — |
@@ -169,7 +180,16 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 
 ### Actions
 
-- **Set battery mode** — change the battery operating mode (Self-Consumption, Economy, Backup, Off-Grid, Peak Shaving, Time of Use)
+- **Set battery mode** — change the battery operating mode (Self-Consumption, Economy, Backup, Off-Grid, Self-Consumption + Max Power, Backup + Max Power, Peak Shaving, Time of Use)
+- **Set reserve SoC** — set the minimum battery state of charge
+- **Set max SoC** — set the maximum battery state of charge
+- **Set max power** — set the max charge/discharge power percentage
+- **Set grid limit** — set the grid power limit for Peak Shaving (W)
+- **Set peak shaving parameters** — configure and activate Peak Shaving with reserve SoC, max SoC, and grid limit
+- **Set time-of-use period** — configure charge schedule and activate Time of Use mode
+- **Set inverter power limit** — set inverter output limit (2-100%, writes to EEPROM)
+- **Set inverter state** — turn inverter on or off
+- **Set relay** — enable/disable the dry contact relay output
 - **Refresh data now** — immediately poll the latest data
 - **Prefer local connection** — attempt to reconnect via local gateway
 - **Prefer cloud connection** — switch to cloud API
@@ -238,7 +258,7 @@ Cloud data field mapping (based on verified API structure):
 - `data.reflux_station_data.load_power` → Home load (W)
 - `data.today_eq` → Daily energy (Wh integer → converted to kWh)
 - `data.total_eq` → Total energy (Wh integer → converted to kWh)
-- `data.tou_mode` → Battery work mode (0=Self-Consumption, 1=Economy, 2=Backup, 3=Off-Grid, 4=Peak Shaving, 5=Time of Use)
+- `data.tou_mode` → Battery work mode (1=Self-Consumption, 2=Economy, 3=Backup, 4=Off-Grid, 5=Self-Consumption + Max Power, 6=Backup + Max Power, 7=Peak Shaving, 8=Time of Use)
 
 Device listing endpoint (`/pvm/api/0/dev/select_by_page`) returns DTU, inverter, gateway, and battery info (serial, model, firmware, hardware) per station.
 
@@ -282,8 +302,8 @@ To protect your S-Miles Cloud account from repeated failed login attempts (which
 | Limitation | Detail |
 |---|---|
 | Unofficial API | May break if Hoymiles updates their backend or local protocol |
-| Write operations | Only battery mode can be changed; charge limits and schedules are not yet supported |
-| Device re-pair | Existing devices may need to be removed and re-added if new capabilities are missing after an update |
+| Write operations | Battery mode, reserve SoC, max SoC, max power, grid limit, power limit, inverter on/off, and relay are supported via cloud and/or local protocol |
+| Device re-pair | Existing devices automatically migrate new capabilities on app update; re-pairing is only needed if the device class changes |
 | HiOne only | Not tested with DTU, micro-inverters, or HYT series |
 | Local polling | Intervals below 30 seconds can disrupt cloud and mobile app connectivity |
 | Battery capacity | Battery runtime estimates assume 5 kWh usable capacity |
