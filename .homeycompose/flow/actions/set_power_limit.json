@@ -1,0 +1,30 @@
+{
+  "id": "set_power_limit",
+  "title": {
+    "en": "Set inverter power limit",
+    "nl": "Stel omvormer vermogenslimiet in"
+  },
+  "titleFormatted": {
+    "en": "Set inverter power limit to [[limit]] %",
+    "nl": "Stel omvormer vermogenslimiet in op [[limit]] %"
+  },
+  "hint": {
+    "en": "Set the inverter output power limit (2-100%). WARNING: writes to EEPROM — max 10 changes/day recommended.",
+    "nl": "Stel de omvormer uitgangsvermogenslimiet in (2-100%). WAARSCHUWING: schrijft naar EEPROM — max 10 wijzigingen/dag aanbevolen."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "limit",
+      "type": "number",
+      "title": { "en": "Power Limit (%)", "nl": "Vermogenslimiet (%)" },
+      "min": 2,
+      "max": 100,
+      "step": 1
+    }
+  ]
+}

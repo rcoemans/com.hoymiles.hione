@@ -1,0 +1,13 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Profit Today",
+    "nl": "Winst vandaag"
+  },
+  "decimals": 2,
+  "insights": true,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/graph.svg"
+}

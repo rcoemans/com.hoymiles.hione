@@ -1,0 +1,38 @@
+{
+  "id": "set_tou_period",
+  "title": {
+    "en": "Set Time of Use period",
+    "nl": "Stel tijdafhankelijke periode in"
+  },
+  "titleFormatted": {
+    "en": "Set Time of Use: charge [[charge_from]] to [[charge_to]] at [[charge_power]]%",
+    "nl": "Stel tijdafhankelijk in: laden [[charge_from]] tot [[charge_to]] op [[charge_power]]%"
+  },
+  "hint": {
+    "en": "Configure a charge/discharge schedule and activate Time of Use mode.",
+    "nl": "Configureer een laad-/ontlaadschema en activeer tijdafhankelijke modus."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "charge_from",
+      "type": "text",
+      "title": { "en": "Charge from (HH:MM)", "nl": "Laden van (HH:MM)" }
+    },
+    {
+      "name": "charge_to",
+      "type": "text",
+      "title": { "en": "Charge to (HH:MM)", "nl": "Laden tot (HH:MM)" }
+    },
+    {
+      "name": "charge_power",
+      "type": "number",
+      "title": { "en": "Charge power (%)", "nl": "Laadvermogen (%)" },
+      "min": 0, "max": 100, "step": 1
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.hoymiles.hione-vork",
   "version": "1.1.0",
-  "compatibility": ">=10.0.0",
+  "compatibility": ">=12.0.0",
   "sdk": 3,
   "platforms": [
     "local"
@@ -923,18 +923,18 @@
         ]
       },
       {
-        "id": "set_reserve_soc",
+        "id": "set_grid_limit",
         "title": {
-          "en": "Set reserve SoC",
-          "nl": "Stel reserve SoC in"
+          "en": "Set grid power limit",
+          "nl": "Stel net vermogenslimiet in"
         },
         "titleFormatted": {
-          "en": "Set reserve SoC to [[soc]] %",
-          "nl": "Stel reserve SoC in op [[soc]] %"
+          "en": "Set grid power limit to [[limit]] W",
+          "nl": "Stel net vermogenslimiet in op [[limit]] W"
         },
         "hint": {
-          "en": "Set the minimum battery state of charge (reserve).",
-          "nl": "Stel het minimale laadniveau van de batterij in (reserve)."
+          "en": "Set the grid power limit for Peak Shaving mode (W).",
+          "nl": "Stel de netvermogenslimiet in voor pieksturing (W)."
         },
         "args": [
           {
@@ -943,9 +943,91 @@
             "filter": "driver_id=hione"
           },
           {
-            "name": "soc",
+            "name": "limit",
             "type": "number",
-            "title": { "en": "Reserve SoC (%)", "nl": "Reserve SoC (%)" },
+            "title": {
+              "en": "Grid Limit (W)",
+              "nl": "Netlimiet (W)"
+            },
+            "min": 0,
+            "max": 50000,
+            "step": 100
+          }
+        ]
+      },
+      {
+        "id": "set_inverter_state",
+        "title": {
+          "en": "Set inverter state",
+          "nl": "Stel omvormerstatus in"
+        },
+        "titleFormatted": {
+          "en": "Turn inverter [[state]]",
+          "nl": "Zet omvormer [[state]]"
+        },
+        "hint": {
+          "en": "Turn the inverter on or off.",
+          "nl": "Zet de omvormer aan of uit."
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=hione"
+          },
+          {
+            "name": "state",
+            "type": "dropdown",
+            "title": {
+              "en": "State",
+              "nl": "Status"
+            },
+            "values": [
+              {
+                "id": "on",
+                "label": {
+                  "en": "On",
+                  "nl": "Aan"
+                }
+              },
+              {
+                "id": "off",
+                "label": {
+                  "en": "Off",
+                  "nl": "Uit"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "set_max_power",
+        "title": {
+          "en": "Set max power",
+          "nl": "Stel max vermogen in"
+        },
+        "titleFormatted": {
+          "en": "Set max charge/discharge power to [[power]] %",
+          "nl": "Stel max laad-/ontlaadvermogen in op [[power]] %"
+        },
+        "hint": {
+          "en": "Set the maximum charge/discharge power percentage.",
+          "nl": "Stel het maximale laad-/ontlaadvermogen percentage in."
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=hione"
+          },
+          {
+            "name": "power",
+            "type": "number",
+            "title": {
+              "en": "Max Power (%)",
+              "nl": "Max vermogen (%)"
+            },
             "min": 0,
             "max": 100,
             "step": 1
@@ -975,70 +1057,13 @@
           {
             "name": "soc",
             "type": "number",
-            "title": { "en": "Max SoC (%)", "nl": "Max SoC (%)" },
+            "title": {
+              "en": "Max SoC (%)",
+              "nl": "Max SoC (%)"
+            },
             "min": 0,
             "max": 100,
             "step": 1
-          }
-        ]
-      },
-      {
-        "id": "set_max_power",
-        "title": {
-          "en": "Set max power",
-          "nl": "Stel max vermogen in"
-        },
-        "titleFormatted": {
-          "en": "Set max charge/discharge power to [[power]] %",
-          "nl": "Stel max laad-/ontlaadvermogen in op [[power]] %"
-        },
-        "hint": {
-          "en": "Set the maximum charge/discharge power percentage.",
-          "nl": "Stel het maximale laad-/ontlaadvermogen percentage in."
-        },
-        "args": [
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=hione"
-          },
-          {
-            "name": "power",
-            "type": "number",
-            "title": { "en": "Max Power (%)", "nl": "Max vermogen (%)" },
-            "min": 0,
-            "max": 100,
-            "step": 1
-          }
-        ]
-      },
-      {
-        "id": "set_grid_limit",
-        "title": {
-          "en": "Set grid power limit",
-          "nl": "Stel net vermogenslimiet in"
-        },
-        "titleFormatted": {
-          "en": "Set grid power limit to [[limit]] W",
-          "nl": "Stel net vermogenslimiet in op [[limit]] W"
-        },
-        "hint": {
-          "en": "Set the grid power limit for Peak Shaving mode (W).",
-          "nl": "Stel de netvermogenslimiet in voor pieksturing (W)."
-        },
-        "args": [
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=hione"
-          },
-          {
-            "name": "limit",
-            "type": "number",
-            "title": { "en": "Grid Limit (W)", "nl": "Netlimiet (W)" },
-            "min": 0,
-            "max": 50000,
-            "step": 100
           }
         ]
       },
@@ -1065,54 +1090,35 @@
           {
             "name": "reserve_soc",
             "type": "number",
-            "title": { "en": "Reserve SoC (%)", "nl": "Reserve SoC (%)" },
-            "min": 0, "max": 100, "step": 1
+            "title": {
+              "en": "Reserve SoC (%)",
+              "nl": "Reserve SoC (%)"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1
           },
           {
             "name": "max_soc",
             "type": "number",
-            "title": { "en": "Max SoC (%)", "nl": "Max SoC (%)" },
-            "min": 0, "max": 100, "step": 1
+            "title": {
+              "en": "Max SoC (%)",
+              "nl": "Max SoC (%)"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1
           },
           {
             "name": "grid_limit",
             "type": "number",
-            "title": { "en": "Grid Limit (W)", "nl": "Netlimiet (W)" },
-            "min": 0, "max": 50000, "step": 100
-          }
-        ]
-      },
-      {
-        "id": "set_tou_period",
-        "title": {
-          "en": "Set Time of Use period",
-          "nl": "Stel tijdafhankelijke periode in"
-        },
-        "hint": {
-          "en": "Configure a charge/discharge schedule and activate Time of Use mode.",
-          "nl": "Configureer een laad-/ontlaadschema en activeer tijdafhankelijke modus."
-        },
-        "args": [
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=hione"
-          },
-          {
-            "name": "charge_from",
-            "type": "text",
-            "title": { "en": "Charge from (HH:MM)", "nl": "Laden van (HH:MM)" }
-          },
-          {
-            "name": "charge_to",
-            "type": "text",
-            "title": { "en": "Charge to (HH:MM)", "nl": "Laden tot (HH:MM)" }
-          },
-          {
-            "name": "charge_power",
-            "type": "number",
-            "title": { "en": "Charge power (%)", "nl": "Laadvermogen (%)" },
-            "min": 0, "max": 100, "step": 1
+            "title": {
+              "en": "Grid Limit (W)",
+              "nl": "Netlimiet (W)"
+            },
+            "min": 0,
+            "max": 50000,
+            "step": 100
           }
         ]
       },
@@ -1139,41 +1145,13 @@
           {
             "name": "limit",
             "type": "number",
-            "title": { "en": "Power Limit (%)", "nl": "Vermogenslimiet (%)" },
+            "title": {
+              "en": "Power Limit (%)",
+              "nl": "Vermogenslimiet (%)"
+            },
             "min": 2,
             "max": 100,
             "step": 1
-          }
-        ]
-      },
-      {
-        "id": "set_inverter_state",
-        "title": {
-          "en": "Set inverter state",
-          "nl": "Stel omvormerstatus in"
-        },
-        "titleFormatted": {
-          "en": "Turn inverter [[state]]",
-          "nl": "Zet omvormer [[state]]"
-        },
-        "hint": {
-          "en": "Turn the inverter on or off.",
-          "nl": "Zet de omvormer aan of uit."
-        },
-        "args": [
-          {
-            "name": "device",
-            "type": "device",
-            "filter": "driver_id=hione"
-          },
-          {
-            "name": "state",
-            "type": "dropdown",
-            "title": { "en": "State", "nl": "Status" },
-            "values": [
-              { "id": "on", "label": { "en": "On", "nl": "Aan" } },
-              { "id": "off", "label": { "en": "Off", "nl": "Uit" } }
-            ]
           }
         ]
       },
@@ -1200,11 +1178,108 @@
           {
             "name": "state",
             "type": "dropdown",
-            "title": { "en": "State", "nl": "Status" },
+            "title": {
+              "en": "State",
+              "nl": "Status"
+            },
             "values": [
-              { "id": "on", "label": { "en": "Enabled", "nl": "Ingeschakeld" } },
-              { "id": "off", "label": { "en": "Disabled", "nl": "Uitgeschakeld" } }
+              {
+                "id": "on",
+                "label": {
+                  "en": "Enabled",
+                  "nl": "Ingeschakeld"
+                }
+              },
+              {
+                "id": "off",
+                "label": {
+                  "en": "Disabled",
+                  "nl": "Uitgeschakeld"
+                }
+              }
             ]
+          }
+        ]
+      },
+      {
+        "id": "set_reserve_soc",
+        "title": {
+          "en": "Set reserve SoC",
+          "nl": "Stel reserve SoC in"
+        },
+        "titleFormatted": {
+          "en": "Set reserve SoC to [[soc]] %",
+          "nl": "Stel reserve SoC in op [[soc]] %"
+        },
+        "hint": {
+          "en": "Set the minimum battery state of charge (reserve).",
+          "nl": "Stel het minimale laadniveau van de batterij in (reserve)."
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=hione"
+          },
+          {
+            "name": "soc",
+            "type": "number",
+            "title": {
+              "en": "Reserve SoC (%)",
+              "nl": "Reserve SoC (%)"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1
+          }
+        ]
+      },
+      {
+        "id": "set_tou_period",
+        "title": {
+          "en": "Set Time of Use period",
+          "nl": "Stel tijdafhankelijke periode in"
+        },
+        "titleFormatted": {
+          "en": "Set Time of Use: charge [[charge_from]] to [[charge_to]] at [[charge_power]]%",
+          "nl": "Stel tijdafhankelijk in: laden [[charge_from]] tot [[charge_to]] op [[charge_power]]%"
+        },
+        "hint": {
+          "en": "Configure a charge/discharge schedule and activate Time of Use mode.",
+          "nl": "Configureer een laad-/ontlaadschema en activeer tijdafhankelijke modus."
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=hione"
+          },
+          {
+            "name": "charge_from",
+            "type": "text",
+            "title": {
+              "en": "Charge from (HH:MM)",
+              "nl": "Laden van (HH:MM)"
+            }
+          },
+          {
+            "name": "charge_to",
+            "type": "text",
+            "title": {
+              "en": "Charge to (HH:MM)",
+              "nl": "Laden tot (HH:MM)"
+            }
+          },
+          {
+            "name": "charge_power",
+            "type": "number",
+            "title": {
+              "en": "Charge power (%)",
+              "nl": "Laadvermogen (%)"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1
           }
         ]
       }
@@ -1277,15 +1352,17 @@
         },
         "meter_power.charged": {
           "title": {
-            "en": "Battery Charged",
-            "nl": "Batterij geladen"
-          }
+            "en": "Energy Charged",
+            "nl": "Energie geladen"
+          },
+          "insights": true
         },
         "meter_power.discharged": {
           "title": {
-            "en": "Battery Discharged",
-            "nl": "Batterij ontladen"
-          }
+            "en": "Energy Discharged",
+            "nl": "Energie ontladen"
+          },
+          "insights": true
         }
       },
       "energy": {
@@ -1334,9 +1411,27 @@
           },
           "value": "both",
           "values": [
-            { "id": "local", "label": { "en": "Local (LAN)", "nl": "Lokaal (LAN)" } },
-            { "id": "both", "label": { "en": "Hybrid (local + cloud)", "nl": "Hybride (lokaal + cloud)" } },
-            { "id": "cloud", "label": { "en": "Cloud only", "nl": "Alleen Cloud" } }
+            {
+              "id": "local",
+              "label": {
+                "en": "Local (LAN)",
+                "nl": "Lokaal (LAN)"
+              }
+            },
+            {
+              "id": "both",
+              "label": {
+                "en": "Hybrid (local + cloud)",
+                "nl": "Hybride (lokaal + cloud)"
+              }
+            },
+            {
+              "id": "cloud",
+              "label": {
+                "en": "Cloud only",
+                "nl": "Alleen Cloud"
+              }
+            }
           ]
         },
         {
@@ -1588,6 +1683,36 @@
     }
   ],
   "capabilities": {
+    "hione_battery_charge_power": {
+      "type": "number",
+      "title": {
+        "en": "Battery Charge Power",
+        "nl": "Batterij laadvermogen"
+      },
+      "units": "W",
+      "insights": true,
+      "decimals": 0,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/power.svg"
+    },
+    "hione_battery_discharge_power": {
+      "type": "number",
+      "title": {
+        "en": "Battery Discharge Power",
+        "nl": "Batterij ontlaadvermogen"
+      },
+      "units": "W",
+      "insights": true,
+      "decimals": 0,
+      "min": 0,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/power.svg"
+    },
     "hione_battery_mode": {
       "type": "enum",
       "title": {
@@ -1657,36 +1782,6 @@
       "setable": true,
       "uiComponent": "picker",
       "icon": "/assets/on-off-button.svg"
-    },
-    "hione_battery_charge_power": {
-      "type": "number",
-      "title": {
-        "en": "Battery Charge Power",
-        "nl": "Batterij laadvermogen"
-      },
-      "units": "W",
-      "insights": true,
-      "decimals": 0,
-      "min": 0,
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/power.svg"
-    },
-    "hione_battery_discharge_power": {
-      "type": "number",
-      "title": {
-        "en": "Battery Discharge Power",
-        "nl": "Batterij ontlaadvermogen"
-      },
-      "units": "W",
-      "insights": true,
-      "decimals": 0,
-      "min": 0,
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/power.svg"
     },
     "hione_battery_power": {
       "type": "number",
@@ -1764,6 +1859,20 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/power.svg"
+    },
+    "hione_co2_reduction": {
+      "type": "number",
+      "title": {
+        "en": "CO₂ Reduction",
+        "nl": "CO₂-reductie"
+      },
+      "units": "kg",
+      "decimals": 1,
+      "insights": true,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/efficiency.svg"
     },
     "hione_connection_source": {
       "type": "enum",
@@ -1898,6 +2007,22 @@
       "uiComponent": "sensor",
       "icon": "/assets/graph.svg"
     },
+    "hione_grid_limit": {
+      "type": "number",
+      "title": {
+        "en": "Grid Power Limit",
+        "nl": "Net vermogenslimiet"
+      },
+      "units": "W",
+      "min": 0,
+      "max": 50000,
+      "step": 100,
+      "insights": true,
+      "getable": true,
+      "setable": true,
+      "uiComponent": "slider",
+      "icon": "/assets/graph.svg"
+    },
     "hione_grid_power": {
       "type": "number",
       "title": {
@@ -1973,6 +2098,52 @@
       "uiComponent": "sensor",
       "icon": "/assets/power.svg"
     },
+    "hione_max_power": {
+      "type": "number",
+      "title": {
+        "en": "Max Power",
+        "nl": "Max vermogen"
+      },
+      "units": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "insights": true,
+      "getable": true,
+      "setable": true,
+      "uiComponent": "slider",
+      "icon": "/assets/power.svg"
+    },
+    "hione_max_soc": {
+      "type": "number",
+      "title": {
+        "en": "Max SoC",
+        "nl": "Max SoC"
+      },
+      "units": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "insights": true,
+      "getable": true,
+      "setable": true,
+      "uiComponent": "slider",
+      "icon": "/assets/power.svg"
+    },
+    "hione_monthly_energy": {
+      "type": "number",
+      "title": {
+        "en": "Monthly Energy",
+        "nl": "Maandelijkse energie"
+      },
+      "units": "kWh",
+      "decimals": 2,
+      "insights": true,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/sun.svg"
+    },
     "hione_power_balance": {
       "type": "number",
       "title": {
@@ -1987,6 +2158,32 @@
       "uiComponent": "sensor",
       "icon": "/assets/efficiency.svg"
     },
+    "hione_profit_today": {
+      "type": "number",
+      "title": {
+        "en": "Profit Today",
+        "nl": "Winst vandaag"
+      },
+      "decimals": 2,
+      "insights": true,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/graph.svg"
+    },
+    "hione_profit_total": {
+      "type": "number",
+      "title": {
+        "en": "Profit Total",
+        "nl": "Winst totaal"
+      },
+      "decimals": 2,
+      "insights": true,
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/graph.svg"
+    },
     "hione_pv_power": {
       "type": "number",
       "title": {
@@ -2000,6 +2197,22 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/sun.svg"
+    },
+    "hione_reserve_soc": {
+      "type": "number",
+      "title": {
+        "en": "Reserve SoC",
+        "nl": "Reserve SoC"
+      },
+      "units": "%",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "insights": true,
+      "getable": true,
+      "setable": true,
+      "uiComponent": "slider",
+      "icon": "/assets/power.svg"
     },
     "hione_self_powered_pct": {
       "type": "number",
@@ -2101,20 +2314,6 @@
       "uiComponent": "sensor",
       "icon": "/assets/sun.svg"
     },
-    "hione_monthly_energy": {
-      "type": "number",
-      "title": {
-        "en": "Monthly Energy",
-        "nl": "Maandelijkse energie"
-      },
-      "units": "kWh",
-      "insights": true,
-      "decimals": 2,
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/sun.svg"
-    },
     "hione_yearly_energy": {
       "type": "number",
       "title": {
@@ -2122,120 +2321,12 @@
         "nl": "Jaarlijkse energie"
       },
       "units": "kWh",
-      "insights": true,
       "decimals": 2,
+      "insights": true,
       "getable": true,
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/sun.svg"
-    },
-    "hione_co2_reduction": {
-      "type": "number",
-      "title": {
-        "en": "CO₂ Reduction",
-        "nl": "CO₂-reductie"
-      },
-      "units": "kg",
-      "insights": true,
-      "decimals": 1,
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/efficiency.svg"
-    },
-    "hione_profit_today": {
-      "type": "number",
-      "title": {
-        "en": "Savings Today",
-        "nl": "Besparing vandaag"
-      },
-      "insights": true,
-      "decimals": 2,
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/efficiency.svg"
-    },
-    "hione_profit_total": {
-      "type": "number",
-      "title": {
-        "en": "Savings Total",
-        "nl": "Totale besparing"
-      },
-      "insights": true,
-      "decimals": 2,
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/efficiency.svg"
-    },
-    "hione_reserve_soc": {
-      "type": "number",
-      "title": {
-        "en": "Reserve SoC",
-        "nl": "Reserve SoC"
-      },
-      "units": "%",
-      "insights": false,
-      "decimals": 0,
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "getable": true,
-      "setable": true,
-      "uiComponent": "slider",
-      "icon": "/assets/percentage.svg"
-    },
-    "hione_max_soc": {
-      "type": "number",
-      "title": {
-        "en": "Max SoC",
-        "nl": "Max SoC"
-      },
-      "units": "%",
-      "insights": false,
-      "decimals": 0,
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "getable": true,
-      "setable": true,
-      "uiComponent": "slider",
-      "icon": "/assets/percentage.svg"
-    },
-    "hione_max_power": {
-      "type": "number",
-      "title": {
-        "en": "Max Power",
-        "nl": "Max vermogen"
-      },
-      "units": "%",
-      "insights": false,
-      "decimals": 0,
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "getable": true,
-      "setable": true,
-      "uiComponent": "slider",
-      "icon": "/assets/percentage.svg"
-    },
-    "hione_grid_limit": {
-      "type": "number",
-      "title": {
-        "en": "Grid Power Limit",
-        "nl": "Netvermogenslimiet"
-      },
-      "units": "W",
-      "insights": false,
-      "decimals": 0,
-      "min": 0,
-      "max": 50000,
-      "step": 100,
-      "getable": true,
-      "setable": true,
-      "uiComponent": "slider",
-      "icon": "/assets/graph.svg"
     }
   }
 }

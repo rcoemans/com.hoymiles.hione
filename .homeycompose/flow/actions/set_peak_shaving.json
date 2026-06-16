@@ -1,0 +1,40 @@
+{
+  "id": "set_peak_shaving",
+  "title": {
+    "en": "Set Peak Shaving parameters",
+    "nl": "Stel pieksturing parameters in"
+  },
+  "titleFormatted": {
+    "en": "Set Peak Shaving: reserve [[reserve_soc]]%, max [[max_soc]]%, grid [[grid_limit]]W",
+    "nl": "Stel pieksturing in: reserve [[reserve_soc]]%, max [[max_soc]]%, net [[grid_limit]]W"
+  },
+  "hint": {
+    "en": "Configure and activate Peak Shaving mode with reserve SoC, max SoC, and grid limit.",
+    "nl": "Configureer en activeer pieksturing met reserve SoC, max SoC en netlimiet."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "reserve_soc",
+      "type": "number",
+      "title": { "en": "Reserve SoC (%)", "nl": "Reserve SoC (%)" },
+      "min": 0, "max": 100, "step": 1
+    },
+    {
+      "name": "max_soc",
+      "type": "number",
+      "title": { "en": "Max SoC (%)", "nl": "Max SoC (%)" },
+      "min": 0, "max": 100, "step": 1
+    },
+    {
+      "name": "grid_limit",
+      "type": "number",
+      "title": { "en": "Grid Limit (W)", "nl": "Netlimiet (W)" },
+      "min": 0, "max": 50000, "step": 100
+    }
+  ]
+}

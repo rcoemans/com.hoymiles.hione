@@ -3,18 +3,29 @@
     "en": "HiOne Station",
     "nl": "HiOne Station"
   },
-  "class": "solarpanel",
+  "class": "battery",
   "capabilities": [
     "measure_battery",
     "measure_power",
     "meter_power",
+    "meter_power.charged",
+    "meter_power.discharged",
     "hione_pv_power",
     "hione_battery_power",
     "hione_grid_power",
     "hione_load_power",
     "hione_battery_mode",
+    "hione_reserve_soc",
+    "hione_max_soc",
+    "hione_max_power",
+    "hione_grid_limit",
     "hione_daily_energy",
+    "hione_monthly_energy",
+    "hione_yearly_energy",
     "hione_total_energy",
+    "hione_co2_reduction",
+    "hione_profit_today",
+    "hione_profit_total",
     "hione_battery_charge_power",
     "hione_battery_discharge_power",
     "hione_grid_import_power",
@@ -35,8 +46,8 @@
   "capabilitiesOptions": {
     "measure_power": {
       "title": {
-        "en": "PV Power",
-        "nl": "PV-vermogen"
+        "en": "Battery Power",
+        "nl": "Batterijvermogen"
       }
     },
     "measure_battery": {
@@ -50,13 +61,26 @@
         "en": "Total Energy Generated",
         "nl": "Totale energie opgewekt"
       }
+    },
+    "meter_power.charged": {
+      "title": {
+        "en": "Energy Charged",
+        "nl": "Energie geladen"
+      },
+      "insights": true
+    },
+    "meter_power.discharged": {
+      "title": {
+        "en": "Energy Discharged",
+        "nl": "Energie ontladen"
+      },
+      "insights": true
     }
   },
   "energy": {
-    "cumulative": true,
-    "batteries": [
-      "INTERNAL"
-    ]
+    "homeBattery": true,
+    "meterPowerImportedCapability": "meter_power.charged",
+    "meterPowerExportedCapability": "meter_power.discharged"
   },
   "images": {
     "small": "/drivers/hione/assets/images/small.png",

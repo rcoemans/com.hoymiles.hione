@@ -27,42 +27,56 @@
       },
       "values": [
         {
-          "id": "0",
+          "id": "1",
           "label": {
             "en": "Self-Consumption",
             "nl": "Eigen verbruik"
           }
         },
         {
-          "id": "1",
+          "id": "2",
           "label": {
             "en": "Economy",
             "nl": "Economie"
           }
         },
         {
-          "id": "2",
+          "id": "3",
           "label": {
             "en": "Backup",
             "nl": "Noodstroom"
           }
         },
         {
-          "id": "3",
+          "id": "4",
           "label": {
             "en": "Off-Grid",
             "nl": "Off-Grid"
           }
         },
         {
-          "id": "4",
+          "id": "5",
+          "label": {
+            "en": "Self-Consumption + Max Power",
+            "nl": "Eigen verbruik + Max vermogen"
+          }
+        },
+        {
+          "id": "6",
+          "label": {
+            "en": "Backup + Max Power",
+            "nl": "Noodstroom + Max vermogen"
+          }
+        },
+        {
+          "id": "7",
           "label": {
             "en": "Peak Shaving",
             "nl": "Pieksturing"
           }
         },
         {
-          "id": "5",
+          "id": "8",
           "label": {
             "en": "Time of Use",
             "nl": "Tijdafhankelijk"

@@ -1,0 +1,14 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Monthly Energy",
+    "nl": "Maandelijkse energie"
+  },
+  "units": "kWh",
+  "decimals": 2,
+  "insights": true,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/sun.svg"
+}

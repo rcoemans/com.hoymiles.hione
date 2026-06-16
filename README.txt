@@ -17,7 +17,7 @@ FEATURES
 - Diagnostics: Quick Scan (known blocks), Deep Scan (full 0x0000–0xFFFF), ESS Probe (experimental battery register discovery)
 
 REQUIREMENTS
-- Homey Pro (2019 or 2023) with firmware >= 10.0.0
+- Homey Pro (2019 or 2023) with firmware >= 12.0.0
 - Hoymiles HiOne all-in-one BESS with HiBox-63T-G3 gateway (or DTS-G3 stick for Modbus TCP)
 - For cloud/hybrid mode: an active S-Miles Cloud account
 - For local mode: the IP address of the HiBox gateway on your LAN

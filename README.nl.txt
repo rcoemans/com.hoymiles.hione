@@ -17,7 +17,7 @@ FUNCTIES
 - Diagnostiek: Quick Scan (bekende blokken), Deep Scan (volledig 0x0000–0xFFFF), ESS Probe (experimentele batterijregister-ontdekking)
 
 VEREISTEN
-- Homey Pro (2019 of 2023) met firmware >= 10.0.0
+- Homey Pro (2019 of 2023) met firmware >= 12.0.0
 - Hoymiles HiOne all-in-one BESS met HiBox-63T-G3 gateway (of DTS-G3 stick voor Modbus TCP)
 - Voor cloud/hybride modus: een actief S-Miles Cloud account
 - Voor lokale modus: het IP-adres van de HiBox gateway op je LAN

@@ -1,0 +1,30 @@
+{
+  "id": "set_grid_limit",
+  "title": {
+    "en": "Set grid power limit",
+    "nl": "Stel net vermogenslimiet in"
+  },
+  "titleFormatted": {
+    "en": "Set grid power limit to [[limit]] W",
+    "nl": "Stel net vermogenslimiet in op [[limit]] W"
+  },
+  "hint": {
+    "en": "Set the grid power limit for Peak Shaving mode (W).",
+    "nl": "Stel de netvermogenslimiet in voor pieksturing (W)."
+  },
+  "args": [
+    {
+      "name": "device",
+      "type": "device",
+      "filter": "driver_id=hione"
+    },
+    {
+      "name": "limit",
+      "type": "number",
+      "title": { "en": "Grid Limit (W)", "nl": "Netlimiet (W)" },
+      "min": 0,
+      "max": 50000,
+      "step": 100
+    }
+  ]
+}
