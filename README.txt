@@ -9,7 +9,7 @@ FEATURES
 - Flow conditions: battery charging/discharging, SoC above/below threshold, PV/load power thresholds, grid importing/exporting, battery mode, gateway online, connection local
 - Flow actions: set battery mode, refresh data, prefer local/cloud, enable/disable cloud fallback
 - Three connection modes: Local (LAN), Local + Cloud (recommended), or Cloud only
-- Modbus TCP support for DTS-G3 sticks (port 502) — automatic fallback when protobuf is unavailable (PV power + energy only; ESS registers not yet mapped)
+- Modbus TCP support for DTS-G3 sticks (port 502) — automatic fallback when protobuf is unavailable (PV power + validated energy only; ESS registers not mapped, unreliable data skipped to preserve cloud values)
 - Homey Energy integration: battery charge/discharge power and cumulative energy count towards Homey Energy
 - Cloud login hardening: backoff after failed attempts (up to 12h for account lockout) to protect your S-Miles account
 - Diagnostics: Quick Scan (known blocks), Deep Scan (full 0x0000–0xFFFF), ESS Probe (experimental battery register discovery)
@@ -50,7 +50,7 @@ The app settings page (Homey > Apps > Hoymiles HiOne > Settings) lets you config
   Quick Scan: checks known DTU-Pro register blocks + ESS candidate blocks
   Deep Scan: probes all 65,536 registers with ASCII decoding, signed interpretation, and FC03/FC04 testing
   ESS Probe: tests candidate battery/grid register blocks with strict plausibility validation
-Note: Modbus TCP only provides confirmed PV power and energy data. Battery, grid, load, and mode require protobuf or cloud.
+Note: Modbus TCP only provides confirmed PV power and validated energy data. The HiBox gateway does NOT follow the DTU-Pro register layout — unreliable energy values are automatically detected and skipped to preserve cloud data. Battery, grid, load, and mode require protobuf or cloud.
 
 CLOUD DATA MAPPING
 The S-Miles Cloud API returns real-time data in reflux_station_data:

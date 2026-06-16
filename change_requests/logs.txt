@@ -1,0 +1,741 @@
+## Local LAN (Modbus TCP)
+
+***QUICKSCAN***
+
+{
+  "DTU_INFO": {
+    "label": "DTU info",
+    "start": 0,
+    "regs": [
+      {
+        "address": 8,
+        "hex": "0x0008",
+        "value": 5,
+        "valueHex": "0x0005",
+        "signed": 5,
+        "scaled01": 0.5,
+        "scaled001": 0.05
+      },
+      {
+        "address": 14,
+        "hex": "0x000e",
+        "value": 10,
+        "valueHex": "0x000a",
+        "signed": 10,
+        "scaled01": 1,
+        "scaled001": 0.1
+      },
+      {
+        "address": 15,
+        "hex": "0x000f",
+        "value": 8,
+        "valueHex": "0x0008",
+        "signed": 8,
+        "scaled01": 0.8,
+        "scaled001": 0.08
+      },
+      {
+        "address": 16,
+        "hex": "0x0010",
+        "value": 10,
+        "valueHex": "0x000a",
+        "signed": 10,
+        "scaled01": 1,
+        "scaled001": 0.1
+      },
+      {
+        "address": 17,
+        "hex": "0x0011",
+        "value": 5,
+        "valueHex": "0x0005",
+        "signed": 5,
+        "scaled01": 0.5,
+        "scaled001": 0.05
+      },
+      {
+        "address": 18,
+        "hex": "0x0012",
+        "value": 5,
+        "valueHex": "0x0005",
+        "signed": 5,
+        "scaled01": 0.5,
+        "scaled001": 0.05
+      },
+      {
+        "address": 19,
+        "hex": "0x0013",
+        "value": 20,
+        "valueHex": "0x0014",
+        "signed": 20,
+        "scaled01": 2,
+        "scaled001": 0.2
+      },
+      {
+        "address": 22,
+        "hex": "0x0016",
+        "value": 100,
+        "valueHex": "0x0064",
+        "signed": 100,
+        "scaled01": 10,
+        "scaled001": 1
+      },
+      {
+        "address": 23,
+        "hex": "0x0017",
+        "value": 30,
+        "valueHex": "0x001e",
+        "signed": 30,
+        "scaled01": 3,
+        "scaled001": 0.3
+      },
+      {
+        "address": 24,
+        "hex": "0x0018",
+        "value": 200,
+        "valueHex": "0x00c8",
+        "signed": 200,
+        "scaled01": 20,
+        "scaled001": 2
+      },
+      {
+        "address": 25,
+        "hex": "0x0019",
+        "value": 2000,
+        "valueHex": "0x07d0",
+        "signed": 2000,
+        "scaled01": 200,
+        "scaled001": 20
+      },
+      {
+        "address": 26,
+        "hex": "0x001a",
+        "value": 1,
+        "valueHex": "0x0001",
+        "signed": 1,
+        "scaled01": 0.1,
+        "scaled001": 0.01
+      },
+      {
+        "address": 28,
+        "hex": "0x001c",
+        "value": 1,
+        "valueHex": "0x0001",
+        "signed": 1,
+        "scaled01": 0.1,
+        "scaled001": 0.01
+      },
+      {
+        "address": 29,
+        "hex": "0x001d",
+        "value": 255,
+        "valueHex": "0x00ff",
+        "signed": 255,
+        "scaled01": 25.5,
+        "scaled001": 2.55
+      }
+    ],
+    "total": 48,
+    "readable": true,
+    "confidence": "confirmed"
+  },
+  "PV_PORT_0": {
+    "label": "PV port 0",
+    "start": 4096,
+    "regs": [
+      {
+        "address": 4100,
+        "hex": "0x1004",
+        "value": 1,
+        "valueHex": "0x0001",
+        "signed": 1,
+        "scaled01": 0.1,
+        "scaled001": 0.01
+      },
+      {
+        "address": 4101,
+        "hex": "0x1005",
+        "value": 1,
+        "valueHex": "0x0001",
+        "signed": 1,
+        "scaled01": 0.1,
+        "scaled001": 0.01
+      },
+      {
+        "address": 4102,
+        "hex": "0x1006",
+        "value": 320,
+        "valueHex": "0x0140",
+        "signed": 320,
+        "scaled01": 32,
+        "scaled001": 3.2
+      },
+      {
+        "address": 4103,
+        "hex": "0x1007",
+        "value": 200,
+        "valueHex": "0x00c8",
+        "signed": 200,
+        "scaled01": 20,
+        "scaled001": 2
+      },
+      {
+        "address": 4104,
+        "hex": "0x1008",
+        "value": 600,
+        "valueHex": "0x0258",
+        "signed": 600,
+        "scaled01": 60,
+        "scaled001": 6
+      },
+      {
+        "address": 4105,
+        "hex": "0x1009",
+        "value": 540,
+        "valueHex": "0x021c",
+        "signed": 540,
+        "scaled01": 54,
+        "scaled001": 5.4
+      },
+      {
+        "address": 4106,
+        "hex": "0x100a",
+        "value": 564,
+        "valueHex": "0x0234",
+        "signed": 564,
+        "scaled01": 56.4,
+        "scaled001": 5.64
+      },
+      {
+        "address": 4107,
+        "hex": "0x100b",
+        "value": 20,
+        "valueHex": "0x0014",
+        "signed": 20,
+        "scaled01": 2,
+        "scaled001": 0.2
+      },
+      {
+        "address": 4108,
+        "hex": "0x100c",
+        "value": 584,
+        "valueHex": "0x0248",
+        "signed": 584,
+        "scaled01": 58.4,
+        "scaled001": 5.84
+      },
+      {
+        "address": 4109,
+        "hex": "0x100d",
+        "value": 3000,
+        "valueHex": "0x0bb8",
+        "signed": 3000,
+        "scaled01": 300,
+        "scaled001": 30
+      },
+      {
+        "address": 4110,
+        "hex": "0x100e",
+        "value": 6,
+        "valueHex": "0x0006",
+        "signed": 6,
+        "scaled01": 0.6,
+        "scaled001": 0.06
+      },
+      {
+        "address": 4111,
+        "hex": "0x100f",
+        "value": 420,
+        "valueHex": "0x01a4",
+        "signed": 420,
+        "scaled01": 42,
+        "scaled001": 4.2
+      },
+      {
+        "address": 4112,
+        "hex": "0x1010",
+        "value": 460,
+        "valueHex": "0x01cc",
+        "signed": 460,
+        "scaled01": 46,
+        "scaled001": 4.6
+      },
+      {
+        "address": 4113,
+        "hex": "0x1011",
+        "value": 3,
+        "valueHex": "0x0003",
+        "signed": 3,
+        "scaled01": 0.3,
+        "scaled001": 0.03
+      },
+      {
+        "address": 4117,
+        "hex": "0x1015",
+        "value": 650,
+        "valueHex": "0x028a",
+        "signed": 650,
+        "scaled01": 65,
+        "scaled001": 6.5
+      }
+    ],
+    "total": 40,
+    "readable": true,
+    "confidence": "confirmed"
+  },
+  "PV_PORT_1": {
+    "label": "PV port 1",
+    "start": 4136,
+    "regs": [],
+    "total": 40,
+    "readable": true,
+    "confidence": "confirmed"
+  },
+  "PV_PORT_2": {
+    "label": "PV port 2",
+    "start": 4176,
+    "regs": [
+      {
+        "address": 4200,
+        "hex": "0x1068",
+        "value": 1,
+        "valueHex": "0x0001",
+        "signed": 1,
+        "scaled01": 0.1,
+        "scaled001": 0.01
+      },
+      {
+        "address": 4201,
+        "hex": "0x1069",
+        "value": 1,
+        "valueHex": "0x0001",
+        "signed": 1,
+        "scaled01": 0.1,
+        "scaled001": 0.01
+      },
+      {
+        "address": 4202,
+        "hex": "0x106a",
+        "value": 2,
+        "valueHex": "0x0002",
+        "signed": 2,
+        "scaled01": 0.2,
+        "scaled001": 0.02
+      },
+      {
+        "address": 4204,
+        "hex": "0x106c",
+        "value": 31,
+        "valueHex": "0x001f",
+        "signed": 31,
+        "scaled01": 3.1,
+        "scaled001": 0.31
+      },
+      {
+        "address": 4213,
+        "hex": "0x1075",
+        "value": 96,
+        "valueHex": "0x0060",
+        "signed": 96,
+        "scaled01": 9.6,
+        "scaled001": 0.96
+      }
+    ],
+    "total": 40,
+    "readable": true,
+    "confidence": "confirmed"
+  },
+  "PV_PORT_3": {
+    "label": "PV port 3",
+    "start": 4216,
+    "regs": [
+      {
+        "address": 4222,
+        "hex": "0x107e",
+        "value": 31,
+        "valueHex": "0x001f",
+        "signed": 31,
+        "scaled01": 3.1,
+        "scaled001": 0.31
+      },
+      {
+        "address": 4227,
+        "hex": "0x1083",
+        "value": 96,
+        "valueHex": "0x0060",
+        "signed": 96,
+        "scaled01": 9.6,
+        "scaled001": 0.96
+      },
+      {
+        "address": 4232,
+        "hex": "0x1088",
+        "value": 30,
+        "valueHex": "0x001e",
+        "signed": 30,
+        "scaled01": 3,
+        "scaled001": 0.3
+      },
+      {
+        "address": 4234,
+        "hex": "0x108a",
+        "value": 70,
+        "valueHex": "0x0046",
+        "signed": 70,
+        "scaled01": 7,
+        "scaled001": 0.7
+      },
+      {
+        "address": 4235,
+        "hex": "0x108b",
+        "value": 70,
+        "valueHex": "0x0046",
+        "signed": 70,
+        "scaled01": 7,
+        "scaled001": 0.7
+      },
+      {
+        "address": 4236,
+        "hex": "0x108c",
+        "value": 63,
+        "valueHex": "0x003f",
+        "signed": 63,
+        "scaled01": 6.3,
+        "scaled001": 0.63
+      },
+      {
+        "address": 4237,
+        "hex": "0x108d",
+        "value": 32,
+        "valueHex": "0x0020",
+        "signed": 32,
+        "scaled01": 3.2,
+        "scaled001": 0.32
+      },
+      {
+        "address": 4239,
+        "hex": "0x108f",
+        "value": 30,
+        "valueHex": "0x001e",
+        "signed": 30,
+        "scaled01": 3,
+        "scaled001": 0.3
+      },
+      {
+        "address": 4240,
+        "hex": "0x1090",
+        "value": 90,
+        "valueHex": "0x005a",
+        "signed": 90,
+        "scaled01": 9,
+        "scaled001": 0.9
+      },
+      {
+        "address": 4243,
+        "hex": "0x1093",
+        "value": 23,
+        "valueHex": "0x0017",
+        "signed": 23,
+        "scaled01": 2.3,
+        "scaled001": 0.23
+      },
+      {
+        "address": 4248,
+        "hex": "0x1098",
+        "value": 7,
+        "valueHex": "0x0007",
+        "signed": 7,
+        "scaled01": 0.7,
+        "scaled001": 0.07
+      },
+      {
+        "address": 4252,
+        "hex": "0x109c",
+        "value": 23,
+        "valueHex": "0x0017",
+        "signed": 23,
+        "scaled01": 2.3,
+        "scaled001": 0.23
+      }
+    ],
+    "total": 40,
+    "readable": true,
+    "confidence": "confirmed"
+  },
+  "PLANT_AGG": {
+    "label": "Plant aggregate",
+    "start": 8192,
+    "readable": false,
+    "error": "Modbus TCP connection error: read ECONNRESET"
+  },
+  "ESS_3000": {
+    "label": "ESS block 0x3000",
+    "start": 12288,
+    "readable": false,
+    "error": "Modbus TCP timeout"
+  },
+  "ESS_3100": {
+    "label": "ESS block 0x3100",
+    "start": 12544,
+    "readable": false,
+    "error": "Modbus TCP timeout"
+  },
+  "ESS_4000": {
+    "label": "ESS block 0x4000",
+    "start": 16384,
+    "readable": false,
+    "error": "Modbus TCP timeout"
+  },
+  "ESS_5000": {
+    "label": "ESS block 0x5000",
+    "start": 20480,
+    "readable": false,
+    "error": "Modbus TCP timeout"
+  },
+  "ESS_6000": {
+    "label": "ESS block 0x6000",
+    "start": 24576,
+    "readable": false,
+    "error": "Modbus TCP timeout"
+  }
+}
+
+***DEEP SCAN***
+
+{
+  "timestamp": "2026-06-16T07:20:29.100Z",
+  "host": "192.168.1.116",
+  "port": 502,
+  "unitId": 1,
+  "fc03Ranges": [],
+  "fc04Ranges": [
+    {
+      "start": 39950,
+      "count": 50
+    },
+    {
+      "start": 57400,
+      "count": 50
+    }
+  ],
+  "registers": [],
+  "asciiStrings": [],
+  "summary": {
+    "totalReadable": 100,
+    "totalNonZero": 0,
+    "blocksScanned": 1311
+  }
+}
+
+***ESS PROBE***
+
+{
+  "found": false,
+  "message": "No plausible ESS data found in candidate register blocks."
+}
+
+---
+
+## Cloud (API)
+
+***LOGGING***
+
+[2026-06-16 06:58:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 06:58:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 06:59:31] [DEV] Polling...
+[2026-06-16 06:59:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-256 load=774 daily=1.8 total=111.6 mode=1000
+[2026-06-16 06:59:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-256 load=774 chg=3 dis=0 daily=1.8 total=111.6
+[2026-06-16 06:59:53] [DEV] Polling...
+[2026-06-16 06:59:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 06:59:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 06:59:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:00:31] [DEV] Polling...
+[2026-06-16 07:00:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-256 load=774 daily=1.8 total=111.6 mode=1000
+[2026-06-16 07:00:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-256 load=774 chg=3 dis=0 daily=1.8 total=111.6
+[2026-06-16 07:00:53] [DEV] Polling...
+[2026-06-16 07:00:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:00:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:00:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:01:31] [DEV] Polling...
+[2026-06-16 07:01:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-256 load=774 daily=1.8 total=111.6 mode=1000
+[2026-06-16 07:01:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-256 load=774 chg=3 dis=0 daily=1.8 total=111.6
+[2026-06-16 07:01:53] [DEV] Polling...
+[2026-06-16 07:01:54] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:01:54] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:01:54] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:02:31] [DEV] Polling...
+[2026-06-16 07:02:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-256 load=774 daily=1.8 total=111.6 mode=1000
+[2026-06-16 07:02:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-256 load=774 chg=3 dis=0 daily=1.8 total=111.6
+[2026-06-16 07:02:53] [DEV] Polling...
+[2026-06-16 07:02:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:02:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:02:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:03:31] [DEV] Polling...
+[2026-06-16 07:03:32] [DEV] Raw data: pv=0 bat=4 soc=29 grid=-408 load=873 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:03:32] [DEV] Mapped: pv=0 bat=4 soc=29 grid=-408 load=873 chg=4 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:03:53] [DEV] Polling...
+[2026-06-16 07:03:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:03:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:03:54] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:04:31] [DEV] Polling...
+[2026-06-16 07:04:32] [DEV] Raw data: pv=0 bat=4 soc=29 grid=-408 load=873 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:04:32] [DEV] Mapped: pv=0 bat=4 soc=29 grid=-408 load=873 chg=4 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:04:53] [DEV] Polling...
+[2026-06-16 07:04:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:04:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:04:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:05:31] [DEV] Polling...
+[2026-06-16 07:05:32] [DEV] Raw data: pv=0 bat=4 soc=29 grid=-408 load=873 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:05:32] [DEV] Mapped: pv=0 bat=4 soc=29 grid=-408 load=873 chg=4 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:05:53] [DEV] Polling...
+[2026-06-16 07:05:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:05:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:05:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:06:31] [DEV] Polling...
+[2026-06-16 07:06:31] [DEV] Raw data: pv=0 bat=4 soc=29 grid=-408 load=873 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:06:31] [DEV] Mapped: pv=0 bat=4 soc=29 grid=-408 load=873 chg=4 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:06:53] [DEV] Polling...
+[2026-06-16 07:06:54] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:06:55] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:06:55] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:07:31] [DEV] Polling...
+[2026-06-16 07:07:32] [DEV] Raw data: pv=0 bat=4 soc=29 grid=-408 load=873 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:07:32] [DEV] Mapped: pv=0 bat=4 soc=29 grid=-408 load=873 chg=4 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:07:53] [DEV] Polling...
+[2026-06-16 07:07:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:07:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:07:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:08:31] [DEV] Polling...
+[2026-06-16 07:08:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:08:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:08:53] [DEV] Polling...
+[2026-06-16 07:08:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:08:54] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:08:54] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:09:31] [DEV] Polling...
+[2026-06-16 07:09:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:09:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:09:53] [DEV] Polling...
+[2026-06-16 07:09:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:09:54] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:09:54] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:10:31] [DEV] Polling...
+[2026-06-16 07:10:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:10:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:10:53] [DEV] Polling...
+[2026-06-16 07:10:54] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:10:54] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:10:54] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:11:31] [DEV] Polling...
+[2026-06-16 07:11:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:11:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:11:53] [DEV] Polling...
+[2026-06-16 07:11:54] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:11:54] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:11:54] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:12:28] [INFO] Modbus register scan requested...
+[2026-06-16 07:12:28] [INFO] Scanning Modbus registers at 192.168.1.116:502 (known blocks + ESS candidates)...
+[2026-06-16 07:12:31] [DEV] Polling...
+[2026-06-16 07:12:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:12:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:12:53] [DEV] Polling...
+[2026-06-16 07:12:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=0 mode=0
+[2026-06-16 07:12:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=0
+[2026-06-16 07:12:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:13:10] [INFO] Modbus scan completed: {"DTU_INFO":{"label":"DTU info","start":0,"regs":[{"address":8,"hex":"0x0008","value":5,"valueHex":"0x0005","signed":5,"scaled01":0.5,"scaled001":0.05},{"address":14,"hex":"0x000e","value":10,"valueHex":"0x000a","signed":10,"scaled01":1,"scaled001":0.1},{"address":15,"hex":"0x000f","value":8,"valueHex":"0x0008","signed":8,"scaled01":0.8,"scaled001":0.08},{"address":16,"hex":"0x0010","value":10,"valueHex":"0x000a","signed":10,"scaled01":1,"scaled001":0.1},{"address":17,"hex":"0x0011","value":5,"v
+[2026-06-16 07:13:31] [DEV] Polling...
+[2026-06-16 07:13:32] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:13:32] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:13:53] [DEV] Polling...
+[2026-06-16 07:13:55] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:13:55] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:13:55] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:14:32] [DEV] Polling...
+[2026-06-16 07:14:33] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:14:33] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:14:53] [DEV] Polling...
+[2026-06-16 07:14:54] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=613426.32 mode=0
+[2026-06-16 07:14:54] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=613426.32
+[2026-06-16 07:14:54] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:15:32] [DEV] Polling...
+[2026-06-16 07:15:33] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:15:33] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:15:35] [INFO] Modbus DEEP scan requested (0x0000–0xFFFF) — this may take a while...
+[2026-06-16 07:15:53] [DEV] Polling...
+[2026-06-16 07:15:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=0 mode=0
+[2026-06-16 07:15:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=0
+[2026-06-16 07:15:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:16:32] [DEV] Polling...
+[2026-06-16 07:16:33] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:16:33] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:16:53] [DEV] Polling...
+[2026-06-16 07:16:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=0 mode=0
+[2026-06-16 07:16:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=0
+[2026-06-16 07:16:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:17:32] [DEV] Polling...
+[2026-06-16 07:17:33] [DEV] Raw data: pv=0 bat=3 soc=29 grid=-397 load=953 daily=1.9 total=111.6 mode=1000
+[2026-06-16 07:17:33] [DEV] Mapped: pv=0 bat=3 soc=29 grid=-397 load=953 chg=3 dis=0 daily=1.9 total=111.6
+[2026-06-16 07:17:53] [DEV] Polling...
+[2026-06-16 07:17:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=0 mode=0
+[2026-06-16 07:17:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=0
+[2026-06-16 07:17:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:18:32] [DEV] Polling...
+[2026-06-16 07:18:33] [DEV] Raw data: pv=0 bat=292 soc=29 grid=-6 load=918 daily=2.1 total=111.6 mode=1000
+[2026-06-16 07:18:33] [DEV] Mapped: pv=0 bat=292 soc=29 grid=-6 load=918 chg=292 dis=0 daily=2.1 total=111.6
+[2026-06-16 07:18:53] [DEV] Polling...
+[2026-06-16 07:18:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=0 mode=0
+[2026-06-16 07:18:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=0
+[2026-06-16 07:18:54] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:19:32] [DEV] Polling...
+[2026-06-16 07:19:33] [DEV] Raw data: pv=0 bat=292 soc=29 grid=-6 load=918 daily=2.1 total=111.6 mode=1000
+[2026-06-16 07:19:33] [DEV] Mapped: pv=0 bat=292 soc=29 grid=-6 load=918 chg=292 dis=0 daily=2.1 total=111.6
+[2026-06-16 07:19:41] [INFO] Modbus ESS probe requested (experimental)...
+[2026-06-16 07:19:41] [INFO] [Modbus] Starting experimental ESS register probe...
+[2026-06-16 07:19:41] [INFO] [Modbus] ESS probe ESS block 0x3000: Modbus TCP connection error: read ECONNRESET
+[2026-06-16 07:19:41] [INFO] [Modbus] ESS probe ESS block 0x3100: Modbus TCP connection error: read ECONNRESET
+[2026-06-16 07:19:41] [INFO] [Modbus] ESS probe ESS block 0x4000: Modbus TCP connection error: read ECONNRESET
+[2026-06-16 07:19:41] [INFO] [Modbus] ESS probe ESS block 0x5000: Modbus TCP connection error: read ECONNRESET
+[2026-06-16 07:19:41] [INFO] [Modbus] ESS probe ESS block 0x6000: Modbus TCP connection error: read ECONNRESET
+[2026-06-16 07:19:41] [INFO] [Modbus] No plausible ESS data found in candidate blocks
+[2026-06-16 07:19:41] [INFO] ESS probe complete: No ESS data found
+[2026-06-16 07:19:51] [INFO] Modbus register scan requested...
+[2026-06-16 07:19:51] [INFO] Scanning Modbus registers at 192.168.1.116:502 (known blocks + ESS candidates)...
+[2026-06-16 07:19:51] [INFO] Modbus scan completed: {"DTU_INFO":{"label":"DTU info","start":0,"readable":false,"error":"Modbus TCP connection closed unexpectedly"},"PV_PORT_0":{"label":"PV port 0","start":4096,"readable":false,"error":"Modbus TCP connection closed unexpectedly"},"PV_PORT_1":{"label":"PV port 1","start":4136,"readable":false,"error":"Modbus TCP connection error: read ECONNRESET"},"PV_PORT_2":{"label":"PV port 2","start":4176,"readable":false,"error":"Modbus TCP connection error: read ECONNRESET"},"PV_PORT_3":{"label":"PV port 3","
+[2026-06-16 07:19:53] [DEV] Polling...
+[2026-06-16 07:19:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=0 mode=0
+[2026-06-16 07:19:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=0
+[2026-06-16 07:19:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:20:02] [INFO] Modbus ESS probe requested (experimental)...
+[2026-06-16 07:20:02] [INFO] [Modbus] Starting experimental ESS register probe...
+[2026-06-16 07:20:02] [INFO] [Modbus] ESS probe ESS block 0x3000: Modbus TCP connection closed unexpectedly
+[2026-06-16 07:20:02] [INFO] [Modbus] ESS probe ESS block 0x3100: Modbus TCP connection closed unexpectedly
+[2026-06-16 07:20:02] [INFO] [Modbus] ESS probe ESS block 0x4000: Modbus TCP connection error: read ECONNRESET
+[2026-06-16 07:20:02] [INFO] [Modbus] ESS probe ESS block 0x5000: Modbus TCP connection closed unexpectedly
+[2026-06-16 07:20:02] [INFO] [Modbus] ESS probe ESS block 0x6000: Modbus TCP connection closed unexpectedly
+[2026-06-16 07:20:02] [INFO] [Modbus] No plausible ESS data found in candidate blocks
+[2026-06-16 07:20:02] [INFO] ESS probe complete: No ESS data found
+[2026-06-16 07:20:29] [INFO] Modbus DEEP scan requested (0x0000–0xFFFF) — this may take a while...
+[2026-06-16 07:20:32] [DEV] Polling...
+[2026-06-16 07:20:32] [DEV] Raw data: pv=0 bat=292 soc=29 grid=-6 load=918 daily=2.1 total=111.6 mode=1000
+[2026-06-16 07:20:32] [DEV] Mapped: pv=0 bat=292 soc=29 grid=-6 load=918 chg=292 dis=0 daily=2.1 total=111.6
+[2026-06-16 07:20:53] [DEV] Polling...
+[2026-06-16 07:20:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=0 mode=0
+[2026-06-16 07:20:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=0
+[2026-06-16 07:20:53] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:21:10] [INFO] [Modbus] Deep scan complete: 0 non-zero in 100 readable registers
+[2026-06-16 07:21:10] [INFO] Deep scan complete: 0 non-zero registers in 100 readable
+[2026-06-16 07:21:32] [DEV] Polling...
+[2026-06-16 07:21:33] [DEV] Raw data: pv=0 bat=292 soc=29 grid=-6 load=918 daily=2.1 total=111.6 mode=1000
+[2026-06-16 07:21:33] [DEV] Mapped: pv=0 bat=292 soc=29 grid=-6 load=918 chg=292 dis=0 daily=2.1 total=111.6
+[2026-06-16 07:21:53] [DEV] Polling...
+[2026-06-16 07:21:53] [DEV] Raw data: pv=0 bat=0 soc=0 grid=0 load=0 daily=0 total=0 mode=0
+[2026-06-16 07:21:53] [DEV] Mapped: pv=0 bat=0 soc=0 grid=0 load=0 chg=0 dis=0 daily=0 total=0
+[2026-06-16 07:21:54] [DEV] Modbus fallback active — ESS capabilities not updated (confidence: none)
+[2026-06-16 07:22:00] [INFO] Modbus ESS probe requested (experimental)...
+[2026-06-16 07:22:00] [INFO] [Modbus] Starting experimental ESS register probe...
+[2026-06-16 07:22:00] [INFO] [Modbus] ESS probe ESS block 0x3000: Modbus TCP connection closed unexpectedly
+[2026-06-16 07:22:00] [INFO] [Modbus] ESS probe ESS block 0x3100: Modbus TCP connection closed unexpectedly
+[2026-06-16 07:22:00] [INFO] [Modbus] ESS probe ESS block 0x4000: Modbus TCP connection error: read ECONNRESET
+[2026-06-16 07:22:00] [INFO] [Modbus] ESS probe ESS block 0x5000: Modbus TCP connection error: read ECONNRESET
+[2026-06-16 07:22:00] [INFO] [Modbus] ESS probe ESS block 0x6000: Modbus TCP connection closed unexpectedly
+[2026-06-16 07:22:00] [INFO] [Modbus] No plausible ESS data found in candidate blocks
+[2026-06-16 07:22:00] [INFO] ESS probe complete: No ESS data found

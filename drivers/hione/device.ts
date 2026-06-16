@@ -155,12 +155,16 @@ module.exports = class HiOneDevice extends Homey.Device {
       const data = HioneMapper.normalize(rawData);
       this._appLog('DEV', 'Mapped: pv=' + data.pvPower + ' bat=' + data.batteryPower + ' soc=' + data.batterySoc + ' grid=' + data.gridPower + ' load=' + data.loadPower + ' chg=' + data.batteryChargePower + ' dis=' + data.batteryDischargePower + ' daily=' + data.dailyEnergy + ' total=' + data.totalEnergy);
 
-      // ── Confidence guard: skip ESS updates when Modbus has no mapping ──
+      // ── Confidence guard: skip unconfirmed updates when Modbus has no mapping ──
       const conf = (rawData as any)?.confidence;
       const essConfirmed = !conf || conf.batteryPower !== 'none';
-      if (conf && !essConfirmed) {
-        this.log('[Poll] Modbus fallback: ESS data unconfirmed — keeping previous battery/grid/load values');
-        this._appLog('DEV', 'Modbus fallback active — ESS capabilities not updated (confidence: none)');
+      const energyConfirmed = !conf || conf.totalEnergy !== 'none';
+      if (conf && (!essConfirmed || !energyConfirmed)) {
+        const skipped = [];
+        if (!essConfirmed) skipped.push('ESS');
+        if (!energyConfirmed) skipped.push('energy');
+        this.log('[Poll] Modbus fallback: ' + skipped.join('+') + ' unconfirmed — keeping previous values');
+        this._appLog('DEV', 'Modbus fallback active — ' + skipped.join('+') + ' capabilities not updated (confidence: none)');
       }
 
       // ── Core capabilities ────────────────────────────────────────────
@@ -174,9 +178,11 @@ module.exports = class HiOneDevice extends Homey.Device {
         await this._safeCap('hione_load_power', data.loadPower);
         await this._safeCap('hione_battery_mode', data.batteryMode);
       }
-      await this._safeCap('meter_power', data.totalEnergy);
-      await this._safeCap('hione_daily_energy', data.dailyEnergy);
-      await this._safeCap('hione_total_energy', data.totalEnergy);
+      if (energyConfirmed) {
+        await this._safeCap('meter_power', data.totalEnergy);
+        await this._safeCap('hione_daily_energy', data.dailyEnergy);
+        await this._safeCap('hione_total_energy', data.totalEnergy);
+      }
 
       // ── Split power capabilities ──────────────────────────────────────
 

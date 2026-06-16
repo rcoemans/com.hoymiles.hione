@@ -58,7 +58,7 @@
     <div class='hint' id='t-hint-port'>TCP port of the HiBox gateway (default: 10081).</div>
   </div>
   <div class='error' id='error'></div>
-  <button class='btn-primary' id='t-next' onclick='proceed()'>Next</button>
+  <button class='btn-primary' id='t-next' onclick='proceed()' disabled style='background:#ccc;color:#888;cursor:not-allowed;opacity:0.6;'>Next</button>
   <script>
     function updateNextButton() {
       var ip = document.getElementById('ip').value.trim();

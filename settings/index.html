@@ -55,8 +55,8 @@
     .btn-log.copy:hover { background: #1565c0; }
     .btn-log.refresh { background: #61BA1A; color: #fff; }
     .btn-log.refresh:hover { background: #52a014; }
-    .btn-log.scan { background: #ff9800; color: #fff; }
-    .btn-log.scan:hover { background: #f57c00; }
+    .btn-log.scan { background: #61BA1A; color: #fff; }
+    .btn-log.scan:hover { background: #52a014; }
     .copy-toast {
       display: none; font-size: 12px; color: #2e7d32; margin-left: 8px; align-self: center;
     }
@@ -129,8 +129,8 @@
     <div class='hint' id='t-hint-diag'>Scan Modbus TCP registers to discover available data points. Quick Scan checks known blocks, Deep Scan probes all 65536 registers (slow), ESS Probe tests battery/grid register candidates.</div>
     <div class='log-buttons' style='margin-top:8px;'>
       <button class='btn-log scan' id='btn-modbus-scan' onclick='runModbusScan()'>Quick Scan</button>
-      <button class='btn-log scan' id='btn-deep-scan' onclick='runDeepScan()' style='background:#9c27b0;'>Deep Scan</button>
-      <button class='btn-log scan' id='btn-ess-probe' onclick='runEssProbe()' style='background:#00838f;'>ESS Probe</button>
+      <button class='btn-log scan' id='btn-deep-scan' onclick='runDeepScan()'>Deep Scan</button>
+      <button class='btn-log scan' id='btn-ess-probe' onclick='runEssProbe()'>ESS Probe</button>
     </div>
     <div class='log-buttons' style='margin-top:4px;'>
       <button class='btn-log copy' id='btn-copy-scan' onclick='copyScan()'>Copy</button>

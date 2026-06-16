@@ -259,8 +259,9 @@ As an alternative to the protobuf protocol, the app supports **Modbus TCP** comm
 - FC03 (Read Holding Registers) and FC04 (Read Input Registers) are supported
 - **Confirmed registers** (DTU-Pro V1.2 spec): DTU info (0x0000), micro-inverter PV port data (0x1000+), plant aggregate (0x2000+)
 - **ESS/battery registers are NOT mapped** — the DTU-Pro register map covers micro-inverters only. HiOne battery, grid, load, and mode data is not available via Modbus TCP (use protobuf or cloud instead)
-- The app returns **confidence metadata** for each data field: `confirmed` (from verified registers) or `none` (no mapping available)
-- If protobuf communication fails, the app falls back to Modbus TCP — but only PV power and energy values are available; ESS fields return zero
+- **HiBox compatibility note**: the HiBox gateway responds to Modbus TCP but does NOT follow the DTU-Pro register layout. Plant aggregate (0x2000) and ESS blocks (0x3000–0x6000) are not supported. PV port registers may contain non-standard data. The app validates all Modbus values with per-field plausibility checks and cross-validates grid indicators (voltage/frequency) to detect incompatible register layouts.
+- The app returns **confidence metadata** for each data field: `confirmed` (from verified registers), `none` (no mapping or unreliable data)
+- If protobuf communication fails, the app falls back to Modbus TCP — only confirmed PV power and validated energy values are used; unreliable energy and ESS fields are skipped to preserve previous cloud/protobuf values
 - Three diagnostic tools in app settings:
   - **Quick Scan**: checks known DTU-Pro register blocks + ESS candidate blocks
   - **Deep Scan**: probes all 65,536 registers (0x0000–0xFFFF) with ASCII decoding, signed interpretation, and FC03/FC04 testing
