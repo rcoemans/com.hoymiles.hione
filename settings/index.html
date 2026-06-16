@@ -126,9 +126,13 @@
 
   <div class='log-section'>
     <h3 style='font-size:14px; margin-bottom:10px;' id='t-section-diag'>Diagnostics</h3>
-    <div class='hint' id='t-hint-diag'>Scan Modbus TCP registers on the DTS-G3 stick to discover available data points.</div>
+    <div class='hint' id='t-hint-diag'>Scan Modbus TCP registers to discover available data points. Quick Scan checks known blocks, Deep Scan probes all 65536 registers (slow), ESS Probe tests battery/grid register candidates.</div>
     <div class='log-buttons' style='margin-top:8px;'>
-      <button class='btn-log scan' id='btn-modbus-scan' onclick='runModbusScan()'>Modbus Register Scan</button>
+      <button class='btn-log scan' id='btn-modbus-scan' onclick='runModbusScan()'>Quick Scan</button>
+      <button class='btn-log scan' id='btn-deep-scan' onclick='runDeepScan()' style='background:#9c27b0;'>Deep Scan</button>
+      <button class='btn-log scan' id='btn-ess-probe' onclick='runEssProbe()' style='background:#00838f;'>ESS Probe</button>
+    </div>
+    <div class='log-buttons' style='margin-top:4px;'>
       <button class='btn-log copy' id='btn-copy-scan' onclick='copyScan()'>Copy</button>
       <button class='btn-log clear' id='btn-clear-scan' onclick='clearScan()'>Clear</button>
       <span class='copy-toast' id='scan-copy-toast'>Copied!</span>
@@ -165,11 +169,16 @@
         logCleared: 'Log gewist.',
         sectionDiag: 'Diagnostiek',
         hintDiag: 'Scan Modbus TCP-registers op de DTS-G3 stick om beschikbare datapunten te ontdekken.',
-        modbusScan: 'Modbus Register Scan',
+        modbusScan: 'Quick Scan',
+        deepScan: 'Deep Scan',
+        essProbe: 'ESS Probe',
         scanning: 'Scannen...',
+        deepScanning: 'Deep scan loopt (dit kan even duren)...',
+        essProbing: 'ESS-registers testen...',
         scanError: 'Scan mislukt: ',
         copyScan: 'Kopieer',
-        clearScan: 'Wissen'
+        clearScan: 'Wissen',
+        hintDiagFull: 'Scan Modbus TCP-registers om beschikbare datapunten te ontdekken. Quick Scan controleert bekende blokken, Deep Scan test alle 65536 registers (langzaam), ESS Probe test batterij/net-registers.'
       },
       en: {
         title: 'Hoymiles HiOne — Settings',
@@ -198,11 +207,16 @@
         logCleared: 'Log cleared.',
         sectionDiag: 'Diagnostics',
         hintDiag: 'Scan Modbus TCP registers on the DTS-G3 stick to discover available data points.',
-        modbusScan: 'Modbus Register Scan',
+        modbusScan: 'Quick Scan',
+        deepScan: 'Deep Scan',
+        essProbe: 'ESS Probe',
         scanning: 'Scanning...',
+        deepScanning: 'Deep scan running (this may take a while)...',
+        essProbing: 'Testing ESS registers...',
         scanError: 'Scan failed: ',
         copyScan: 'Copy',
-        clearScan: 'Clear'
+        clearScan: 'Clear',
+        hintDiagFull: 'Scan Modbus TCP registers to discover available data points. Quick Scan checks known blocks, Deep Scan probes all 65536 registers (slow), ESS Probe tests battery/grid register candidates.'
       }
     };
 
@@ -233,7 +247,9 @@
       if (document.getElementById('btn-clear-log')) document.getElementById('btn-clear-log').textContent = t.clearLog || 'Clear';
       if (document.getElementById('t-section-diag')) document.getElementById('t-section-diag').textContent = t.sectionDiag || 'Diagnostics';
       if (document.getElementById('t-hint-diag')) document.getElementById('t-hint-diag').textContent = t.hintDiag || '';
-      if (document.getElementById('btn-modbus-scan')) document.getElementById('btn-modbus-scan').textContent = t.modbusScan || 'Modbus Register Scan';
+      if (document.getElementById('btn-modbus-scan')) document.getElementById('btn-modbus-scan').textContent = t.modbusScan || 'Quick Scan';
+      if (document.getElementById('btn-deep-scan')) document.getElementById('btn-deep-scan').textContent = t.deepScan || 'Deep Scan';
+      if (document.getElementById('btn-ess-probe')) document.getElementById('btn-ess-probe').textContent = t.essProbe || 'ESS Probe';
       if (document.getElementById('btn-copy-scan')) document.getElementById('btn-copy-scan').textContent = t.copyScan || 'Copy';
       if (document.getElementById('btn-clear-scan')) document.getElementById('btn-clear-scan').textContent = t.clearScan || 'Clear';
     }
@@ -330,50 +346,72 @@
       var resultBox = document.getElementById('scan-result');
       resultBox.textContent = '';
       resultBox.style.display = 'none';
-      if (_homeyRef) _homeyRef.set('modbus_scan_result', null, function() {});
+      if (_homeyRef) {
+        _homeyRef.set('modbus_scan_result', null, function() {});
+        _homeyRef.set('modbus_deep_scan_result', null, function() {});
+        _homeyRef.set('modbus_ess_probe_result', null, function() {});
+      }
     }
 
-    function runModbusScan() {
+    function _runScanGeneric(triggerKey, resultKey, btn, statusText, maxPolls) {
       if (!_homeyRef) return;
       var t = i18n[_lang] || i18n.en;
-      var btn = document.getElementById('btn-modbus-scan');
       var resultBox = document.getElementById('scan-result');
-      btn.textContent = t.scanning || 'Scanning...';
+      var origText = btn.textContent;
+      btn.textContent = statusText;
       btn.disabled = true;
       btn.style.opacity = '0.6';
       resultBox.style.display = 'block';
-      resultBox.textContent = t.scanning || 'Scanning...';
+      resultBox.textContent = statusText;
 
-      // Clear previous result before starting scan
-      _homeyRef.set('modbus_scan_result', null, function() {});
-      // Trigger the scan by setting a key
-      _homeyRef.set('run_modbus_scan', Date.now(), function(err) {
+      _homeyRef.set(resultKey, null, function() {});
+      _homeyRef.set(triggerKey, Date.now(), function(err) {
         if (err) {
           resultBox.textContent = (t.scanError || 'Scan failed: ') + err.message;
-          btn.textContent = t.modbusScan || 'Modbus Register Scan';
+          btn.textContent = origText;
           btn.disabled = false;
           btn.style.opacity = '1';
           return;
         }
-        // Poll for result
         var polls = 0;
         var poller = setInterval(function() {
           polls++;
-          _homeyRef.get('modbus_scan_result', function(err2, result) {
-            if (result || polls > 30) {
+          _homeyRef.get(resultKey, function(err2, result) {
+            if (result || polls > (maxPolls || 30)) {
               clearInterval(poller);
-              btn.textContent = t.modbusScan || 'Modbus Register Scan';
+              btn.textContent = origText;
               btn.disabled = false;
               btn.style.opacity = '1';
               if (result) {
                 resultBox.textContent = JSON.stringify(result, null, 2);
               } else {
-                resultBox.textContent = 'Timeout — no result received.';
+                resultBox.textContent = 'Timeout \u2014 no result received.';
               }
             }
           });
         }, 2000);
       });
+    }
+
+    function runModbusScan() {
+      var t = i18n[_lang] || i18n.en;
+      _runScanGeneric('run_modbus_scan', 'modbus_scan_result',
+        document.getElementById('btn-modbus-scan'),
+        t.scanning || 'Scanning...', 30);
+    }
+
+    function runDeepScan() {
+      var t = i18n[_lang] || i18n.en;
+      _runScanGeneric('run_modbus_deep_scan', 'modbus_deep_scan_result',
+        document.getElementById('btn-deep-scan'),
+        t.deepScanning || 'Deep scan running...', 120);
+    }
+
+    function runEssProbe() {
+      var t = i18n[_lang] || i18n.en;
+      _runScanGeneric('run_modbus_ess_probe', 'modbus_ess_probe_result',
+        document.getElementById('btn-ess-probe'),
+        t.essProbing || 'Testing ESS registers...', 30);
     }
 
     function onHomeyReady(Homey) {

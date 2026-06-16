@@ -9,10 +9,10 @@ FEATURES
 - Flow conditions: battery charging/discharging, SoC above/below threshold, PV/load power thresholds, grid importing/exporting, battery mode, gateway online, connection local
 - Flow actions: set battery mode, refresh data, prefer local/cloud, enable/disable cloud fallback
 - Three connection modes: Local (LAN), Local + Cloud (recommended), or Cloud only
-- Modbus TCP support for DTS-G3 sticks (port 502) — automatic fallback when protobuf is unavailable
+- Modbus TCP support for DTS-G3 sticks (port 502) — automatic fallback when protobuf is unavailable (PV power + energy only; ESS registers not yet mapped)
 - Homey Energy integration: battery charge/discharge power and cumulative energy count towards Homey Energy
 - Cloud login hardening: backoff after failed attempts (up to 12h for account lockout) to protect your S-Miles account
-- Register scan diagnostic: discover available Modbus registers from the app settings page
+- Diagnostics: Quick Scan (known blocks), Deep Scan (full 0x0000–0xFFFF), ESS Probe (experimental battery register discovery)
 
 REQUIREMENTS
 - Homey Pro (2019 or 2023) with firmware >= 10.0.0
@@ -46,7 +46,11 @@ DEVICE SETTINGS
 After pairing, you can view and change your connection mode (Local, Hybrid, or Cloud only), S-Miles Cloud email and password, gateway IP/port, and poll interval in the device settings screen — no need to re-pair the device. The connection mode determines which data source the device uses. Device info sections (DTU, Inverter, Gateway/HiBox, Battery) show serial number, model, firmware and hardware versions (read-only, populated from cloud API and/or local gateway). The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
 
 APP SETTINGS
-The app settings page (Homey > Apps > Hoymiles HiOne > Settings) lets you configure app-level defaults and view diagnostic logs. The logging section shows the last 200 log entries with buttons to refresh, copy, and clear. The diagnostics section includes a Modbus TCP register scan (uses the app-level Gateway IP) to discover available data points, with copy and clear buttons.
+The app settings page (Homey > Apps > Hoymiles HiOne > Settings) lets you configure app-level defaults and view diagnostic logs. The logging section shows the last 200 log entries with buttons to refresh, copy, and clear. The diagnostics section includes three Modbus TCP tools (using the app-level Gateway IP):
+  Quick Scan: checks known DTU-Pro register blocks + ESS candidate blocks
+  Deep Scan: probes all 65,536 registers with ASCII decoding, signed interpretation, and FC03/FC04 testing
+  ESS Probe: tests candidate battery/grid register blocks with strict plausibility validation
+Note: Modbus TCP only provides confirmed PV power and energy data. Battery, grid, load, and mode require protobuf or cloud.
 
 CLOUD DATA MAPPING
 The S-Miles Cloud API returns real-time data in reflux_station_data:

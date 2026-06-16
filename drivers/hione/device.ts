@@ -155,33 +155,45 @@ module.exports = class HiOneDevice extends Homey.Device {
       const data = HioneMapper.normalize(rawData);
       this._appLog('DEV', 'Mapped: pv=' + data.pvPower + ' bat=' + data.batteryPower + ' soc=' + data.batterySoc + ' grid=' + data.gridPower + ' load=' + data.loadPower + ' chg=' + data.batteryChargePower + ' dis=' + data.batteryDischargePower + ' daily=' + data.dailyEnergy + ' total=' + data.totalEnergy);
 
+      // ── Confidence guard: skip ESS updates when Modbus has no mapping ──
+      const conf = (rawData as any)?.confidence;
+      const essConfirmed = !conf || conf.batteryPower !== 'none';
+      if (conf && !essConfirmed) {
+        this.log('[Poll] Modbus fallback: ESS data unconfirmed — keeping previous battery/grid/load values');
+        this._appLog('DEV', 'Modbus fallback active — ESS capabilities not updated (confidence: none)');
+      }
+
       // ── Core capabilities ────────────────────────────────────────────
 
       await this._safeCap('measure_power', data.pvPower);
-      await this._safeCap('measure_battery', data.batterySoc);
-      await this._safeCap('meter_power', data.totalEnergy);
       await this._safeCap('hione_pv_power', data.pvPower);
-      await this._safeCap('hione_battery_power', data.batteryPower);
-      await this._safeCap('hione_grid_power', data.gridPower);
-      await this._safeCap('hione_load_power', data.loadPower);
-      await this._safeCap('hione_battery_mode', data.batteryMode);
+      if (essConfirmed) {
+        await this._safeCap('measure_battery', data.batterySoc);
+        await this._safeCap('hione_battery_power', data.batteryPower);
+        await this._safeCap('hione_grid_power', data.gridPower);
+        await this._safeCap('hione_load_power', data.loadPower);
+        await this._safeCap('hione_battery_mode', data.batteryMode);
+      }
+      await this._safeCap('meter_power', data.totalEnergy);
       await this._safeCap('hione_daily_energy', data.dailyEnergy);
       await this._safeCap('hione_total_energy', data.totalEnergy);
 
       // ── Split power capabilities ──────────────────────────────────────
 
-      await this._safeCap('hione_battery_charge_power', data.batteryChargePower);
-      await this._safeCap('hione_battery_discharge_power', data.batteryDischargePower);
-      await this._safeCap('hione_grid_import_power', data.gridImportPower);
-      await this._safeCap('hione_grid_export_power', data.gridExportPower);
+      if (essConfirmed) {
+        await this._safeCap('hione_battery_charge_power', data.batteryChargePower);
+        await this._safeCap('hione_battery_discharge_power', data.batteryDischargePower);
+        await this._safeCap('hione_grid_import_power', data.gridImportPower);
+        await this._safeCap('hione_grid_export_power', data.gridExportPower);
+      }
 
       // ── Calculated capabilities ──────────────────────────────────────
 
-      const batteryState = HioneCalculator.batteryDirection(data.batteryPower);
-      const gridState = HioneCalculator.gridDirection(data.gridPower);
-      const selfPoweredPct = HioneCalculator.selfPoweredPct(data.loadPower, data.gridPower);
-      const powerBalance = HioneCalculator.powerBalance(data.pvPower, data.gridPower, data.batteryPower, data.loadPower);
-      const energyState = HioneCalculator.energyState(data.pvPower, data.gridPower, data.batteryPower, data.loadPower);
+      const batteryState = essConfirmed ? HioneCalculator.batteryDirection(data.batteryPower) : (this.getCapabilityValue('hione_battery_state') || 'idle');
+      const gridState = essConfirmed ? HioneCalculator.gridDirection(data.gridPower) : (this.getCapabilityValue('hione_grid_state') || 'neutral');
+      const selfPoweredPct = essConfirmed ? HioneCalculator.selfPoweredPct(data.loadPower, data.gridPower) : (this.getCapabilityValue('hione_self_powered_pct') || 0);
+      const powerBalance = essConfirmed ? HioneCalculator.powerBalance(data.pvPower, data.gridPower, data.batteryPower, data.loadPower) : (this.getCapabilityValue('hione_power_balance') || 0);
+      const energyState = essConfirmed ? HioneCalculator.energyState(data.pvPower, data.gridPower, data.batteryPower, data.loadPower) : (this.getCapabilityValue('hione_energy_state') || 'self_sufficient');
 
       await this._safeCap('hione_battery_state', batteryState);
       await this._safeCap('hione_grid_state', gridState);

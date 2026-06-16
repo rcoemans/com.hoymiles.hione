@@ -172,27 +172,36 @@ module.exports = class HoymilesHiOneApp extends Homey.App {
       if (key === 'run_modbus_scan') {
         this._runModbusScan().catch(() => {});
       }
+      if (key === 'run_modbus_deep_scan') {
+        this._runModbusDeepScan().catch(() => {});
+      }
+      if (key === 'run_modbus_ess_probe') {
+        this._runModbusEssProbe().catch(() => {});
+      }
+    });
+  }
+
+  private _createModbusClient(): any {
+    const gatewayIp = this.homey.settings.get('gateway_ip');
+    if (!gatewayIp) return null;
+    return new ModbusTcpClient({
+      host: gatewayIp,
+      log:   (...args: any[]) => { this.log(...args); (this as any).appendLog?.('INFO', ...args); },
+      error: (...args: any[]) => { this.error(...args); (this as any).appendLog?.('ERROR', ...args); },
     });
   }
 
   private async _runModbusScan() {
     try {
       (this as any).appendLog?.('INFO', 'Modbus register scan requested...');
-
-      // Use app-level gateway IP directly — independent of device connection mode
-      const gatewayIp = this.homey.settings.get('gateway_ip');
-      if (!gatewayIp) {
+      const client = this._createModbusClient();
+      if (!client) {
         this.homey.settings.set('modbus_scan_result', { error: 'No gateway IP configured in app settings. Set the Gateway IP address first.' });
         return;
       }
 
-      const client = new ModbusTcpClient({
-        host: gatewayIp,
-        log:   (...args: any[]) => { this.log(...args); (this as any).appendLog?.('INFO', ...args); },
-        error: (...args: any[]) => { this.error(...args); (this as any).appendLog?.('ERROR', ...args); },
-      });
-
-      (this as any).appendLog?.('INFO', `Scanning Modbus registers at ${gatewayIp}:502...`);
+      const gatewayIp = this.homey.settings.get('gateway_ip');
+      (this as any).appendLog?.('INFO', `Scanning Modbus registers at ${gatewayIp}:502 (known blocks + ESS candidates)...`);
       const result = await client.scanKnownBlocks();
 
       if (result && Object.keys(result).length > 0) {
@@ -205,6 +214,42 @@ module.exports = class HoymilesHiOneApp extends Homey.App {
     } catch (err: any) {
       this.homey.settings.set('modbus_scan_result', { error: 'Scan failed: ' + err.message });
       (this as any).appendLog?.('ERROR', 'Modbus scan failed: ' + err.message);
+    }
+  }
+
+  private async _runModbusDeepScan() {
+    try {
+      (this as any).appendLog?.('INFO', 'Modbus DEEP scan requested (0x0000–0xFFFF) — this may take a while...');
+      const client = this._createModbusClient();
+      if (!client) {
+        this.homey.settings.set('modbus_deep_scan_result', { error: 'No gateway IP configured in app settings.' });
+        return;
+      }
+
+      const result = await client.deepScan();
+      this.homey.settings.set('modbus_deep_scan_result', result);
+      (this as any).appendLog?.('INFO', `Deep scan complete: ${result.summary.totalNonZero} non-zero registers in ${result.summary.totalReadable} readable`);
+    } catch (err: any) {
+      this.homey.settings.set('modbus_deep_scan_result', { error: 'Deep scan failed: ' + err.message });
+      (this as any).appendLog?.('ERROR', 'Modbus deep scan failed: ' + err.message);
+    }
+  }
+
+  private async _runModbusEssProbe() {
+    try {
+      (this as any).appendLog?.('INFO', 'Modbus ESS probe requested (experimental)...');
+      const client = this._createModbusClient();
+      if (!client) {
+        this.homey.settings.set('modbus_ess_probe_result', { error: 'No gateway IP configured in app settings.' });
+        return;
+      }
+
+      const result = await client.probeEssRegisters();
+      this.homey.settings.set('modbus_ess_probe_result', result || { found: false, message: 'No plausible ESS data found in candidate register blocks.' });
+      (this as any).appendLog?.('INFO', 'ESS probe complete: ' + (result?.found ? `Found at ${result.block}` : 'No ESS data found'));
+    } catch (err: any) {
+      this.homey.settings.set('modbus_ess_probe_result', { error: 'ESS probe failed: ' + err.message });
+      (this as any).appendLog?.('ERROR', 'Modbus ESS probe failed: ' + err.message);
     }
   }
 

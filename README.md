@@ -252,15 +252,19 @@ For local communication, the app connects to the HiBox-63T-G3 gateway over TCP (
 - The port is configurable in device settings (default: 10081)
 - Polling interval: 60 seconds (aggressive polling below 30s can disrupt cloud connectivity)
 
-### Modbus TCP (DTS-G3 stick)
+### Modbus TCP (DTS-G3 stick) — Experimental
 
 As an alternative to the protobuf protocol, the app supports **Modbus TCP** communication on port 502. This is primarily used by the **DTS-G3** data transfer stick and other Hoymiles DTU devices that support the Modbus TCP interface.
 
 - FC03 (Read Holding Registers) and FC04 (Read Input Registers) are supported
-- Micro-inverter data is read from registers starting at 0x1000 (40 registers per PV port)
-- Plant aggregate data (total power, daily/total energy) is read from registers at 0x2000
-- ESS/battery data register addresses are firmware-dependent — use the **register scan diagnostic** in app settings to discover available data points
-- If protobuf communication fails, the app automatically falls back to Modbus TCP
+- **Confirmed registers** (DTU-Pro V1.2 spec): DTU info (0x0000), micro-inverter PV port data (0x1000+), plant aggregate (0x2000+)
+- **ESS/battery registers are NOT mapped** — the DTU-Pro register map covers micro-inverters only. HiOne battery, grid, load, and mode data is not available via Modbus TCP (use protobuf or cloud instead)
+- The app returns **confidence metadata** for each data field: `confirmed` (from verified registers) or `none` (no mapping available)
+- If protobuf communication fails, the app falls back to Modbus TCP — but only PV power and energy values are available; ESS fields return zero
+- Three diagnostic tools in app settings:
+  - **Quick Scan**: checks known DTU-Pro register blocks + ESS candidate blocks
+  - **Deep Scan**: probes all 65,536 registers (0x0000–0xFFFF) with ASCII decoding, signed interpretation, and FC03/FC04 testing
+  - **ESS Probe**: tests candidate ESS register blocks (0x3000–0x6000) with strict plausibility validation
 
 ### Cloud login hardening
 
