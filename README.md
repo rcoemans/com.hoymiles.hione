@@ -135,7 +135,7 @@ The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find it
 | Battery State | Charging / Discharging / Idle / Standby / Fault | — |
 | Grid State | Importing / Exporting / Neutral | — |
 | Connection Source | Local (LAN) or Cloud | — |
-| Gateway Online | Whether the local gateway is reachable | — |
+| Gateway Online | Whether the gateway is online (cloud device status or local connectivity) | — |
 | System State | Online (local/cloud) / Degraded / Offline / Syncing / Error | — |
 | System Alarm | Active when polling fails or system is offline | — |
 | Last Update | Timestamp of the last successful poll | — |
@@ -282,6 +282,8 @@ As an alternative to the protobuf protocol, the app supports **Modbus TCP** comm
 - **HiBox compatibility note**: the HiBox gateway responds to Modbus TCP but does NOT follow the DTU-Pro register layout. Plant aggregate (0x2000) and ESS blocks (0x3000–0x6000) are not supported. PV port registers may contain non-standard data. The app validates all Modbus values with per-field plausibility checks and cross-validates grid indicators (voltage/frequency) to detect incompatible register layouts.
 - The app returns **confidence metadata** for each data field: `confirmed` (from verified registers), `none` (no mapping or unreliable data)
 - If protobuf communication fails, the app falls back to Modbus TCP — only confirmed PV power and validated energy values are used; unreliable energy and ESS fields are skipped to preserve previous cloud/protobuf values
+- **Hybrid top-up**: when Modbus TCP connects but has no ESS/energy mapping, the app automatically fetches missing data (battery, grid, load, energy) from the cloud API. The data source shows as `local+cloud`
+- **Export scan report**: generates a comprehensive, shareable JSON report combining known blocks scan + ESS probe for community register discovery efforts
 - Three diagnostic tools in app settings:
   - **Quick Scan**: checks known DTU-Pro register blocks + ESS candidate blocks
   - **Deep Scan**: probes all 65,536 registers (0x0000–0xFFFF) with ASCII decoding, signed interpretation, and FC03/FC04 testing
@@ -306,13 +308,33 @@ To protect your S-Miles Cloud account from repeated failed login attempts (which
 | Device re-pair | Existing devices automatically migrate new capabilities on app update; re-pairing is only needed if the device class changes |
 | HiOne only | Not tested with DTU, micro-inverters, or HYT series |
 | Local polling | Intervals below 30 seconds can disrupt cloud and mobile app connectivity |
-| Battery capacity | Battery runtime estimates assume 5 kWh usable capacity |
+| Battery capacity | Battery runtime estimates use 30 kWh default capacity (HiOne 4×8 kWh). Actual reserve and max SoC from cloud settings are used for precise estimates |
 
 ## Security considerations
 
 - **Cloud credentials** are stored in Homey's encrypted device store and are only transmitted to the official Hoymiles S-Miles Cloud API (`neapi.hoymiles.com` and `euapi.hoymiles.com`). They are never sent to any third party.
 - **Local communication** does not require authentication. Anyone on your local network with access to the HiBox gateway IP can read data and control the battery mode. This is a limitation of the HiBox gateway, not of this app.
 - The password is hashed (Argon2id, SHA-256 or MD5, depending on the authentication profile) before being sent to the Hoymiles cloud API. The raw password is never transmitted.
+
+### Data validation
+
+All incoming data (cloud and Modbus TCP) passes through plausibility validation before updating Homey capabilities:
+
+| Field | Valid range | Action if invalid |
+|---|---|---|
+| PV power | -500 to 50,000 W | Rejected, set to 0 |
+| Battery power | -50,000 to 50,000 W | Rejected, set to 0 |
+| Grid power | -50,000 to 50,000 W | Rejected, set to 0 |
+| Load power | -500 to 50,000 W | Rejected, set to 0 |
+| Battery SoC | 0 to 100% | Clamped |
+| Daily energy | 0 to 200 kWh | Rejected, set to 0 |
+| Total energy | 0 to 100,000 kWh | Rejected, set to 0 |
+
+Additionally:
+- Daily energy is cross-checked against total energy (daily ≤ total)
+- A ±10 W deadband prevents state flickering on battery charge/discharge and grid import/export splits
+- Modbus energy validation: rejects values > 100 MWh (catches the 613,426 kWh garbage from incompatible register layouts)
+- All rejections are logged with the raw value, mapped value, source, and reason
 
 ### Signed power conventions
 
@@ -323,7 +345,7 @@ To protect your S-Miles Cloud account from repeated failed login attempts (which
 | `grid_power > 0` | Importing from grid |
 | `grid_power < 0` | Exporting to grid |
 
-Split positive values (`battery_charge_power`, `battery_discharge_power`, `grid_import_power`, `grid_export_power`) are derived from the signed values for easier use in Flows.
+A ±10 W deadband is applied: values within the deadband are treated as idle/neutral. Split positive values (`battery_charge_power`, `battery_discharge_power`, `grid_import_power`, `grid_export_power`) are derived from the signed values with this deadband for easier use in Flows.
 
 ## Credits
 

@@ -11,7 +11,9 @@ FUNCTIES
 - Flow condities: batterij laden/ontladen, SoC boven/onder drempel, PV-/belastingsvermogen drempels, net importeren/exporteren, batterijmodus, gateway online, verbinding lokaal
 - Flow acties: batterijmodus instellen, reserve SoC, max SoC, max vermogen, netlimiet, pieksturing, tijdafhankelijke periode, vermogenslimiet, omvormerstatus, relais, data vernieuwen, voorkeur lokaal/cloud, cloud-fallback in-/uitschakelen
 - Drie verbindingsmodi: Lokaal (LAN), Lokaal + Cloud (aanbevolen), of alleen Cloud
-- Modbus TCP-ondersteuning voor DTS-G3 sticks (poort 502) — automatische terugval wanneer protobuf niet beschikbaar is (alleen PV-vermogen + gevalideerde energie; ESS-registers niet in kaart gebracht, onbetrouwbare data wordt overgeslagen om cloudwaarden te behouden)
+- Modbus TCP-ondersteuning voor DTS-G3 sticks (poort 502) — automatische terugval wanneer protobuf niet beschikbaar is (alleen PV-vermogen + gevalideerde energie; ESS-registers niet in kaart gebracht, onbetrouwbare data wordt overgeslagen om cloudwaarden te behouden). Hybride aanvulling: wanneer Modbus verbindt maar geen ESS/energie-mapping heeft, worden ontbrekende gegevens opgehaald uit de cloud API (bron: local+cloud)
+- Datavalidatie: alle waarden worden gecontroleerd op plausibiliteit voordat capabilities worden bijgewerkt. Ongeldige waarden worden afgewezen en gelogd (bijv. 613.426 kWh totale energie uit incompatibele Modbus-registerindelingen). ±10 W dodeband voorkomt statusflikkering bij batterij/net-splitsingen
+- Gateway online status: gebruikt S-Miles Cloud apparaatstatus indien beschikbaar, valt terug op lokale connectiviteit
 - Homey Energy integratie: homeBattery met meter_power.charged en meter_power.discharged voor batterij-energietracking
 - Cloud-login afgehard: wachttijd na mislukte pogingen (tot 12 uur bij accountblokkade) om je S-Miles-account te beschermen
 - Diagnostiek: Quick Scan (bekende blokken), Deep Scan (volledig 0x0000–0xFFFF), ESS Probe (experimentele batterijregister-ontdekking)
@@ -52,7 +54,7 @@ De app-instellingenpagina (Homey > Apps > Hoymiles HiOne > Instellingen) laat je
   Quick Scan: controleert bekende DTU-Pro registerblokken + ESS-kandidaatblokken
   Deep Scan: test alle 65.536 registers met ASCII-decodering, signed-interpretatie en FC03/FC04-testen
   ESS Probe: test kandidaat-batterij/net-registerblokken met strikte plausibiliteitsvalidatie
-Opmerking: Modbus TCP levert alleen bevestigd PV-vermogen en gevalideerde energiedata. De HiBox gateway volgt NIET de DTU-Pro registerindeling — onbetrouwbare energiewaarden worden automatisch gedetecteerd en overgeslagen om clouddata te behouden. Batterij, net, belasting en modus vereisen protobuf of cloud.
+Opmerking: Modbus TCP levert alleen bevestigd PV-vermogen en gevalideerde energiedata. De HiBox gateway volgt NIET de DTU-Pro registerindeling — onbetrouwbare energiewaarden worden automatisch gedetecteerd en overgeslagen om clouddata te behouden. Batterij, net, belasting en modus vereisen protobuf of cloud. Wanneer Modbus verbindt maar geen ESS-mapping heeft, vult de app ontbrekende velden aan vanuit de cloud (hybride aanvulling, bron: local+cloud). Een Export Scan Report genereert een deelbaar JSON-bestand voor gemeenschappelijke registerontdekking.
 
 CLOUD DATA MAPPING
 De S-Miles Cloud API retourneert realtime data in reflux_station_data:

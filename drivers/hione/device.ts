@@ -5,6 +5,7 @@ import Homey from 'homey';
 const HoymilesHybrid = require('../../lib/HoymilesHybrid');
 const HioneMapper = require('../../lib/HioneMapper');
 const HioneCalculator = require('../../lib/HioneCalculator');
+const { DEFAULT_CAPACITY_KWH } = require('../../lib/HioneCalculator');
 const { BATTERY_MODES } = require('../../lib/HoymilesApi');
 
 const DEFAULT_POLL_MS = 60_000;
@@ -25,6 +26,10 @@ module.exports = class HiOneDevice extends Homey.Device {
   private _pollCount: number = 0;
   private _chargedTotal: number = 0;
   private _dischargedTotal: number = 0;
+  private _batteryCapacityKwh: number = DEFAULT_CAPACITY_KWH;
+  private _reserveSoc: number = 10;
+  private _maxSoc: number = 100;
+  private _gatewayOnlineFromCloud: boolean | null = null;
 
   private _appLog(level: string, ...args: any[]) {
     try {
@@ -46,6 +51,10 @@ module.exports = class HiOneDevice extends Homey.Device {
     this._pollCount = 0;
     this._chargedTotal = 0;
     this._dischargedTotal = 0;
+    this._batteryCapacityKwh = DEFAULT_CAPACITY_KWH;
+    this._reserveSoc = 10;
+    this._maxSoc = 100;
+    this._gatewayOnlineFromCloud = null;
 
     // Sync store credentials → device settings (for devices paired before credential settings existed)
     await this._syncStoreToSettings();
@@ -248,8 +257,13 @@ module.exports = class HiOneDevice extends Homey.Device {
       const rawData = await this._hybrid.getData();
       this.log('Raw data received (source: ' + (rawData?.source || 'unknown') + ')');
       this._appLog('DEV', 'Raw data: pv=' + rawData?.pvPower + ' bat=' + rawData?.batteryPower + ' soc=' + rawData?.batterySoc + ' grid=' + rawData?.gridPower + ' load=' + rawData?.loadPower + ' daily=' + rawData?.dailyEnergy + ' total=' + rawData?.totalEnergy + ' mode=' + rawData?.batteryMode);
-      const data = HioneMapper.normalize(rawData);
+      const data = HioneMapper.normalize(rawData, this.log.bind(this));
       this._appLog('DEV', 'Mapped: pv=' + data.pvPower + ' bat=' + data.batteryPower + ' soc=' + data.batterySoc + ' grid=' + data.gridPower + ' load=' + data.loadPower + ' chg=' + data.batteryChargePower + ' dis=' + data.batteryDischargePower + ' daily=' + data.dailyEnergy + ' total=' + data.totalEnergy);
+
+      // Log validation rejections
+      if (data.rejected && data.rejected.length > 0) {
+        this._appLog('DEV-WARN', 'Validation rejected: ' + data.rejected.map((r: any) => `${r.name}=${r.raw} (${r.reason})`).join(', '));
+      }
 
       // ── Confidence guard: skip unconfirmed updates when Modbus has no mapping ──
       const conf = (rawData as any)?.confidence;
@@ -293,7 +307,7 @@ module.exports = class HiOneDevice extends Homey.Device {
 
       const batteryState = essConfirmed ? HioneCalculator.batteryDirection(data.batteryPower) : (this.getCapabilityValue('hione_battery_state') || 'idle');
       const gridState = essConfirmed ? HioneCalculator.gridDirection(data.gridPower) : (this.getCapabilityValue('hione_grid_state') || 'neutral');
-      const selfPoweredPct = essConfirmed ? HioneCalculator.selfPoweredPct(data.loadPower, data.gridPower) : (this.getCapabilityValue('hione_self_powered_pct') || 0);
+      const selfPoweredPct = essConfirmed ? (HioneCalculator.selfPoweredPct(data.loadPower, data.gridPower) ?? 0) : (this.getCapabilityValue('hione_self_powered_pct') || 0);
       const powerBalance = essConfirmed ? HioneCalculator.powerBalance(data.pvPower, data.gridPower, data.batteryPower, data.loadPower) : (this.getCapabilityValue('hione_power_balance') || 0);
       const energyState = essConfirmed ? HioneCalculator.energyState(data.pvPower, data.gridPower, data.batteryPower, data.loadPower) : (this.getCapabilityValue('hione_energy_state') || 'self_sufficient');
 
@@ -303,19 +317,25 @@ module.exports = class HiOneDevice extends Homey.Device {
       await this._safeCap('hione_power_balance', powerBalance);
       await this._safeCap('hione_energy_state', energyState);
 
-      // Runtime estimates
-      const dischargePower = data.batteryPower < 0 ? Math.abs(data.batteryPower) : 0;
-      const chargePower = data.batteryPower > 0 ? data.batteryPower : 0;
-      const runtimeHours = HioneCalculator.batteryRuntimeHours(data.batterySoc, dischargePower);
-      const timeToFull = HioneCalculator.timeToFullHours(data.batterySoc, chargePower);
+      // Runtime estimates (using configurable capacity and reserve/max SoC)
+      const dischargePower = data.batteryDischargePower || 0;
+      const chargePower = data.batteryChargePower || 0;
+      const runtimeHours = HioneCalculator.batteryRuntimeHours(
+        data.batterySoc, dischargePower, this._batteryCapacityKwh, this._reserveSoc);
+      const timeToFull = HioneCalculator.timeToFullHours(
+        data.batterySoc, chargePower, this._batteryCapacityKwh, this._maxSoc);
 
       await this._safeCap('hione_battery_runtime_hours', runtimeHours ?? 0);
       await this._safeCap('hione_time_to_full_hours', timeToFull ?? 0);
 
       // ── Status capabilities ──────────────────────────────────────────
 
-      const systemState = data.source === 'local' ? 'online_local' : 'online_cloud';
-      const gatewayOnline = data.source === 'local' || this._hybrid.connectionMode === 'local';
+      const systemState = data.source === 'local' || data.source === 'local+cloud'
+        ? 'online_local' : 'online_cloud';
+      // Gateway Online: use cloud device status when available (Section 13.2)
+      const gatewayOnline = this._gatewayOnlineFromCloud !== null
+        ? this._gatewayOnlineFromCloud
+        : (data.source === 'local' || data.source === 'local+cloud' || this._hybrid.connectionMode === 'local');
 
       await this._safeCap('hione_system_state', systemState);
       await this._safeCap('hione_connection_source', data.source);
@@ -507,9 +527,21 @@ module.exports = class HiOneDevice extends Homey.Device {
         await this._safeCap('hione_max_soc', settings.maxSoc);
         await this._safeCap('hione_max_power', settings.maxPower);
         await this._safeCap('hione_grid_limit', settings.gridLimit);
+        // Update runtime calculation parameters
+        if (typeof settings.reserveSoc === 'number') this._reserveSoc = settings.reserveSoc;
+        if (typeof settings.maxSoc === 'number') this._maxSoc = settings.maxSoc;
       }
     } catch (err: any) {
       this.log('[ExtendedData] Battery settings refresh failed: ' + err.message);
+    }
+
+    // Gateway online status from cloud (Section 13.2 — fix showing 'No' while S-Miles says Online)
+    try {
+      const gwOnline = await this._hybrid.getGatewayStatus();
+      this._gatewayOnlineFromCloud = gwOnline;
+      await this._safeCap('hione_gateway_online', gwOnline);
+    } catch (err: any) {
+      this.log('[ExtendedData] Gateway status check failed: ' + err.message);
     }
   }
 
