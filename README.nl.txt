@@ -56,6 +56,9 @@ De app-instellingenpagina (Homey > Apps > Hoymiles HiOne > Instellingen) laat je
   ESS Probe: test kandidaat-batterij/net-registerblokken met strikte plausibiliteitsvalidatie
 Opmerking: Modbus TCP levert alleen bevestigd PV-vermogen en gevalideerde energiedata. De HiBox gateway volgt NIET de DTU-Pro registerindeling — onbetrouwbare energiewaarden worden automatisch gedetecteerd en overgeslagen om clouddata te behouden. Batterij, net, belasting en modus vereisen protobuf of cloud. Wanneer Modbus verbindt maar geen ESS-mapping heeft, vult de app ontbrekende velden aan vanuit de cloud (hybride aanvulling, bron: local+cloud). Een Export Scan Report genereert een deelbaar JSON-bestand voor gemeenschappelijke registerontdekking.
 
+MODBUS-VALIDATIE (Ontwikkelaarsmodus)
+De Modbus-validatiesectie legt Cloud API- en Modbus TCP-data gelijktijdig vast om registermappings te reverse-engineeren. Het leest ~20 kandidaat-registers per cyclus, berekent delta's tegen API-waarden en bouwt betrouwbaarheidsscores op over tijd (HOOG/GEMIDDELD/LAAG/ONOPGELOST). Slaat tot 5000 snapshots op. Gebruik de Start/Stop/Exporteer/Wis-knoppen in de app-instellingen. Laat het 24-48 uur draaien onder verschillende bedrijfsomstandigheden voor de beste resultaten. Wijzigt GEEN productie-capabilities — puur diagnostisch.
+
 CLOUD DATA MAPPING
 De S-Miles Cloud API retourneert realtime data in reflux_station_data:
   pv_power = PV-vermogen (W), bms_power = Batterijvermogen (W), bms_soc = Batterij SoC (%),

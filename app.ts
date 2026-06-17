@@ -4,6 +4,7 @@ import Homey from 'homey';
 
 const HoymilesApi      = require('./lib/HoymilesApi');
 const ModbusTcpClient  = require('./lib/ModbusTcpClient');
+const ModbusValidator  = require('./lib/ModbusValidator');
 
 const LOG_MAX = 200;
 
@@ -221,6 +222,10 @@ module.exports = class HoymilesHiOneApp extends Homey.App {
         return soc > threshold;
       });
 
+    // ── Modbus validation engine ──────────────────────────────────────────
+    (this as any)._validator = null;
+    (this as any)._validationInterval = null;
+
     // ── Settings API: Modbus register scan diagnostic ───────────────────
     this.homey.settings.on('set', (key: string) => {
       if (key === 'run_modbus_scan') {
@@ -231,6 +236,18 @@ module.exports = class HoymilesHiOneApp extends Homey.App {
       }
       if (key === 'run_modbus_ess_probe') {
         this._runModbusEssProbe().catch(() => {});
+      }
+      if (key === 'start_modbus_validation') {
+        this._startModbusValidation().catch(() => {});
+      }
+      if (key === 'stop_modbus_validation') {
+        this._stopModbusValidation();
+      }
+      if (key === 'export_validation_data') {
+        this._exportValidationData();
+      }
+      if (key === 'clear_validation_data') {
+        this._clearValidationData();
       }
     });
   }
@@ -287,6 +304,149 @@ module.exports = class HoymilesHiOneApp extends Homey.App {
       this.homey.settings.set('modbus_deep_scan_result', { error: 'Deep scan failed: ' + err.message });
       (this as any).appendLog?.('ERROR', 'Modbus deep scan failed: ' + err.message);
     }
+  }
+
+  // ── Modbus Validation Engine ──────────────────────────────────────────────
+
+  private async _startModbusValidation() {
+    try {
+      const intervalSec = this.homey.settings.get('validation_interval') || 60;
+      (this as any).appendLog?.('INFO', `Modbus validation starting (interval: ${intervalSec}s)...`);
+
+      // Create validator if needed
+      if (!(this as any)._validator) {
+        (this as any)._validator = new ModbusValidator({
+          log: (...args: any[]) => { this.log(...args); (this as any).appendLog?.('INFO', ...args); },
+          error: (...args: any[]) => { this.error(...args); (this as any).appendLog?.('ERROR', ...args); },
+        });
+
+        // Restore previous state
+        const savedSnapshots = this.homey.settings.get('validation_snapshots');
+        const savedConfidence = this.homey.settings.get('validation_confidence');
+        if (savedSnapshots || savedConfidence) {
+          (this as any)._validator.loadState(savedSnapshots, savedConfidence);
+        }
+      }
+
+      // Find the first HiOne device for its hybrid instance
+      const driver = this.homey.drivers.getDriver('hione');
+      const devices = driver.getDevices();
+      if (!devices || devices.length === 0) {
+        this.homey.settings.set('validation_status', { running: false, error: 'No HiOne device found. Add a device first.' });
+        (this as any).appendLog?.('ERROR', 'Validation: No HiOne device found');
+        return;
+      }
+
+      const device = devices[0] as any;
+      const hybrid = device._hybrid;
+      if (!hybrid) {
+        this.homey.settings.set('validation_status', { running: false, error: 'Device hybrid not initialized' });
+        return;
+      }
+
+      // Stop existing interval
+      if ((this as any)._validationInterval) {
+        clearInterval((this as any)._validationInterval);
+      }
+
+      // Run first snapshot immediately
+      await this._runValidationCycle(hybrid);
+
+      // Start periodic collection
+      (this as any)._validationInterval = setInterval(async () => {
+        await this._runValidationCycle(hybrid);
+      }, intervalSec * 1000);
+
+      this.homey.settings.set('validation_status', {
+        running: true,
+        startedAt: new Date().toISOString(),
+        intervalSec,
+        snapshotCount: (this as any)._validator.getSnapshots().length,
+      });
+      (this as any).appendLog?.('INFO', 'Modbus validation started');
+    } catch (err: any) {
+      this.homey.settings.set('validation_status', { running: false, error: err.message });
+      (this as any).appendLog?.('ERROR', 'Validation start failed: ' + err.message);
+    }
+  }
+
+  private async _runValidationCycle(hybrid: any) {
+    try {
+      const validator = (this as any)._validator;
+      if (!validator) return;
+
+      const snapshot = await hybrid.collectValidationSnapshot(validator);
+      if (!snapshot) return;
+
+      // Save state periodically (every 10 snapshots to reduce settings writes)
+      const count = validator.getSnapshots().length;
+      if (count % 10 === 0 || count <= 3) {
+        this.homey.settings.set('validation_snapshots', validator.getSnapshots());
+        this.homey.settings.set('validation_confidence', validator.getConfidence());
+      }
+
+      // Update status
+      this.homey.settings.set('validation_status', {
+        running: true,
+        startedAt: this.homey.settings.get('validation_status')?.startedAt,
+        intervalSec: this.homey.settings.get('validation_status')?.intervalSec,
+        snapshotCount: count,
+        lastSnapshot: snapshot.timestampStart,
+        lastDurationMs: snapshot.durationMs,
+      });
+
+      // Log deltas summary
+      if (snapshot.deltas) {
+        const keys = Object.keys(snapshot.deltas);
+        const exactMatches = keys.filter(k => snapshot.deltas[k].absDiff === 0).length;
+        (this as any).appendLog?.('VALID', `Snapshot #${count}: ${exactMatches}/${keys.length} exact matches, duration=${snapshot.durationMs}ms`);
+      }
+
+    } catch (err: any) {
+      (this as any).appendLog?.('ERROR', 'Validation cycle failed: ' + err.message);
+    }
+  }
+
+  private _stopModbusValidation() {
+    if ((this as any)._validationInterval) {
+      clearInterval((this as any)._validationInterval);
+      (this as any)._validationInterval = null;
+    }
+
+    // Persist final state
+    const validator = (this as any)._validator;
+    if (validator) {
+      this.homey.settings.set('validation_snapshots', validator.getSnapshots());
+      this.homey.settings.set('validation_confidence', validator.getConfidence());
+    }
+
+    this.homey.settings.set('validation_status', {
+      running: false,
+      stoppedAt: new Date().toISOString(),
+      snapshotCount: validator ? validator.getSnapshots().length : 0,
+    });
+    (this as any).appendLog?.('INFO', 'Modbus validation stopped');
+  }
+
+  private _exportValidationData() {
+    const validator = (this as any)._validator;
+    if (!validator) {
+      this.homey.settings.set('validation_export', { error: 'No validation data. Start validation first.' });
+      return;
+    }
+    const data = validator.exportData();
+    this.homey.settings.set('validation_export', data);
+    (this as any).appendLog?.('INFO', `Validation data exported: ${data.snapshots.length} snapshots, ${Object.keys(data.confidence).length} candidates`);
+  }
+
+  private _clearValidationData() {
+    const validator = (this as any)._validator;
+    if (validator) validator.clearData();
+    this.homey.settings.set('validation_snapshots', null);
+    this.homey.settings.set('validation_confidence', null);
+    this.homey.settings.set('validation_export', null);
+    this.homey.settings.set('validation_status', { running: false, snapshotCount: 0 });
+    (this as any).appendLog?.('INFO', 'Validation data cleared');
   }
 
   private async _runModbusEssProbe() {

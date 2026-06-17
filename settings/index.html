@@ -66,6 +66,30 @@
       padding: 12px; border-radius: 10px; border: 2px solid #333; white-space: pre-wrap; word-break: break-all;
       margin-top: 8px; display: none;
     }
+    .validation-status {
+      background: #f5f5f5; border-radius: 10px; padding: 12px 14px;
+      margin-top: 10px; font-size: 12px; line-height: 1.6;
+    }
+    .validation-status .running { color: #2e7d32; font-weight: 600; }
+    .validation-status .stopped { color: #666; font-weight: 600; }
+    .validation-status .error { color: #d32f2f; }
+    .confidence-table {
+      width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px;
+    }
+    .confidence-table th, .confidence-table td {
+      padding: 4px 8px; text-align: left; border-bottom: 1px solid #e8e8e8;
+    }
+    .confidence-table th { font-weight: 600; color: #444; background: #f9f9f9; }
+    .conf-high { color: #2e7d32; font-weight: 600; }
+    .conf-medium { color: #e65100; font-weight: 600; }
+    .conf-low { color: #d32f2f; }
+    .conf-unresolved { color: #999; }
+    .btn-log.start { background: #2e7d32; color: #fff; }
+    .btn-log.start:hover { background: #1b5e20; }
+    .btn-log.stop { background: #f44336; color: #fff; }
+    .btn-log.stop:hover { background: #d32f2f; }
+    .btn-log.export { background: #1976d2; color: #fff; }
+    .btn-log.export:hover { background: #1565c0; }
   </style>
 </head>
 <body>
@@ -140,10 +164,54 @@
     <div class='scan-result' id='scan-result'></div>
   </div>
 
+  <div class='log-section'>
+    <h3 style='font-size:14px; margin-bottom:10px;' id='t-section-validation'>Modbus Validation</h3>
+    <div class='hint' id='t-hint-validation'>Capture Cloud API and Modbus TCP data simultaneously to validate register mappings. Requires a paired HiOne device with cloud credentials and local gateway IP configured.</div>
+
+    <label style='margin-top:10px;'>
+      <span id='t-label-val-interval'>Validation interval (seconds)</span>
+      <input type='number' id='validation_interval' value='60' min='30' max='300' placeholder='60' style='width:100px;'>
+    </label>
+    <div class='hint' id='t-hint-val-interval'>How often to capture a validation snapshot (30–300 seconds).</div>
+
+    <div class='log-buttons' style='margin-top:10px;'>
+      <button class='btn-log start' id='btn-start-validation' onclick='startValidation()'>Start</button>
+      <button class='btn-log stop' id='btn-stop-validation' onclick='stopValidation()'>Stop</button>
+      <button class='btn-log export' id='btn-export-validation' onclick='exportValidation()'>Export</button>
+      <button class='btn-log copy' id='btn-copy-validation' onclick='copyValidation()'>Copy</button>
+      <button class='btn-log clear' id='btn-clear-validation' onclick='clearValidation()'>Clear</button>
+      <span class='copy-toast' id='validation-copy-toast'>Copied!</span>
+    </div>
+
+    <div class='validation-status' id='validation-status'>
+      <span class='stopped'>Stopped</span> — 0 snapshots
+    </div>
+
+    <div id='confidence-container' style='margin-top:10px; display:none;'>
+      <h4 style='font-size:12px; font-weight:600; margin-bottom:6px;'>Confidence scores</h4>
+      <table class='confidence-table' id='confidence-table'>
+        <thead><tr><th>Register</th><th>API field</th><th>Samples</th><th>Match%</th><th>Avg diff</th><th>Level</th></tr></thead>
+        <tbody id='confidence-body'></tbody>
+      </table>
+    </div>
+
+    <div class='scan-result' id='validation-result'></div>
+  </div>
+
   <script>
     var i18n = {
       nl: {
         title: 'Hoymiles HiOne — Instellingen',
+        sectionValidation: 'Modbus-validatie',
+        hintValidation: 'Leg Cloud API- en Modbus TCP-data gelijktijdig vast om registermappings te valideren. Vereist een gekoppeld HiOne-apparaat met cloud-inloggegevens en lokaal gateway-IP.',
+        labelValInterval: 'Validatie-interval (seconden)',
+        hintValInterval: 'Hoe vaak een validatie-snapshot wordt gemaakt (30–300 seconden).',
+        startValidation: 'Start',
+        stopValidation: 'Stop',
+        exportValidation: 'Exporteer',
+        clearValidation: 'Wissen',
+        validationRunning: 'Actief',
+        validationStopped: 'Gestopt',
         disclaimer: 'Configureer hieronder de app-brede standaardinstellingen. Deze worden gebruikt als standaard bij het koppelen van nieuwe apparaten.',
         sectionLocal: 'Lokale verbinding',
         labelIp: 'Gateway IP-adres',
@@ -182,6 +250,16 @@
       },
       en: {
         title: 'Hoymiles HiOne — Settings',
+        sectionValidation: 'Modbus Validation',
+        hintValidation: 'Capture Cloud API and Modbus TCP data simultaneously to validate register mappings. Requires a paired HiOne device with cloud credentials and local gateway IP configured.',
+        labelValInterval: 'Validation interval (seconds)',
+        hintValInterval: 'How often to capture a validation snapshot (30–300 seconds).',
+        startValidation: 'Start',
+        stopValidation: 'Stop',
+        exportValidation: 'Export',
+        clearValidation: 'Clear',
+        validationRunning: 'Running',
+        validationStopped: 'Stopped',
         disclaimer: 'Configure app-level defaults below. These settings are used as defaults when pairing new devices.',
         sectionLocal: 'Local connection',
         labelIp: 'Gateway IP address',
@@ -252,6 +330,14 @@
       if (document.getElementById('btn-ess-probe')) document.getElementById('btn-ess-probe').textContent = t.essProbe || 'ESS Probe';
       if (document.getElementById('btn-copy-scan')) document.getElementById('btn-copy-scan').textContent = t.copyScan || 'Copy';
       if (document.getElementById('btn-clear-scan')) document.getElementById('btn-clear-scan').textContent = t.clearScan || 'Clear';
+      if (document.getElementById('t-section-validation')) document.getElementById('t-section-validation').textContent = t.sectionValidation || 'Modbus Validation';
+      if (document.getElementById('t-hint-validation')) document.getElementById('t-hint-validation').textContent = t.hintValidation || '';
+      if (document.getElementById('t-label-val-interval')) document.getElementById('t-label-val-interval').textContent = t.labelValInterval || 'Validation interval (seconds)';
+      if (document.getElementById('t-hint-val-interval')) document.getElementById('t-hint-val-interval').textContent = t.hintValInterval || '';
+      if (document.getElementById('btn-start-validation')) document.getElementById('btn-start-validation').textContent = t.startValidation || 'Start';
+      if (document.getElementById('btn-stop-validation')) document.getElementById('btn-stop-validation').textContent = t.stopValidation || 'Stop';
+      if (document.getElementById('btn-export-validation')) document.getElementById('btn-export-validation').textContent = t.exportValidation || 'Export';
+      if (document.getElementById('btn-clear-validation')) document.getElementById('btn-clear-validation').textContent = t.clearValidation || 'Clear';
     }
 
     function toggleLang() {
@@ -414,6 +500,118 @@
         t.essProbing || 'Testing ESS registers...', 30);
     }
 
+    function startValidation() {
+      if (!_homeyRef) return;
+      var interval = parseInt(document.getElementById('validation_interval').value) || 60;
+      _homeyRef.set('validation_interval', Math.max(30, Math.min(300, interval)), function() {});
+      _homeyRef.set('start_modbus_validation', Date.now(), function(err) {
+        if (err) {
+          document.getElementById('validation-status').innerHTML = '<span class="error">' + err.message + '</span>';
+        }
+        // Poll for status updates
+        setTimeout(refreshValidationStatus, 2000);
+      });
+    }
+
+    function stopValidation() {
+      if (!_homeyRef) return;
+      _homeyRef.set('stop_modbus_validation', Date.now(), function() {
+        setTimeout(refreshValidationStatus, 1000);
+      });
+    }
+
+    function exportValidation() {
+      if (!_homeyRef) return;
+      var resultBox = document.getElementById('validation-result');
+      resultBox.style.display = 'block';
+      resultBox.textContent = 'Exporting...';
+      _homeyRef.set('export_validation_data', Date.now(), function() {
+        setTimeout(function() {
+          _homeyRef.get('validation_export', function(err, data) {
+            if (data) {
+              resultBox.textContent = JSON.stringify(data, null, 2);
+            } else {
+              resultBox.textContent = 'No data available.';
+            }
+          });
+        }, 1500);
+      });
+    }
+
+    function copyValidation() {
+      var box = document.getElementById('validation-result');
+      var text = box.textContent || '';
+      if (!text || text === '(no data)') return;
+      _copyText(text, 'validation-copy-toast');
+    }
+
+    function clearValidation() {
+      if (!_homeyRef) return;
+      _homeyRef.set('clear_validation_data', Date.now(), function() {
+        document.getElementById('validation-result').style.display = 'none';
+        document.getElementById('validation-result').textContent = '';
+        document.getElementById('confidence-container').style.display = 'none';
+        refreshValidationStatus();
+      });
+    }
+
+    function refreshValidationStatus() {
+      if (!_homeyRef) return;
+      var t = i18n[_lang] || i18n.en;
+      _homeyRef.get('validation_status', function(err, status) {
+        var el = document.getElementById('validation-status');
+        if (!status) {
+          el.innerHTML = '<span class="stopped">' + (t.validationStopped || 'Stopped') + '</span> \u2014 0 snapshots';
+          return;
+        }
+        if (status.error) {
+          el.innerHTML = '<span class="error">Error: ' + status.error + '</span>';
+          return;
+        }
+        var stateSpan = status.running
+          ? '<span class="running">\u25CF ' + (t.validationRunning || 'Running') + '</span>'
+          : '<span class="stopped">' + (t.validationStopped || 'Stopped') + '</span>';
+        var info = stateSpan + ' \u2014 ' + (status.snapshotCount || 0) + ' snapshots';
+        if (status.lastSnapshot) info += ' \u2014 last: ' + status.lastSnapshot.replace('T', ' ').substring(0, 19);
+        if (status.lastDurationMs) info += ' (' + status.lastDurationMs + 'ms)';
+        if (status.intervalSec) info += ' \u2014 every ' + status.intervalSec + 's';
+        el.innerHTML = info;
+      });
+
+      // Refresh confidence table
+      _homeyRef.get('validation_confidence', function(err, confidence) {
+        var container = document.getElementById('confidence-container');
+        var body = document.getElementById('confidence-body');
+        if (!confidence || Object.keys(confidence).length === 0) {
+          container.style.display = 'none';
+          return;
+        }
+        container.style.display = 'block';
+        body.innerHTML = '';
+        var entries = Object.entries(confidence).sort(function(a, b) {
+          var order = { high: 0, medium: 1, low: 2, unresolved: 3 };
+          return (order[a[1].level] || 3) - (order[b[1].level] || 3);
+        });
+        entries.forEach(function(entry) {
+          var key = entry[0];
+          var c = entry[1];
+          var cls = 'conf-' + (c.level || 'unresolved');
+          var row = '<tr>'
+            + '<td><code>' + key + '</code></td>'
+            + '<td>' + (c.apiField || '-') + '</td>'
+            + '<td>' + c.samples + '</td>'
+            + '<td>' + c.matchRate + '%</td>'
+            + '<td>' + c.avgAbsDiff + '</td>'
+            + '<td class="' + cls + '">' + (c.level || 'unresolved').toUpperCase() + '</td>'
+            + '</tr>';
+          body.innerHTML += row;
+        });
+      });
+    }
+
+    // Auto-refresh validation status every 5 seconds when page is open
+    var _validationRefreshTimer = null;
+
     function onHomeyReady(Homey) {
       _homeyRef = Homey;
 
@@ -424,12 +622,13 @@
         }
       });
 
-      var fields = ['gateway_ip', 'gateway_port', 'cloud_username', 'cloud_password', 'cloud_api_url'];
+      var fields = ['gateway_ip', 'gateway_port', 'cloud_username', 'cloud_password', 'cloud_api_url', 'validation_interval'];
       var loaded = 0;
       fields.forEach(function(key) {
         Homey.get(key, function(err, value) {
           if (!err && value != null) {
-            document.getElementById(key).value = value;
+            var el = document.getElementById(key);
+            if (el) el.value = value;
           }
           loaded++;
           if (loaded >= fields.length) updateSaveButton();
@@ -493,6 +692,11 @@
       });
 
       updateSaveButton();
+
+      // Load validation status
+      refreshValidationStatus();
+      _validationRefreshTimer = setInterval(refreshValidationStatus, 5000);
+
       Homey.ready();
     }
   </script>

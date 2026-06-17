@@ -229,6 +229,29 @@ The app captures all API and device log messages in a ring buffer (last 200 entr
 
 The diagnostics section includes a **Modbus Register Scan** button to discover available data points on a connected DTS-G3 stick. Scan results can be copied to clipboard or cleared using the dedicated buttons.
 
+### Modbus Validation (Developer mode)
+
+The **Modbus Validation** section is a developer/diagnostics tool for reverse-engineering Modbus TCP register mappings. It captures Cloud API data and local Modbus TCP candidate register data simultaneously, then compares both datasets to identify which Modbus registers correspond to known API values.
+
+Features:
+- **Simultaneous capture**: API and Modbus data are fetched in the same poll cycle using `Promise.allSettled` to minimize timing skew
+- **Candidate registers**: reads ~20 pre-identified register candidates (daily energy, SoC, battery power, grid power, load power, mode, voltage, frequency, temperature) based on deep scan analysis
+- **Confidence scoring**: automatically calculates match rates per register over time. Registers are classified as HIGH (≥95% match), MEDIUM (≥75%), LOW (≥50%), or UNRESOLVED
+- **Ring buffer storage**: stores up to 5,000 snapshots (~24–48 hours at 30s intervals)
+- **Export**: generates a comprehensive JSON report with all snapshots, deltas, and confidence scores for external analysis
+- **Live status**: the settings page auto-refreshes every 5 seconds showing snapshot count, last capture time, and a confidence score table
+
+To use:
+1. Ensure you have a paired HiOne device with both cloud credentials and local gateway IP configured
+2. Open the app settings page
+3. Set the validation interval (30–300 seconds, default 60)
+4. Click **Start** to begin capturing
+5. Let it run for 24–48 hours across different operating conditions (PV active/inactive, charging/discharging, grid import/export)
+6. Click **Export** to download the collected data
+7. Click **Stop** when done
+
+The validation engine does **not** modify any production capabilities. It is purely diagnostic — register mappings are only promoted to production after manual review and confirmation.
+
 ## How it works
 
 ### S-Miles Cloud API
