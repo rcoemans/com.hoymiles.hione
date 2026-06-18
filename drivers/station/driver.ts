@@ -86,7 +86,7 @@ class StationDriver extends Homey.Driver {
           local_protocol: localConfig.localProtocol || 'protobuf',
           local_port: localConfig.localPort || 10081,
           modbus_unit_id: localConfig.modbusUnitId || 1,
-          cloud_api_url: api._baseUrl || 'https://neapi.hoymiles.com',
+          cloud_api_url: api._baseUrl || 'https://euapi.hoymiles.com',
           appliance: 'Station',
           model: dtu.model || '-',
           serial_number: dtu.sn || '-',

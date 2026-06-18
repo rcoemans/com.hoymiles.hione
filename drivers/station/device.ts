@@ -57,7 +57,7 @@ class StationDevice extends Homey.Device {
       localProtocol:  settings.local_protocol || 'protobuf',
       localPort:      settings.local_port || 10081,
       modbusUnitId:   settings.modbus_unit_id || 1,
-      cloudApiUrl:    settings.cloud_api_url || 'https://neapi.hoymiles.com',
+      cloudApiUrl:    settings.cloud_api_url || 'https://euapi.hoymiles.com',
     };
 
     app.pollingService.registerPlant(data.plantId, config);

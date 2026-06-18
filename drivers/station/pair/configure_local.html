@@ -10,11 +10,9 @@
     .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; background: #61BA1A; color: #fff; }
     .btn-skip { background: #eee; color: #666; margin-top: 8px; }
     .hint { font-size: 12px; color: #888; margin-top: 4px; }
-    .lang-switch { text-align: right; font-size: 12px; color: #61BA1A; cursor: pointer; margin-bottom: 10px; }
   </style>
 </head>
 <body>
-  <div class="lang-switch" onclick="toggleLanguage()"><span id="langLabel">NL</span></div>
   <h2 id="title">Local LAN Configuration</h2>
   <p class="subtitle" id="subtitle">Optional: configure local connection for faster updates and local control.</p>
 
@@ -30,7 +28,7 @@
   <p class="hint" id="hintIp">IP address of your DTS stick or HiBox gateway on the local network.</p>
 
   <label id="lblProtocol">Protocol</label>
-  <select id="localProtocol" onchange="updatePort()">
+  <select id="localProtocol">
     <option value="protobuf">Protobuf (port 10081)</option>
     <option value="modbus">Modbus TCP (port 502)</option>
   </select>
@@ -38,22 +36,24 @@
   <label id="lblPort">Port</label>
   <input type="number" id="localPort" value="10081">
 
-  <button class="btn" id="nextBtn" onclick="doNext()">
+  <button class="btn" id="nextBtn">
     <span id="btnText">Next</span>
   </button>
-  <button class="btn btn-skip" onclick="doSkip()">
+  <button class="btn btn-skip" id="skipBtn">
     <span id="skipText">Skip (Cloud Only)</span>
   </button>
 
   <script>
-    const i18n = {
-      en: { title: 'Local LAN Configuration', subtitle: 'Optional: configure local connection for faster updates and local control.', mode: 'Connection mode', ip: 'Gateway/DTS IP Address', hintIp: 'IP address of your DTS stick or HiBox gateway on the local network.', protocol: 'Protocol', port: 'Port', next: 'Next', skip: 'Skip (Cloud Only)', switchLang: 'NL' },
-      nl: { title: 'Lokale LAN-configuratie', subtitle: 'Optioneel: configureer een lokale verbinding voor snellere updates en lokale bediening.', mode: 'Verbindingsmodus', ip: 'Gateway/DTS IP-adres', hintIp: 'IP-adres van je DTS stick of HiBox gateway in het lokale netwerk.', protocol: 'Protocol', port: 'Poort', next: 'Volgende', skip: 'Overslaan (alleen Cloud)', switchLang: 'EN' },
+    var _Homey = null;
+    var _lang = 'en';
+
+    var i18n = {
+      en: { title: 'Local LAN Configuration', subtitle: 'Optional: configure local connection for faster updates and local control.', mode: 'Connection mode', ip: 'Gateway/DTS IP Address', hintIp: 'IP address of your DTS stick or HiBox gateway on the local network.', protocol: 'Protocol', port: 'Port', next: 'Next', skip: 'Skip (Cloud Only)' },
+      nl: { title: 'Lokale LAN-configuratie', subtitle: 'Optioneel: configureer een lokale verbinding voor snellere updates en lokale bediening.', mode: 'Verbindingsmodus', ip: 'Gateway/DTS IP-adres', hintIp: 'IP-adres van je DTS stick of HiBox gateway in het lokale netwerk.', protocol: 'Protocol', port: 'Poort', next: 'Volgende', skip: 'Overslaan (alleen Cloud)' }
     };
-    let lang = sessionStorage.getItem('homey_lang') || 'en';
 
     function applyLang() {
-      const t = i18n[lang] || i18n.en;
+      var t = i18n[_lang] || i18n.en;
       document.getElementById('title').textContent = t.title;
       document.getElementById('subtitle').textContent = t.subtitle;
       document.getElementById('lblMode').textContent = t.mode;
@@ -63,39 +63,50 @@
       document.getElementById('lblPort').textContent = t.port;
       document.getElementById('btnText').textContent = t.next;
       document.getElementById('skipText').textContent = t.skip;
-      document.getElementById('langLabel').textContent = t.switchLang;
-    }
-
-    function toggleLanguage() {
-      lang = lang === 'en' ? 'nl' : 'en';
-      sessionStorage.setItem('homey_lang', lang);
-      applyLang();
     }
 
     function updatePort() {
-      const proto = document.getElementById('localProtocol').value;
+      var proto = document.getElementById('localProtocol').value;
       document.getElementById('localPort').value = proto === 'modbus' ? '502' : '10081';
     }
 
-    async function doNext() {
-      await Homey.emit('setLocalConfig', {
+    function doNext() {
+      if (!_Homey) return;
+      _Homey.emit('setLocalConfig', {
         connectionMode: document.getElementById('connectionMode').value,
         gatewayIp: document.getElementById('gatewayIp').value.trim(),
         localProtocol: document.getElementById('localProtocol').value,
-        localPort: parseInt(document.getElementById('localPort').value) || 10081,
+        localPort: parseInt(document.getElementById('localPort').value) || 10081
+      }, function(err) {
+        if (err) return;
+        _Homey.nextView();
       });
-      await Homey.nextView();
     }
 
-    async function doSkip() {
-      await Homey.emit('setLocalConfig', { connectionMode: 'cloud' });
-      await Homey.nextView();
+    function doSkip() {
+      if (!_Homey) return;
+      _Homey.emit('setLocalConfig', { connectionMode: 'cloud' }, function(err) {
+        if (err) return;
+        _Homey.nextView();
+      });
     }
 
-    Homey.getLanguage().then(l => {
-      if (!sessionStorage.getItem('homey_lang')) { lang = l || 'en'; sessionStorage.setItem('homey_lang', lang); }
-      applyLang();
-    }).catch(() => applyLang());
+    function onHomeyReady(Homey) {
+      _Homey = Homey;
+
+      document.getElementById('nextBtn').addEventListener('click', doNext);
+      document.getElementById('skipBtn').addEventListener('click', doSkip);
+      document.getElementById('localProtocol').addEventListener('change', updatePort);
+
+      Homey.getLanguage(function(err, language) {
+        if (!err && language) {
+          _lang = language.substring(0, 2);
+        }
+        applyLang();
+      });
+
+      Homey.ready();
+    }
   </script>
 </body>
 </html>

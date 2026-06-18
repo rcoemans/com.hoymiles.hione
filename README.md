@@ -181,7 +181,7 @@ Station device settings (editable without re-pairing):
 | Protocol | Protobuf or Modbus TCP | Protobuf |
 | Port | TCP port | 10081 |
 | Modbus Unit ID | Modbus slave address | 1 |
-| Cloud API URL | S-Miles Cloud API base URL | `https://neapi.hoymiles.com` |
+| Cloud API URL | S-Miles Cloud API base URL (auto-detected during login) | `https://euapi.hoymiles.com` |
 | Poll interval | 30–300 seconds | 60 |
 
 System info labels (read-only): model, serial number, firmware version, hardware version, connected devices.

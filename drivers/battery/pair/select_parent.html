@@ -10,54 +10,68 @@
     .station-list li:hover { background: #f5f5f5; }
     .station-list li.selected { background: #e8f5e9; border-color: #61BA1A; }
     .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; background: #ccc; color: #fff; }
-    .btn.active { background: #61BA1A; }
+    .btn.active { background: #61BA1A; cursor: pointer; }
     .loading { text-align: center; padding: 40px; color: #888; }
   </style>
 </head>
 <body>
-  <h2>Select parent station</h2>
-  <p class="subtitle">Choose the station this device belongs to.</p>
+  <h2 id="title">Select parent station</h2>
+  <p class="subtitle" id="subtitle">Choose the station this device belongs to.</p>
   <div id="loading" class="loading">Loading stations...</div>
   <ul class="station-list" id="stationList" style="display:none;"></ul>
-  <button class="btn" id="nextBtn" disabled onclick="doNext()">Next</button>
+  <button class="btn" id="nextBtn" disabled>Next</button>
 
   <script>
-    let selectedId = null;
-    let stations = [];
+    var _Homey = null;
+    var selectedId = null;
+    var stations = [];
 
     function render() {
-      const list = document.getElementById('stationList');
+      var list = document.getElementById('stationList');
       list.innerHTML = '';
       if (stations.length === 0) {
         list.innerHTML = '<li>No stations found. Please add a station first.</li>';
       }
-      stations.forEach(s => {
-        const li = document.createElement('li');
-        li.textContent = s.name || 'Station ' + s.plantId;
-        li.onclick = () => {
-          selectedId = s.id;
-          document.querySelectorAll('.station-list li').forEach(el => el.classList.remove('selected'));
-          li.classList.add('selected');
-          const btn = document.getElementById('nextBtn');
-          btn.disabled = false;
-          btn.classList.add('active');
-        };
-        list.appendChild(li);
-      });
+      for (var i = 0; i < stations.length; i++) {
+        (function(s) {
+          var li = document.createElement('li');
+          li.textContent = s.name || 'Station ' + (s.plantId || s.id);
+          li.addEventListener('click', function() {
+            selectedId = s.id;
+            var items = document.querySelectorAll('.station-list li');
+            for (var j = 0; j < items.length; j++) items[j].classList.remove('selected');
+            li.classList.add('selected');
+            var btn = document.getElementById('nextBtn');
+            btn.disabled = false;
+            btn.classList.add('active');
+          });
+          list.appendChild(li);
+        })(stations[i]);
+      }
       document.getElementById('loading').style.display = 'none';
       list.style.display = 'block';
     }
 
-    async function doNext() {
-      if (!selectedId) return;
-      await Homey.emit('selectParent', selectedId);
-      await Homey.nextView();
+    function doNext() {
+      if (!selectedId || !_Homey) return;
+      _Homey.emit('selectParent', selectedId, function(err) {
+        if (err) return;
+        _Homey.nextView();
+      });
     }
 
-    Homey.emit('getStationDevices').then(list => {
-      stations = list || [];
-      render();
-    }).catch(() => { stations = []; render(); });
+    function onHomeyReady(Homey) {
+      _Homey = Homey;
+
+      document.getElementById('nextBtn').addEventListener('click', doNext);
+
+      Homey.emit('getStationDevices', function(err, list) {
+        stations = (err || !list) ? [] : list;
+        render();
+      });
+
+      Homey.ready();
+    }
   </script>
 </body>
 </html>

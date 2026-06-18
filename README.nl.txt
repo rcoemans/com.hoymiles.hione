@@ -30,10 +30,13 @@ APPARATEN TOEVOEGEN
 7. Data wordt elke 60 seconden vernieuwd (instelbaar 30-300s)
 
 APPARAATINSTELLINGEN
-Verbindingsmodus, gateway IP, protocol, poort, poll-interval en cloud API URL kunnen allemaal in de Station-apparaatinstellingen gewijzigd worden zonder opnieuw te koppelen. Systeeminfo (model, serienummer, firmware) wordt als alleen-lezen labels weergegeven.
+Verbindingsmodus, gateway IP, protocol, poort, poll-interval en cloud API URL kunnen allemaal in de Station-apparaatinstellingen gewijzigd worden zonder opnieuw te koppelen. Standaard cloud API URL is https://euapi.hoymiles.com (automatisch gedetecteerd tijdens inloggen). Systeeminfo (model, serienummer, firmware) wordt als alleen-lezen labels weergegeven.
 
 APP-INSTELLINGEN
-De app-instellingenpagina biedt diagnostiektools voor Modbus TCP- en Protobuf-datacorrelatie. Start/Stop/Exporteer/Wis snapshot-verzameling voor registerontdekking en data-analyse.
+De app-instellingenpagina (Homey > Apps > Hoymiles HiOne > Instellingen) biedt een cloud login-test en diagnostiektools voor Modbus TCP- en Protobuf-datacorrelatie. Start/Stop/Exporteer/Wis snapshot-verzameling voor registerontdekking en data-analyse.
+
+TAAL
+De app ondersteunt Engels en Nederlands. De taal wordt automatisch ingesteld op basis van je Homey-systeemtaal.
 
 DISCLAIMER
 Dit is een onofficiële, door de community ontwikkelde integratie. Niet gelieerd aan of goedgekeurd door Hoymiles Power Electronics Inc. Gebruik op eigen risico.

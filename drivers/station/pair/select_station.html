@@ -12,87 +12,90 @@
     .station-id { font-size: 12px; color: #888; }
     .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; transition: background 0.2s; }
     .btn-primary { background: #ccc; color: #fff; }
-    .btn-primary.active { background: #61BA1A; }
+    .btn-primary.active { background: #61BA1A; cursor: pointer; }
     .loading { text-align: center; padding: 40px; color: #888; }
-    .lang-switch { text-align: right; font-size: 12px; color: #61BA1A; cursor: pointer; margin-bottom: 10px; }
   </style>
 </head>
 <body>
-  <div class="lang-switch" onclick="toggleLanguage()"><span id="langLabel">NL</span></div>
   <h2 id="title">Select station</h2>
   <div id="loading" class="loading">Loading stations...</div>
   <ul class="station-list" id="stationList" style="display:none;"></ul>
-  <button class="btn btn-primary" id="nextBtn" disabled onclick="doNext()">
+  <button class="btn btn-primary" id="nextBtn" disabled>
     <span id="btnText">Next</span>
   </button>
 
   <script>
-    const i18n = {
-      en: { title: 'Select station', loading: 'Loading stations...', next: 'Next', none: 'No stations found', switchLang: 'NL' },
-      nl: { title: 'Selecteer station', loading: 'Stations laden...', next: 'Volgende', none: 'Geen stations gevonden', switchLang: 'EN' },
+    var _Homey = null;
+    var _lang = 'en';
+    var selectedId = null;
+    var stations = [];
+
+    var i18n = {
+      en: { title: 'Select station', loading: 'Loading stations...', next: 'Next', none: 'No stations found' },
+      nl: { title: 'Selecteer station', loading: 'Stations laden...', next: 'Volgende', none: 'Geen stations gevonden' }
     };
-    let lang = sessionStorage.getItem('homey_lang') || 'en';
-    let selectedId = null;
-    let stations = [];
 
     function applyLang() {
-      const t = i18n[lang] || i18n.en;
+      var t = i18n[_lang] || i18n.en;
       document.getElementById('title').textContent = t.title;
       document.getElementById('loading').textContent = t.loading;
       document.getElementById('btnText').textContent = t.next;
-      document.getElementById('langLabel').textContent = t.switchLang;
-    }
-
-    function toggleLanguage() {
-      lang = lang === 'en' ? 'nl' : 'en';
-      sessionStorage.setItem('homey_lang', lang);
-      applyLang();
     }
 
     function renderStations() {
-      const list = document.getElementById('stationList');
-      const t = i18n[lang] || i18n.en;
+      var list = document.getElementById('stationList');
+      var t = i18n[_lang] || i18n.en;
       list.innerHTML = '';
       if (stations.length === 0) {
         list.innerHTML = '<li>' + t.none + '</li>';
       }
-      stations.forEach(s => {
-        const li = document.createElement('li');
-        li.innerHTML = '<div class="station-name">' + (s.name || 'Station') + '</div><div class="station-id">ID: ' + s.id + '</div>';
-        li.onclick = () => selectStation(s.id, li);
-        list.appendChild(li);
-      });
+      for (var i = 0; i < stations.length; i++) {
+        (function(s) {
+          var li = document.createElement('li');
+          li.innerHTML = '<div class="station-name">' + (s.name || 'Station') + '</div><div class="station-id">ID: ' + s.id + '</div>';
+          li.addEventListener('click', function() {
+            selectedId = s.id;
+            var items = document.querySelectorAll('.station-list li');
+            for (var j = 0; j < items.length; j++) items[j].classList.remove('selected');
+            li.classList.add('selected');
+            var btn = document.getElementById('nextBtn');
+            btn.disabled = false;
+            btn.classList.add('active');
+          });
+          list.appendChild(li);
+        })(stations[i]);
+      }
       document.getElementById('loading').style.display = 'none';
       list.style.display = 'block';
     }
 
-    function selectStation(id, li) {
-      selectedId = id;
-      document.querySelectorAll('.station-list li').forEach(el => el.classList.remove('selected'));
-      li.classList.add('selected');
-      const btn = document.getElementById('nextBtn');
-      btn.disabled = false;
-      btn.classList.add('active');
+    function doNext() {
+      if (!selectedId || !_Homey) return;
+      _Homey.emit('selectStation', selectedId, function(err) {
+        if (err) return;
+        _Homey.nextView();
+      });
     }
 
-    async function doNext() {
-      if (!selectedId) return;
-      await Homey.emit('selectStation', selectedId);
-      await Homey.nextView();
+    function onHomeyReady(Homey) {
+      _Homey = Homey;
+
+      document.getElementById('nextBtn').addEventListener('click', doNext);
+
+      Homey.getLanguage(function(err, language) {
+        if (!err && language) {
+          _lang = language.substring(0, 2);
+        }
+        applyLang();
+      });
+
+      Homey.emit('getStations', function(err, list) {
+        stations = (err || !list) ? [] : list;
+        renderStations();
+      });
+
+      Homey.ready();
     }
-
-    Homey.getLanguage().then(l => {
-      if (!sessionStorage.getItem('homey_lang')) { lang = l || 'en'; sessionStorage.setItem('homey_lang', lang); }
-      applyLang();
-    }).catch(() => applyLang());
-
-    Homey.emit('getStations').then(list => {
-      stations = list || [];
-      renderStations();
-    }).catch(() => {
-      stations = [];
-      renderStations();
-    });
   </script>
 </body>
 </html>

@@ -30,10 +30,13 @@ ADDING DEVICES
 7. Data refreshes every 60 seconds (configurable 30-300s)
 
 DEVICE SETTINGS
-Connection mode, gateway IP, protocol, port, poll interval, and cloud API URL can all be changed in the Station device settings without re-pairing. System info (model, serial, firmware) is shown as read-only labels.
+Connection mode, gateway IP, protocol, port, poll interval, and cloud API URL can all be changed in the Station device settings without re-pairing. Default cloud API URL is https://euapi.hoymiles.com (auto-detected during login). System info (model, serial, firmware) is shown as read-only labels.
 
 APP SETTINGS
-The app settings page provides diagnostics tools for Modbus TCP and Protobuf data correlation. Start/Stop/Export/Clear snapshot collection for register discovery and data analysis.
+The app settings page (Homey > Apps > Hoymiles HiOne > Settings) provides a cloud login test and diagnostics tools for Modbus TCP and Protobuf data correlation. Start/Stop/Export/Clear snapshot collection for register discovery and data analysis.
+
+LANGUAGE
+The app supports English and Dutch. Language is automatically set based on your Homey system language.
 
 DISCLAIMER
 This is an unofficial, community-developed integration. Not affiliated with or endorsed by Hoymiles Power Electronics Inc. Use at your own risk.

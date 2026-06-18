@@ -77,91 +77,92 @@
 
   <script>
     function showStatus(elId, msg, type) {
-      const el = document.getElementById(elId);
+      var el = document.getElementById(elId);
+      if (!el) return;
       el.textContent = msg;
       el.style.display = 'block';
       el.className = 'status-bar ' + (type || '');
     }
 
-    async function testLogin() {
-      const email = document.getElementById('testEmail').value.trim();
-      const pw = document.getElementById('testPassword').value;
+    function testLogin() {
+      var email = document.getElementById('testEmail').value.trim();
+      var pw = document.getElementById('testPassword').value;
       if (!email || !pw) return;
       showStatus('loginResult', 'Logging in...', '');
-      try {
-        const res = await Homey.api('POST', '/login', { email, password: pw });
-        if (res.success) {
+      Homey.api('POST', '/login', { email: email, password: pw }, function(err, res) {
+        if (err) {
+          showStatus('loginResult', 'Error: ' + (err.message || err), 'stopped');
+          return;
+        }
+        if (res && res.success) {
           showStatus('loginResult', 'Login successful!', 'running');
         } else {
-          showStatus('loginResult', 'Login failed: ' + (res.error || 'unknown'), 'stopped');
+          showStatus('loginResult', 'Login failed: ' + ((res && res.error) || 'unknown'), 'stopped');
         }
-      } catch (err) {
-        showStatus('loginResult', 'Error: ' + err.message, 'stopped');
-      }
+      });
     }
 
-    async function startDiag() {
-      const ip = document.getElementById('diagIp').value.trim();
+    function startDiag() {
+      var ip = document.getElementById('diagIp').value.trim();
       if (!ip) { alert('Please enter a Gateway IP'); return; }
-      try {
-        await Homey.api('POST', '/diagnostics/start', {
-          gatewayIp: ip,
-          intervalMs: parseInt(document.getElementById('diagInterval').value) || 60,
-          dtuSn: document.getElementById('diagDtuSn').value.trim() || undefined,
-          modbusUnitId: parseInt(document.getElementById('diagUnitId').value) || 1,
-        });
+      Homey.api('POST', '/diagnostics/start', {
+        gatewayIp: ip,
+        intervalMs: parseInt(document.getElementById('diagInterval').value) || 60,
+        dtuSn: document.getElementById('diagDtuSn').value.trim() || undefined,
+        modbusUnitId: parseInt(document.getElementById('diagUnitId').value) || 1,
+      }, function(err) {
+        if (err) {
+          showStatus('diagStatus', 'Start failed: ' + (err.message || err), 'stopped');
+          return;
+        }
         document.getElementById('btnStart').disabled = true;
         document.getElementById('btnStop').disabled = false;
         refreshStatus();
-      } catch (err) {
-        showStatus('diagStatus', 'Start failed: ' + err.message, 'stopped');
-      }
+      });
     }
 
-    async function stopDiag() {
-      try {
-        await Homey.api('POST', '/diagnostics/stop');
+    function stopDiag() {
+      Homey.api('POST', '/diagnostics/stop', null, function(err) {
+        if (err) {
+          showStatus('diagStatus', 'Stop failed: ' + (err.message || err), 'stopped');
+          return;
+        }
         document.getElementById('btnStart').disabled = false;
         document.getElementById('btnStop').disabled = true;
         refreshStatus();
-      } catch (err) {
-        showStatus('diagStatus', 'Stop failed: ' + err.message, 'stopped');
-      }
+      });
     }
 
-    async function exportDiag() {
-      try {
-        const data = await Homey.api('GET', '/diagnostics/export');
-        const json = JSON.stringify(data, null, 2);
+    function exportDiag() {
+      Homey.api('GET', '/diagnostics/export', function(err, data) {
+        if (err) {
+          showStatus('diagStatus', 'Export failed: ' + (err.message || err), 'stopped');
+          return;
+        }
+        var json = JSON.stringify(data, null, 2);
         document.getElementById('diagOutput').textContent = json;
         document.getElementById('diagOutput').style.display = 'block';
-
-        // Copy to clipboard
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(json).catch(() => {});
-        }
-      } catch (err) {
-        showStatus('diagStatus', 'Export failed: ' + err.message, 'stopped');
-      }
+      });
     }
 
-    async function clearDiag() {
+    function clearDiag() {
       if (!confirm('Clear all collected snapshots?')) return;
-      try {
-        await Homey.api('POST', '/diagnostics/clear');
+      Homey.api('POST', '/diagnostics/clear', null, function(err) {
+        if (err) {
+          showStatus('diagStatus', 'Clear failed: ' + (err.message || err), 'stopped');
+          return;
+        }
         document.getElementById('diagOutput').style.display = 'none';
         refreshStatus();
-      } catch (err) {
-        showStatus('diagStatus', 'Clear failed: ' + err.message, 'stopped');
-      }
+      });
     }
 
-    async function refreshStatus() {
-      try {
-        const st = await Homey.api('GET', '/diagnostics');
-        const running = st.running;
-        const count = st.snapshotCount || 0;
-        const last = st.lastSnapshot ? new Date(st.lastSnapshot).toLocaleTimeString() : '-';
+    function refreshStatus() {
+      Homey.api('GET', '/diagnostics', function(err, st) {
+        if (err || !st) return;
+        var running = st.running;
+        var count = st.snapshotCount || 0;
+        var last = st.lastSnapshot ? new Date(st.lastSnapshot).toLocaleTimeString() : '-';
         showStatus('diagStatus',
           'Status: ' + (running ? 'RUNNING' : 'stopped') +
           ' | Snapshots: ' + count +
@@ -170,12 +171,14 @@
         );
         document.getElementById('btnStart').disabled = running;
         document.getElementById('btnStop').disabled = !running;
-      } catch (_) {}
+      });
     }
 
-    // Auto-refresh status on page load
-    refreshStatus();
-    setInterval(refreshStatus, 5000);
+    function onHomeyReady(Homey) {
+      Homey.ready();
+      refreshStatus();
+      setInterval(refreshStatus, 5000);
+    }
   </script>
 </body>
 </html>
