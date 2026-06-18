@@ -22,7 +22,6 @@
   <button class="btn" id="nextBtn" disabled>Next</button>
 
   <script>
-    var _Homey = null;
     var selectedId = null;
     var stations = [];
 
@@ -52,26 +51,20 @@
       list.style.display = 'block';
     }
 
-    function doNext() {
-      if (!selectedId || !_Homey) return;
-      _Homey.emit('selectParent', selectedId, function(err) {
-        if (err) return;
-        _Homey.nextView();
-      });
+    async function doNext() {
+      if (!selectedId) return;
+      await Homey.emit('selectParent', selectedId);
+      Homey.nextView();
     }
 
-    function onHomeyReady(Homey) {
-      _Homey = Homey;
+    document.getElementById('nextBtn').addEventListener('click', doNext);
 
-      document.getElementById('nextBtn').addEventListener('click', doNext);
+    Homey.emit('getStationDevices').then(function(list) {
+      stations = list || [];
+      render();
+    }).catch(function() { stations = []; render(); });
 
-      Homey.emit('getStationDevices', function(err, list) {
-        stations = (err || !list) ? [] : list;
-        render();
-      });
-
-      Homey.ready();
-    }
+    Homey.ready();
   </script>
 </body>
 </html>

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
   <style>
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #fff; color: #333; margin: 0; }
@@ -76,6 +78,8 @@
   </div>
 
   <script>
+    var _homey = null;
+
     function showStatus(elId, msg, type) {
       var el = document.getElementById(elId);
       if (!el) return;
@@ -85,11 +89,12 @@
     }
 
     function testLogin() {
+      if (!_homey) return;
       var email = document.getElementById('testEmail').value.trim();
       var pw = document.getElementById('testPassword').value;
       if (!email || !pw) return;
       showStatus('loginResult', 'Logging in...', '');
-      Homey.api('POST', '/login', { email: email, password: pw }, function(err, res) {
+      _homey.api('POST', '/login', { email: email, password: pw }, function(err, res) {
         if (err) {
           showStatus('loginResult', 'Error: ' + (err.message || err), 'stopped');
           return;
@@ -103,9 +108,10 @@
     }
 
     function startDiag() {
+      if (!_homey) return;
       var ip = document.getElementById('diagIp').value.trim();
       if (!ip) { alert('Please enter a Gateway IP'); return; }
-      Homey.api('POST', '/diagnostics/start', {
+      _homey.api('POST', '/diagnostics/start', {
         gatewayIp: ip,
         intervalMs: parseInt(document.getElementById('diagInterval').value) || 60,
         dtuSn: document.getElementById('diagDtuSn').value.trim() || undefined,
@@ -122,7 +128,8 @@
     }
 
     function stopDiag() {
-      Homey.api('POST', '/diagnostics/stop', null, function(err) {
+      if (!_homey) return;
+      _homey.api('POST', '/diagnostics/stop', null, function(err) {
         if (err) {
           showStatus('diagStatus', 'Stop failed: ' + (err.message || err), 'stopped');
           return;
@@ -134,7 +141,8 @@
     }
 
     function exportDiag() {
-      Homey.api('GET', '/diagnostics/export', function(err, data) {
+      if (!_homey) return;
+      _homey.api('GET', '/diagnostics/export', function(err, data) {
         if (err) {
           showStatus('diagStatus', 'Export failed: ' + (err.message || err), 'stopped');
           return;
@@ -146,8 +154,9 @@
     }
 
     function clearDiag() {
+      if (!_homey) return;
       if (!confirm('Clear all collected snapshots?')) return;
-      Homey.api('POST', '/diagnostics/clear', null, function(err) {
+      _homey.api('POST', '/diagnostics/clear', null, function(err) {
         if (err) {
           showStatus('diagStatus', 'Clear failed: ' + (err.message || err), 'stopped');
           return;
@@ -158,7 +167,8 @@
     }
 
     function refreshStatus() {
-      Homey.api('GET', '/diagnostics', function(err, st) {
+      if (!_homey) return;
+      _homey.api('GET', '/diagnostics', function(err, st) {
         if (err || !st) return;
         var running = st.running;
         var count = st.snapshotCount || 0;
@@ -175,6 +185,7 @@
     }
 
     function onHomeyReady(Homey) {
+      _homey = Homey;
       Homey.ready();
       refreshStatus();
       setInterval(refreshStatus, 5000);

@@ -25,7 +25,6 @@
   </button>
 
   <script>
-    var _Homey = null;
     var _lang = 'en';
     var selectedId = null;
     var stations = [];
@@ -69,33 +68,28 @@
       list.style.display = 'block';
     }
 
-    function doNext() {
-      if (!selectedId || !_Homey) return;
-      _Homey.emit('selectStation', selectedId, function(err) {
-        if (err) return;
-        _Homey.nextView();
-      });
+    async function doNext() {
+      if (!selectedId) return;
+      await Homey.emit('selectStation', selectedId);
+      Homey.nextView();
     }
 
-    function onHomeyReady(Homey) {
-      _Homey = Homey;
+    document.getElementById('nextBtn').addEventListener('click', doNext);
 
-      document.getElementById('nextBtn').addEventListener('click', doNext);
+    Homey.getLanguage().then(function(lang) {
+      if (lang) { _lang = lang.substring(0, 2); }
+      applyLang();
+    }).catch(function() { applyLang(); });
 
-      Homey.getLanguage(function(err, language) {
-        if (!err && language) {
-          _lang = language.substring(0, 2);
-        }
-        applyLang();
-      });
+    Homey.emit('getStations').then(function(list) {
+      stations = list || [];
+      renderStations();
+    }).catch(function() {
+      stations = [];
+      renderStations();
+    });
 
-      Homey.emit('getStations', function(err, list) {
-        stations = (err || !list) ? [] : list;
-        renderStations();
-      });
-
-      Homey.ready();
-    }
+    Homey.ready();
   </script>
 </body>
 </html>

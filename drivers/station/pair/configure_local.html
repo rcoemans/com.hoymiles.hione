@@ -44,7 +44,6 @@
   </button>
 
   <script>
-    var _Homey = null;
     var _lang = 'en';
 
     var i18n = {
@@ -70,43 +69,31 @@
       document.getElementById('localPort').value = proto === 'modbus' ? '502' : '10081';
     }
 
-    function doNext() {
-      if (!_Homey) return;
-      _Homey.emit('setLocalConfig', {
+    async function doNext() {
+      await Homey.emit('setLocalConfig', {
         connectionMode: document.getElementById('connectionMode').value,
         gatewayIp: document.getElementById('gatewayIp').value.trim(),
         localProtocol: document.getElementById('localProtocol').value,
         localPort: parseInt(document.getElementById('localPort').value) || 10081
-      }, function(err) {
-        if (err) return;
-        _Homey.nextView();
       });
+      Homey.nextView();
     }
 
-    function doSkip() {
-      if (!_Homey) return;
-      _Homey.emit('setLocalConfig', { connectionMode: 'cloud' }, function(err) {
-        if (err) return;
-        _Homey.nextView();
-      });
+    async function doSkip() {
+      await Homey.emit('setLocalConfig', { connectionMode: 'cloud' });
+      Homey.nextView();
     }
 
-    function onHomeyReady(Homey) {
-      _Homey = Homey;
+    document.getElementById('nextBtn').addEventListener('click', doNext);
+    document.getElementById('skipBtn').addEventListener('click', doSkip);
+    document.getElementById('localProtocol').addEventListener('change', updatePort);
 
-      document.getElementById('nextBtn').addEventListener('click', doNext);
-      document.getElementById('skipBtn').addEventListener('click', doSkip);
-      document.getElementById('localProtocol').addEventListener('change', updatePort);
+    Homey.getLanguage().then(function(lang) {
+      if (lang) { _lang = lang.substring(0, 2); }
+      applyLang();
+    }).catch(function() { applyLang(); });
 
-      Homey.getLanguage(function(err, language) {
-        if (!err && language) {
-          _lang = language.substring(0, 2);
-        }
-        applyLang();
-      });
-
-      Homey.ready();
-    }
+    Homey.ready();
   </script>
 </body>
 </html>
