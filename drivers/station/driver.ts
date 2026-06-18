@@ -15,6 +15,39 @@ class StationDriver extends Homey.Driver {
     let localConfig: any = {};
 
     // ── Step 1: login_credentials ──
+
+    // Return saved credentials so the pairing page can auto-fill
+    session.setHandler('get_saved_login', async () => {
+      const email = this.homey.settings.get('saved_email');
+      return email ? { email } : null;
+    });
+
+    // Auto-login with saved credentials
+    session.setHandler('login_saved', async () => {
+      const email    = this.homey.settings.get('saved_email');
+      const password = this.homey.settings.get('saved_password');
+      if (!email || !password) return false;
+      try {
+        api = new HoymilesApi({
+          log: this.log.bind(this),
+          error: this.error.bind(this),
+        });
+        await api.login(email, password, AUTH_MODE_AUTO);
+        return true;
+      } catch (err: any) {
+        this.error('Saved login failed:', err.message);
+        return false;
+      }
+    });
+
+    // Forget saved credentials
+    session.setHandler('forget_login', async () => {
+      this.homey.settings.unset('saved_email');
+      this.homey.settings.unset('saved_password');
+      return true;
+    });
+
+    // Manual login
     session.setHandler('login', async (data: any) => {
       try {
         api = new HoymilesApi({
@@ -23,6 +56,9 @@ class StationDriver extends Homey.Driver {
           baseUrl: data.apiUrl || undefined,
         });
         await api.login(data.email, data.password, data.authMode || AUTH_MODE_AUTO);
+        // Save credentials for next pairing
+        this.homey.settings.set('saved_email', data.email);
+        this.homey.settings.set('saved_password', data.password);
         return { success: true };
       } catch (err: any) {
         return { success: false, error: err.message };

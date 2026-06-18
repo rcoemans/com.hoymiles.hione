@@ -246,7 +246,7 @@ Token auto-refresh on expiry with transparent re-authentication.
 Key endpoints:
 - `/iam/pub/3/auth/pre-insp` — pre-inspection (nonce + optional salt)
 - `/iam/pub/3/auth/login` — v3 authentication
-- `/pvm-data/api/0/station/select_by_condition` — station listing
+- `/pvm/api/0/station/select_by_page` — station listing
 - `/pvm-data/api/0/station/data/count_station_real_data` — real-time power/energy
 - `/pvm-data/api/0/station/data/count_device_by_station` — device listing
 - `/pvm-ctl/api/0/dev/setting/read` and `/write` — battery settings R/W with job polling
