@@ -148,8 +148,8 @@
           "id": "cloud_api_url",
           "type": "text",
           "label": { "en": "Cloud API URL", "nl": "Cloud API URL" },
-          "hint": { "en": "Base URL of the S-Miles Cloud API. The app auto-selects the right endpoint during login. Default: https://euapi.hoymiles.com", "nl": "Basis-URL van de S-Miles Cloud API. De app selecteert automatisch het juiste endpoint bij het inloggen. Standaard: https://euapi.hoymiles.com" },
-          "value": "https://euapi.hoymiles.com"
+          "hint": { "en": "Base URL of the S-Miles Cloud API. The app auto-selects the right endpoint during login. Default: https://neapi.hoymiles.com", "nl": "Basis-URL van de S-Miles Cloud API. De app selecteert automatisch het juiste endpoint bij het inloggen. Standaard: https://neapi.hoymiles.com" },
+          "value": "https://neapi.hoymiles.com"
         }
       ]
     },
