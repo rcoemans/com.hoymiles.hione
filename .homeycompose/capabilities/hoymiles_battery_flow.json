@@ -1,0 +1,9 @@
+{
+  "type": "string",
+  "title": { "en": "Battery Flow", "nl": "Accustroom" },
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/flow.svg"
+}

@@ -1,0 +1,11 @@
+{
+  "type": "number",
+  "title": { "en": "Phase B Voltage", "nl": "Fase B spanning" },
+  "units": "V",
+  "insights": true,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/power.svg"
+}

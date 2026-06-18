@@ -1,0 +1,169 @@
+{
+  "name": { "en": "HiOne Station", "nl": "HiOne Station" },
+  "class": "battery",
+  "capabilities": [
+    "measure_power",
+    "hoymiles_battery_flow",
+    "measure_battery",
+    "meter_power.charged",
+    "meter_power.discharged",
+    "hoymiles_pv_power",
+    "hoymiles_grid_power",
+    "hoymiles_load_power",
+    "hoymiles_battery_mode",
+    "hoymiles_reserve_soc",
+    "hoymiles_max_soc",
+    "hoymiles_max_charge_power",
+    "hoymiles_max_discharge_power",
+    "hoymiles_grid_limit",
+    "hoymiles_daily_energy",
+    "hoymiles_monthly_energy",
+    "hoymiles_yearly_energy",
+    "hoymiles_total_energy",
+    "hoymiles_co2_reduction",
+    "hoymiles_profit_today",
+    "hoymiles_profit_total",
+    "hoymiles_battery_charge_power",
+    "hoymiles_battery_discharge_power",
+    "hoymiles_grid_import_power",
+    "hoymiles_grid_export_power",
+    "hoymiles_battery_state",
+    "hoymiles_grid_state",
+    "hoymiles_self_powered_pct",
+    "hoymiles_power_balance",
+    "hoymiles_battery_runtime",
+    "hoymiles_time_to_full",
+    "hoymiles_system_state",
+    "hoymiles_connection_source",
+    "hoymiles_gateway_online",
+    "hoymiles_last_update",
+    "alarm_generic"
+  ],
+  "capabilitiesOptions": {
+    "measure_power": {
+      "title": { "en": "Battery Power", "nl": "Accuvermogen" }
+    },
+    "measure_battery": {
+      "title": { "en": "Battery SoC", "nl": "Accu laadniveau" }
+    },
+    "meter_power.charged": {
+      "title": { "en": "Energy Charged", "nl": "Energie geladen" },
+      "insights": true,
+      "decimals": 2
+    },
+    "meter_power.discharged": {
+      "title": { "en": "Energy Discharged", "nl": "Energie ontladen" },
+      "insights": true,
+      "decimals": 2
+    }
+  },
+  "energy": {
+    "homeBattery": true,
+    "meterPowerImportedCapability": "meter_power.charged",
+    "meterPowerExportedCapability": "meter_power.discharged"
+  },
+  "images": {
+    "small": "/drivers/station/assets/icon.svg",
+    "large": "/drivers/station/assets/icon.svg"
+  },
+  "pair": [
+    { "id": "login_credentials" },
+    { "id": "select_station" },
+    { "id": "configure_local" },
+    { "id": "list_devices", "template": "list_devices", "navigation": { "next": "add_devices" } },
+    { "id": "add_devices", "template": "add_devices" }
+  ],
+  "settings": [
+    {
+      "type": "group",
+      "label": { "en": "Connection", "nl": "Verbinding" },
+      "children": [
+        {
+          "id": "connection_mode",
+          "type": "dropdown",
+          "label": { "en": "Connection mode", "nl": "Verbindingsmodus" },
+          "hint": { "en": "Cloud Only: S-Miles Cloud API. Hybrid: Cloud + Local LAN. Local Only: LAN only.", "nl": "Cloud Only: S-Miles Cloud API. Hybride: Cloud + Lokaal LAN. Lokaal: alleen LAN." },
+          "value": "cloud",
+          "values": [
+            { "id": "cloud", "label": { "en": "Cloud Only", "nl": "Alleen Cloud" } },
+            { "id": "hybrid", "label": { "en": "Hybrid", "nl": "Hybride" } },
+            { "id": "local", "label": { "en": "Local Only", "nl": "Alleen lokaal" } }
+          ]
+        },
+        {
+          "id": "poll_interval",
+          "type": "number",
+          "label": { "en": "Poll interval (seconds)", "nl": "Poll-interval (seconden)" },
+          "hint": { "en": "How often to fetch data (30–300 seconds). Default: 60.", "nl": "Hoe vaak data ophalen (30–300 seconden). Standaard: 60." },
+          "value": 60,
+          "min": 30,
+          "max": 300
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": { "en": "Local (LAN)", "nl": "Lokaal (LAN)" },
+      "children": [
+        {
+          "id": "gateway_ip",
+          "type": "text",
+          "label": { "en": "Gateway/DTS IP Address", "nl": "Gateway/DTS IP-adres" },
+          "hint": { "en": "Local LAN IP of the DTS stick or HiBox gateway (e.g. 192.168.1.100).", "nl": "Lokaal LAN IP-adres van de DTS stick of HiBox gateway (bijv. 192.168.1.100)." },
+          "value": ""
+        },
+        {
+          "id": "local_protocol",
+          "type": "dropdown",
+          "label": { "en": "Local protocol", "nl": "Lokaal protocol" },
+          "value": "protobuf",
+          "values": [
+            { "id": "protobuf", "label": { "en": "Protobuf (port 10081)", "nl": "Protobuf (poort 10081)" } },
+            { "id": "modbus", "label": { "en": "Modbus TCP (port 502)", "nl": "Modbus TCP (poort 502)" } }
+          ]
+        },
+        {
+          "id": "local_port",
+          "type": "number",
+          "label": { "en": "Port", "nl": "Poort" },
+          "hint": { "en": "Default: 10081 (Protobuf) or 502 (Modbus).", "nl": "Standaard: 10081 (Protobuf) of 502 (Modbus)." },
+          "value": 10081
+        },
+        {
+          "id": "modbus_unit_id",
+          "type": "number",
+          "label": { "en": "Modbus Unit-ID", "nl": "Modbus Unit-ID" },
+          "hint": { "en": "Modbus slave address. Default: 1.", "nl": "Modbus slave-adres. Standaard: 1." },
+          "value": 1,
+          "min": 1,
+          "max": 247
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": { "en": "Cloud", "nl": "Cloud" },
+      "children": [
+        {
+          "id": "cloud_api_url",
+          "type": "text",
+          "label": { "en": "Cloud API URL", "nl": "Cloud API URL" },
+          "hint": { "en": "Base URL of the S-Miles Cloud API. Endpoints: neapi.hoymiles.com (Global/EU), euapi.hoymiles.com (EU consumer). Default: https://neapi.hoymiles.com", "nl": "Basis-URL van de S-Miles Cloud API. Endpoints: neapi.hoymiles.com (Globaal/EU), euapi.hoymiles.com (EU consument). Standaard: https://neapi.hoymiles.com" },
+          "value": "https://neapi.hoymiles.com"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": { "en": "System info", "nl": "Systeeminfo" },
+      "children": [
+        { "id": "appliance", "type": "label", "label": { "en": "Appliance", "nl": "Apparaat" }, "value": "-" },
+        { "id": "model", "type": "label", "label": { "en": "Model", "nl": "Model" }, "value": "-" },
+        { "id": "serial_number", "type": "label", "label": { "en": "Serial number", "nl": "Serienummer" }, "value": "-" },
+        { "id": "firmware_version", "type": "label", "label": { "en": "Firmware version", "nl": "Firmwareversie" }, "value": "-" },
+        { "id": "hardware_version", "type": "label", "label": { "en": "Hardware version", "nl": "Hardwareversie" }, "value": "-" },
+        { "id": "connected_devices", "type": "textarea", "label": { "en": "Connected devices", "nl": "Gekoppelde apparaten" }, "value": "-" }
+      ]
+    }
+  ]
+}

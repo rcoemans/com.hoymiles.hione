@@ -1,0 +1,11 @@
+{
+  "type": "number",
+  "title": { "en": "Phase C Current", "nl": "Fase C stroom" },
+  "units": "A",
+  "insights": true,
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/power.svg"
+}

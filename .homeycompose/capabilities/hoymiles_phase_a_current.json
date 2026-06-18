@@ -1,0 +1,11 @@
+{
+  "type": "number",
+  "title": { "en": "Phase A Current", "nl": "Fase A stroom" },
+  "units": "A",
+  "insights": true,
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/power.svg"
+}

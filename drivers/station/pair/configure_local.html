@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #fff; color: #333; }
+    h2 { margin-bottom: 8px; font-size: 18px; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 16px; }
+    label { display: block; font-weight: 600; margin: 12px 0 4px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+    .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; background: #61BA1A; color: #fff; }
+    .btn-skip { background: #eee; color: #666; margin-top: 8px; }
+    .hint { font-size: 12px; color: #888; margin-top: 4px; }
+    .lang-switch { text-align: right; font-size: 12px; color: #61BA1A; cursor: pointer; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="lang-switch" onclick="toggleLanguage()"><span id="langLabel">NL</span></div>
+  <h2 id="title">Local LAN Configuration</h2>
+  <p class="subtitle" id="subtitle">Optional: configure local connection for faster updates and local control.</p>
+
+  <label id="lblMode">Connection mode</label>
+  <select id="connectionMode">
+    <option value="cloud">Cloud Only</option>
+    <option value="hybrid">Hybrid (Cloud + Local)</option>
+    <option value="local">Local Only</option>
+  </select>
+
+  <label id="lblIp">Gateway/DTS IP Address</label>
+  <input type="text" id="gatewayIp" placeholder="192.168.1.100">
+  <p class="hint" id="hintIp">IP address of your DTS stick or HiBox gateway on the local network.</p>
+
+  <label id="lblProtocol">Protocol</label>
+  <select id="localProtocol" onchange="updatePort()">
+    <option value="protobuf">Protobuf (port 10081)</option>
+    <option value="modbus">Modbus TCP (port 502)</option>
+  </select>
+
+  <label id="lblPort">Port</label>
+  <input type="number" id="localPort" value="10081">
+
+  <button class="btn" id="nextBtn" onclick="doNext()">
+    <span id="btnText">Next</span>
+  </button>
+  <button class="btn btn-skip" onclick="doSkip()">
+    <span id="skipText">Skip (Cloud Only)</span>
+  </button>
+
+  <script>
+    const i18n = {
+      en: { title: 'Local LAN Configuration', subtitle: 'Optional: configure local connection for faster updates and local control.', mode: 'Connection mode', ip: 'Gateway/DTS IP Address', hintIp: 'IP address of your DTS stick or HiBox gateway on the local network.', protocol: 'Protocol', port: 'Port', next: 'Next', skip: 'Skip (Cloud Only)', switchLang: 'NL' },
+      nl: { title: 'Lokale LAN-configuratie', subtitle: 'Optioneel: configureer een lokale verbinding voor snellere updates en lokale bediening.', mode: 'Verbindingsmodus', ip: 'Gateway/DTS IP-adres', hintIp: 'IP-adres van je DTS stick of HiBox gateway in het lokale netwerk.', protocol: 'Protocol', port: 'Poort', next: 'Volgende', skip: 'Overslaan (alleen Cloud)', switchLang: 'EN' },
+    };
+    let lang = sessionStorage.getItem('homey_lang') || 'en';
+
+    function applyLang() {
+      const t = i18n[lang] || i18n.en;
+      document.getElementById('title').textContent = t.title;
+      document.getElementById('subtitle').textContent = t.subtitle;
+      document.getElementById('lblMode').textContent = t.mode;
+      document.getElementById('lblIp').textContent = t.ip;
+      document.getElementById('hintIp').textContent = t.hintIp;
+      document.getElementById('lblProtocol').textContent = t.protocol;
+      document.getElementById('lblPort').textContent = t.port;
+      document.getElementById('btnText').textContent = t.next;
+      document.getElementById('skipText').textContent = t.skip;
+      document.getElementById('langLabel').textContent = t.switchLang;
+    }
+
+    function toggleLanguage() {
+      lang = lang === 'en' ? 'nl' : 'en';
+      sessionStorage.setItem('homey_lang', lang);
+      applyLang();
+    }
+
+    function updatePort() {
+      const proto = document.getElementById('localProtocol').value;
+      document.getElementById('localPort').value = proto === 'modbus' ? '502' : '10081';
+    }
+
+    async function doNext() {
+      await Homey.emit('setLocalConfig', {
+        connectionMode: document.getElementById('connectionMode').value,
+        gatewayIp: document.getElementById('gatewayIp').value.trim(),
+        localProtocol: document.getElementById('localProtocol').value,
+        localPort: parseInt(document.getElementById('localPort').value) || 10081,
+      });
+      await Homey.nextView();
+    }
+
+    async function doSkip() {
+      await Homey.emit('setLocalConfig', { connectionMode: 'cloud' });
+      await Homey.nextView();
+    }
+
+    Homey.getLanguage().then(l => {
+      if (!sessionStorage.getItem('homey_lang')) { lang = l || 'en'; sessionStorage.setItem('homey_lang', lang); }
+      applyLang();
+    }).catch(() => applyLang());
+  </script>
+</body>
+</html>

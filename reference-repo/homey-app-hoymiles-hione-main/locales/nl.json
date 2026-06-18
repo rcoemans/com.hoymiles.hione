@@ -1,0 +1,17 @@
+{
+  "errors": {
+    "poll_failed": "Kan S-Miles Cloud niet bereiken. Controleer je internetverbinding.",
+    "login_failed": "Inloggen mislukt. Controleer je S-Miles Cloud e-mail en wachtwoord.",
+    "missing_credentials": "Ontbrekende inloggegevens. Koppel het apparaat opnieuw."
+  },
+  "pair": {
+    "login_title": "Inloggen bij S-Miles Cloud",
+    "login_disclaimer": "Deze app gebruikt een niet-officiële API. Je inloggegevens worden alleen verstuurd naar hoymiles.com.",
+    "no_stations": "Inloggen gelukt, maar er is nog geen installatie (station) gevonden op je S-Miles Cloud-account. Installeer je HiOne-systeem en voeg het eerst toe in de S-Miles app, probeer het daarna opnieuw."
+  },
+  "flow": {
+    "charging": "Laden",
+    "discharging": "Ontladen",
+    "idle": "Inactief"
+  }
+}

@@ -4,17 +4,31 @@
     "login_failed": "Login failed. Check your S-Miles Cloud email and password.",
     "missing_credentials": "Missing credentials. Please re-pair the device.",
     "local_unreachable": "Local gateway unreachable. Check the IP address in device settings.",
-    "set_mode_failed": "Could not change battery mode. Try again later."
+    "set_mode_failed": "Could not change battery mode. Try again later.",
+    "api_timeout": "API request timed out. The server may be busy.",
+    "no_stations": "No stations found. Check your S-Miles Cloud account.",
+    "no_gateway_ip": "No gateway IP configured. Set the IP in device settings."
   },
   "pair": {
     "login_title": "Log in to S-Miles Cloud",
-    "login_disclaimer": "This app uses an unofficial API. Your credentials are only sent to hoymiles.com."
+    "login_disclaimer": "This app uses an unofficial API. Your credentials are only sent to hoymiles.com.",
+    "select_station": "Select station",
+    "configure_local": "Configure local connection",
+    "select_parent": "Select parent station"
   },
   "status": {
     "initializing": "Initializing...",
     "polling": "Fetching data...",
     "connected_local": "Connected (local)",
     "connected_cloud": "Connected (cloud)",
-    "offline": "Offline"
+    "connected_hybrid": "Connected (hybrid)",
+    "offline": "Offline",
+    "error": "Error"
+  },
+  "diagnostics": {
+    "started": "Diagnostics collection started",
+    "stopped": "Diagnostics collection stopped",
+    "cleared": "Diagnostics data cleared",
+    "exported": "Diagnostics data exported"
   }
 }

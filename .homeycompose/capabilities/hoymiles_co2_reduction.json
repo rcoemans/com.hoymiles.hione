@@ -1,0 +1,11 @@
+{
+  "type": "number",
+  "title": { "en": "CO₂ Reduction", "nl": "CO₂-besparing" },
+  "units": "kg",
+  "insights": true,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/efficiency.svg"
+}

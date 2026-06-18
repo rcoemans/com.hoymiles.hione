@@ -1,0 +1,32 @@
+{
+  "name": { "en": "HiOne Gateway", "nl": "HiOne Gateway" },
+  "class": "other",
+  "capabilities": [
+    "hoymiles_gateway_online",
+    "hoymiles_system_state",
+    "alarm_generic",
+    "hoymiles_last_update"
+  ],
+  "images": {
+    "small": "/drivers/gateway/assets/icon.svg",
+    "large": "/drivers/gateway/assets/icon.svg"
+  },
+  "pair": [
+    { "id": "select_parent" },
+    { "id": "list_devices", "template": "list_devices", "navigation": { "next": "add_devices" } },
+    { "id": "add_devices", "template": "add_devices" }
+  ],
+  "settings": [
+    {
+      "type": "group",
+      "label": { "en": "System info", "nl": "Systeeminfo" },
+      "children": [
+        { "id": "appliance", "type": "label", "label": { "en": "Appliance", "nl": "Apparaat" }, "value": "-" },
+        { "id": "model", "type": "label", "label": { "en": "Model", "nl": "Model" }, "value": "-" },
+        { "id": "serial_number", "type": "label", "label": { "en": "Serial number", "nl": "Serienummer" }, "value": "-" },
+        { "id": "firmware_version", "type": "label", "label": { "en": "Firmware version", "nl": "Firmwareversie" }, "value": "-" },
+        { "id": "hardware_version", "type": "label", "label": { "en": "Hardware version", "nl": "Hardwareversie" }, "value": "-" }
+      ]
+    }
+  ]
+}

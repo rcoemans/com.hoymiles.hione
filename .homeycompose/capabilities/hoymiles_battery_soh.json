@@ -1,0 +1,11 @@
+{
+  "type": "number",
+  "title": { "en": "Battery SoH", "nl": "Accu gezondheid" },
+  "units": "%",
+  "insights": true,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/percentage.svg"
+}

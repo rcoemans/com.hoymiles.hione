@@ -1,0 +1,17 @@
+{
+  "type": "enum",
+  "title": { "en": "System State", "nl": "Systeemstatus" },
+  "values": [
+    { "id": "online_cloud", "title": { "en": "Online (Cloud)", "nl": "Online (Cloud)" } },
+    { "id": "online_local", "title": { "en": "Online (Local)", "nl": "Online (Lokaal)" } },
+    { "id": "online_hybrid", "title": { "en": "Online (Hybrid)", "nl": "Online (Hybride)" } },
+    { "id": "offline", "title": { "en": "Offline", "nl": "Offline" } },
+    { "id": "error", "title": { "en": "Error", "nl": "Fout" } },
+    { "id": "unknown", "title": { "en": "Unknown", "nl": "Onbekend" } }
+  ],
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/on-off-button.svg"
+}

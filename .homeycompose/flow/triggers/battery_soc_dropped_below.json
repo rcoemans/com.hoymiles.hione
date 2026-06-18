@@ -1,0 +1,8 @@
+{
+  "title": { "en": "Battery SoC dropped below", "nl": "Accu SoC zakte onder" },
+  "titleFormatted": { "en": "Battery SoC dropped below [[soc]]%", "nl": "Accu SoC zakte onder [[soc]]%" },
+  "args": [
+    { "name": "device", "type": "device", "filter": "driver_id=station" },
+    { "name": "soc", "type": "number", "min": 0, "max": 100, "step": 1, "title": { "en": "SoC (%)", "nl": "SoC (%)" } }
+  ]
+}

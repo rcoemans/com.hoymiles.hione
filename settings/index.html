@@ -1,704 +1,181 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset='utf-8'>
-  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-           padding: 24px; max-width: 500px; color: #1a1a1a; line-height: 1.5; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    h2 { font-size: 18px; font-weight: 600; }
-    .disclaimer {
-      background: #fffbf0; border-radius: 10px; padding: 14px 16px;
-      margin-bottom: 20px; font-size: 12px; color: #666; line-height: 1.5;
-    }
-    .disclaimer strong { color: #1a1a1a; }
-    label { display: block; font-size: 13px; font-weight: 500; color: #444; }
-    input {
-      width: 100%; padding: 12px; margin-top: 6px; border: 2px solid #e8e8e8;
-      border-radius: 10px; font-size: 14px; transition: border-color 0.2s;
-      outline: none;
-    }
-    input:focus { border-color: #61BA1A; }
-    .hint { font-size: 11px; color: #999; margin-top: 6px; }
-    .btn-primary {
-      margin-top: 20px; padding: 12px 28px; font-size: 14px; font-weight: 600;
-      background: #61BA1A; color: white; border: none; border-radius: 10px; cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-primary:hover { background: #52a014; }
-    .btn-primary:active { background: #478c12; transform: scale(0.99); }
-    .status { margin-top: 12px; font-size: 13px; display: none; border-radius: 8px; padding: 10px 14px; }
-    .status.ok { color: #2e7d32; background: #f0faf4; }
-    .status.err { color: #d32f2f; background: #fef2f2; }
-    .lang-toggle {
-      font-size: 11px; font-weight: 600; cursor: pointer; color: #fff;
-      border: 1px solid #52a014; border-radius: 6px; padding: 4px 10px;
-      background: #61BA1A; transition: all 0.15s;
-    }
-    .lang-toggle:hover { background: #52a014; color: #fff; }
-    .log-section { margin-top: 28px; }
-    .log-box {
-      width: 100%; height: 260px; overflow-y: auto; background: #1e1e1e; color: #d4d4d4;
-      font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; line-height: 1.5;
-      padding: 12px; border-radius: 10px; border: 2px solid #333; white-space: pre-wrap; word-break: break-all;
-    }
-    .log-buttons { display: flex; gap: 8px; margin-top: 8px; }
-    .btn-log {
-      padding: 8px 16px; font-size: 12px; font-weight: 600; border: none; border-radius: 8px;
-      cursor: pointer; transition: background 0.2s;
-    }
-    .btn-log.clear { background: #f44336; color: #fff; }
-    .btn-log.clear:hover { background: #d32f2f; }
-    .btn-log.copy { background: #1976d2; color: #fff; }
-    .btn-log.copy:hover { background: #1565c0; }
-    .btn-log.refresh { background: #61BA1A; color: #fff; }
-    .btn-log.refresh:hover { background: #52a014; }
-    .btn-log.scan { background: #61BA1A; color: #fff; }
-    .btn-log.scan:hover { background: #52a014; }
-    .copy-toast {
-      display: none; font-size: 12px; color: #2e7d32; margin-left: 8px; align-self: center;
-    }
-    .scan-result {
-      width: 100%; max-height: 200px; overflow-y: auto; background: #1e1e1e; color: #d4d4d4;
-      font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; line-height: 1.5;
-      padding: 12px; border-radius: 10px; border: 2px solid #333; white-space: pre-wrap; word-break: break-all;
-      margin-top: 8px; display: none;
-    }
-    .validation-status {
-      background: #f5f5f5; border-radius: 10px; padding: 12px 14px;
-      margin-top: 10px; font-size: 12px; line-height: 1.6;
-    }
-    .validation-status .running { color: #2e7d32; font-weight: 600; }
-    .validation-status .stopped { color: #666; font-weight: 600; }
-    .validation-status .error { color: #d32f2f; }
-    .confidence-table {
-      width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px;
-    }
-    .confidence-table th, .confidence-table td {
-      padding: 4px 8px; text-align: left; border-bottom: 1px solid #e8e8e8;
-    }
-    .confidence-table th { font-weight: 600; color: #444; background: #f9f9f9; }
-    .conf-high { color: #2e7d32; font-weight: 600; }
-    .conf-medium { color: #e65100; font-weight: 600; }
-    .conf-low { color: #d32f2f; }
-    .conf-unresolved { color: #999; }
-    .btn-log.start { background: #2e7d32; color: #fff; }
-    .btn-log.start:hover { background: #1b5e20; }
-    .btn-log.stop { background: #f44336; color: #fff; }
-    .btn-log.stop:hover { background: #d32f2f; }
-    .btn-log.export { background: #1976d2; color: #fff; }
-    .btn-log.export:hover { background: #1565c0; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #fff; color: #333; margin: 0; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    h2 { font-size: 16px; margin: 24px 0 8px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+    .section { margin-bottom: 24px; }
+    label { display: block; font-weight: 600; margin: 10px 0 4px; font-size: 13px; }
+    input, select { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .btn { display: inline-block; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; margin: 4px 4px 4px 0; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-green { background: #61BA1A; color: #fff; }
+    .btn-red { background: #e74c3c; color: #fff; }
+    .btn-grey { background: #888; color: #fff; }
+    .btn-blue { background: #3498db; color: #fff; }
+    .status-bar { padding: 10px 14px; border-radius: 6px; background: #f5f5f5; margin: 10px 0; font-size: 13px; }
+    .status-bar.running { background: #e8f5e9; border-left: 3px solid #61BA1A; }
+    .status-bar.stopped { background: #fef3e7; border-left: 3px solid #e67e22; }
+    .hint { font-size: 11px; color: #888; margin-top: 2px; }
+    pre { background: #f5f5f5; padding: 12px; border-radius: 6px; font-size: 12px; max-height: 300px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+    .row { display: flex; gap: 8px; align-items: flex-end; }
+    .row > * { flex: 1; }
   </style>
 </head>
 <body>
-  <div class='header'>
-    <h2 id='t-title'>Hoymiles HiOne — Settings</h2>
-    <button class='lang-toggle' id='lang-toggle' onclick='toggleLang()'>NL</button>
+  <h1>Hoymiles HiOne — App Settings</h1>
+
+  <!-- ── Login Test ── -->
+  <div class="section">
+    <h2>Test Cloud Login</h2>
+    <div class="row">
+      <div><label>Email</label><input type="email" id="testEmail"></div>
+      <div><label>Password</label><input type="password" id="testPassword"></div>
+    </div>
+    <button class="btn btn-green" onclick="testLogin()" style="margin-top:10px">Test Login</button>
+    <div id="loginResult" class="status-bar" style="display:none"></div>
   </div>
 
-  <div class='disclaimer' id='t-disclaimer'>
-    Configure app-level defaults below. These settings are used as defaults when pairing new devices.
-  </div>
+  <!-- ── Diagnostics ── -->
+  <div class="section">
+    <h2>Diagnostics (Modbus / Protobuf)</h2>
+    <p class="hint">Collect snapshots from Modbus TCP and Protobuf simultaneously for data correlation analysis.</p>
 
-  <h3 style='font-size:14px; margin-bottom:10px;' id='t-section-local'>Local connection</h3>
-  <label>
-    <span id='t-label-ip'>Gateway IP address</span>
-    <input type='text' id='gateway_ip' placeholder='192.168.1.100'>
-  </label>
-  <div class='hint' id='t-hint-ip'>Local LAN IP address of the HiBox gateway.</div>
-
-  <label style='margin-top:14px;'>
-    <span id='t-label-port'>Gateway port</span>
-    <input type='number' id='gateway_port' value='10081' min='1' max='65535' placeholder='10081'>
-  </label>
-  <div class='hint' id='t-hint-port'>TCP port of the HiBox gateway (default: 10081).</div>
-
-  <h3 style='font-size:14px; margin-top:20px; margin-bottom:10px;' id='t-section-cloud'>S-Miles Cloud</h3>
-  <label>
-    <span id='t-label-username'>S-Miles Cloud username</span>
-    <input type='email' id='cloud_username' placeholder='you@example.com'>
-  </label>
-  <div class='hint' id='t-hint-username'>Email address used to log in at hoymiles.com.</div>
-
-  <label style='margin-top:14px;'>
-    <span id='t-label-password'>S-Miles Cloud password</span>
-    <input type='password' id='cloud_password'>
-  </label>
-  <div class='hint' id='t-hint-password'>Password is stored securely on your Homey.</div>
-
-  <label style='margin-top:14px;'>
-    <span id='t-label-url'>Cloud API URL</span>
-    <input type='url' id='cloud_api_url' placeholder='https://neapi.hoymiles.com'>
-  </label>
-  <div class='hint' id='t-hint-url'>Base URL of the S-Miles Cloud API. Leave empty for the default URL.</div>
-
-  <button class='btn-primary' id='save'>Save</button>
-  <div class='status' id='status'></div>
-
-  <div class='log-section'>
-    <h3 style='font-size:14px; margin-bottom:10px;' id='t-section-log'>Logging</h3>
-    <div class='log-box' id='log-box'></div>
-    <div class='log-buttons'>
-      <button class='btn-log refresh' id='btn-refresh-log' onclick='refreshLog()'>Refresh</button>
-      <button class='btn-log copy' id='btn-copy-log' onclick='copyLog()'>Copy</button>
-      <button class='btn-log clear' id='btn-clear-log' onclick='clearLog()'>Clear</button>
-      <span class='copy-toast' id='copy-toast'>Copied!</span>
+    <div class="row">
+      <div>
+        <label>Gateway IP</label>
+        <input type="text" id="diagIp" placeholder="192.168.1.100">
+      </div>
+      <div>
+        <label>Interval (sec)</label>
+        <input type="number" id="diagInterval" value="60" min="10" max="600">
+      </div>
     </div>
-  </div>
-
-  <div class='log-section'>
-    <h3 style='font-size:14px; margin-bottom:10px;' id='t-section-diag'>Diagnostics</h3>
-    <div class='hint' id='t-hint-diag'>Scan Modbus TCP registers to discover available data points. Quick Scan checks known blocks, Deep Scan probes all 65536 registers (slow), ESS Probe tests battery/grid register candidates.</div>
-    <div class='log-buttons' style='margin-top:8px;'>
-      <button class='btn-log scan' id='btn-modbus-scan' onclick='runModbusScan()'>Quick Scan</button>
-      <button class='btn-log scan' id='btn-deep-scan' onclick='runDeepScan()'>Deep Scan</button>
-      <button class='btn-log scan' id='btn-ess-probe' onclick='runEssProbe()'>ESS Probe</button>
-    </div>
-    <div class='log-buttons' style='margin-top:4px;'>
-      <button class='btn-log copy' id='btn-copy-scan' onclick='copyScan()'>Copy</button>
-      <button class='btn-log clear' id='btn-clear-scan' onclick='clearScan()'>Clear</button>
-      <span class='copy-toast' id='scan-copy-toast'>Copied!</span>
-    </div>
-    <div class='scan-result' id='scan-result'></div>
-  </div>
-
-  <div class='log-section'>
-    <h3 style='font-size:14px; margin-bottom:10px;' id='t-section-validation'>Modbus Validation</h3>
-    <div class='hint' id='t-hint-validation'>Capture Cloud API and Modbus TCP data simultaneously to validate register mappings. Requires a paired HiOne device with cloud credentials and local gateway IP configured.</div>
-
-    <label style='margin-top:10px;'>
-      <span id='t-label-val-interval'>Validation interval (seconds)</span>
-      <input type='number' id='validation_interval' value='60' min='30' max='300' placeholder='60' style='width:100px;'>
-    </label>
-    <div class='hint' id='t-hint-val-interval'>How often to capture a validation snapshot (30–300 seconds).</div>
-
-    <div class='log-buttons' style='margin-top:10px;'>
-      <button class='btn-log start' id='btn-start-validation' onclick='startValidation()'>Start</button>
-      <button class='btn-log stop' id='btn-stop-validation' onclick='stopValidation()'>Stop</button>
-      <button class='btn-log export' id='btn-export-validation' onclick='exportValidation()'>Export</button>
-      <button class='btn-log copy' id='btn-copy-validation' onclick='copyValidation()'>Copy</button>
-      <button class='btn-log clear' id='btn-clear-validation' onclick='clearValidation()'>Clear</button>
-      <span class='copy-toast' id='validation-copy-toast'>Copied!</span>
+    <div class="row" style="margin-top:4px">
+      <div>
+        <label>DTU Serial</label>
+        <input type="text" id="diagDtuSn" placeholder="(optional)">
+      </div>
+      <div>
+        <label>Modbus Unit-ID</label>
+        <input type="number" id="diagUnitId" value="1" min="1" max="247">
+      </div>
     </div>
 
-    <div class='validation-status' id='validation-status'>
-      <span class='stopped'>Stopped</span> — 0 snapshots
+    <div style="margin-top: 12px;">
+      <button class="btn btn-green" id="btnStart" onclick="startDiag()">Start</button>
+      <button class="btn btn-red" id="btnStop" onclick="stopDiag()" disabled>Stop</button>
+      <button class="btn btn-blue" id="btnExport" onclick="exportDiag()">Export</button>
+      <button class="btn btn-grey" id="btnClear" onclick="clearDiag()">Clear</button>
     </div>
 
-    <div id='confidence-container' style='margin-top:10px; display:none;'>
-      <h4 style='font-size:12px; font-weight:600; margin-bottom:6px;'>Confidence scores</h4>
-      <table class='confidence-table' id='confidence-table'>
-        <thead><tr><th>Register</th><th>API field</th><th>Samples</th><th>Match%</th><th>Avg diff</th><th>Level</th></tr></thead>
-        <tbody id='confidence-body'></tbody>
-      </table>
-    </div>
-
-    <div class='scan-result' id='validation-result'></div>
+    <div id="diagStatus" class="status-bar stopped">Status: idle</div>
+    <pre id="diagOutput" style="display:none"></pre>
   </div>
 
   <script>
-    var i18n = {
-      nl: {
-        title: 'Hoymiles HiOne — Instellingen',
-        sectionValidation: 'Modbus-validatie',
-        hintValidation: 'Leg Cloud API- en Modbus TCP-data gelijktijdig vast om registermappings te valideren. Vereist een gekoppeld HiOne-apparaat met cloud-inloggegevens en lokaal gateway-IP.',
-        labelValInterval: 'Validatie-interval (seconden)',
-        hintValInterval: 'Hoe vaak een validatie-snapshot wordt gemaakt (30–300 seconden).',
-        startValidation: 'Start',
-        stopValidation: 'Stop',
-        exportValidation: 'Exporteer',
-        clearValidation: 'Wissen',
-        validationRunning: 'Actief',
-        validationStopped: 'Gestopt',
-        disclaimer: 'Configureer hieronder de app-brede standaardinstellingen. Deze worden gebruikt als standaard bij het koppelen van nieuwe apparaten.',
-        sectionLocal: 'Lokale verbinding',
-        labelIp: 'Gateway IP-adres',
-        hintIp: 'Lokaal LAN IP-adres van de HiBox gateway.',
-        labelPort: 'Gateway poort',
-        hintPort: 'TCP-poort van de HiBox gateway (standaard: 10081).',
-        sectionCloud: 'S-Miles Cloud',
-        labelUsername: 'S-Miles Cloud gebruikersnaam',
-        hintUsername: 'E-mailadres waarmee je inlogt op hoymiles.com.',
-        labelPassword: 'S-Miles Cloud wachtwoord',
-        hintPassword: 'Wachtwoord wordt veilig opgeslagen op je Homey.',
-        labelUrl: 'Cloud API URL',
-        hintUrl: 'Basis-URL van de S-Miles Cloud API. Laat leeg voor de standaard URL.',
-        save: 'Opslaan',
-        invalidUrl: 'Ongeldige URL. Gebruik het format https://...',
-        saveFailed: 'Opslaan mislukt: ',
-        saveOk: 'Opgeslagen! Bestaande apparaten gebruiken de nieuwe instellingen na herstart.',
-        sectionLog: 'Logging',
-        refreshLog: 'Vernieuwen',
-        copyLog: 'Kopieer',
-        clearLog: 'Wissen',
-        copied: 'Gekopieerd!',
-        logCleared: 'Log gewist.',
-        sectionDiag: 'Diagnostiek',
-        hintDiag: 'Scan Modbus TCP-registers op de DTS-G3 stick om beschikbare datapunten te ontdekken.',
-        modbusScan: 'Quick Scan',
-        deepScan: 'Deep Scan',
-        essProbe: 'ESS Probe',
-        scanning: 'Scannen...',
-        deepScanning: 'Deep scan loopt (dit kan even duren)...',
-        essProbing: 'ESS-registers testen...',
-        scanError: 'Scan mislukt: ',
-        copyScan: 'Kopieer',
-        clearScan: 'Wissen',
-        hintDiagFull: 'Scan Modbus TCP-registers om beschikbare datapunten te ontdekken. Quick Scan controleert bekende blokken, Deep Scan test alle 65536 registers (langzaam), ESS Probe test batterij/net-registers.'
-      },
-      en: {
-        title: 'Hoymiles HiOne — Settings',
-        sectionValidation: 'Modbus Validation',
-        hintValidation: 'Capture Cloud API and Modbus TCP data simultaneously to validate register mappings. Requires a paired HiOne device with cloud credentials and local gateway IP configured.',
-        labelValInterval: 'Validation interval (seconds)',
-        hintValInterval: 'How often to capture a validation snapshot (30–300 seconds).',
-        startValidation: 'Start',
-        stopValidation: 'Stop',
-        exportValidation: 'Export',
-        clearValidation: 'Clear',
-        validationRunning: 'Running',
-        validationStopped: 'Stopped',
-        disclaimer: 'Configure app-level defaults below. These settings are used as defaults when pairing new devices.',
-        sectionLocal: 'Local connection',
-        labelIp: 'Gateway IP address',
-        hintIp: 'Local LAN IP address of the HiBox gateway.',
-        labelPort: 'Gateway port',
-        hintPort: 'TCP port of the HiBox gateway (default: 10081).',
-        sectionCloud: 'S-Miles Cloud',
-        labelUsername: 'S-Miles Cloud username',
-        hintUsername: 'Email address used to log in at hoymiles.com.',
-        labelPassword: 'S-Miles Cloud password',
-        hintPassword: 'Password is stored securely on your Homey.',
-        labelUrl: 'Cloud API URL',
-        hintUrl: 'Base URL of the S-Miles Cloud API. Leave empty for the default URL.',
-        save: 'Save',
-        invalidUrl: 'Invalid URL. Use the format https://...',
-        saveFailed: 'Save failed: ',
-        saveOk: 'Saved! Existing devices will use the new settings after restart.',
-        sectionLog: 'Logging',
-        refreshLog: 'Refresh',
-        copyLog: 'Copy',
-        clearLog: 'Clear',
-        copied: 'Copied!',
-        logCleared: 'Log cleared.',
-        sectionDiag: 'Diagnostics',
-        hintDiag: 'Scan Modbus TCP registers on the DTS-G3 stick to discover available data points.',
-        modbusScan: 'Quick Scan',
-        deepScan: 'Deep Scan',
-        essProbe: 'ESS Probe',
-        scanning: 'Scanning...',
-        deepScanning: 'Deep scan running (this may take a while)...',
-        essProbing: 'Testing ESS registers...',
-        scanError: 'Scan failed: ',
-        copyScan: 'Copy',
-        clearScan: 'Clear',
-        hintDiagFull: 'Scan Modbus TCP registers to discover available data points. Quick Scan checks known blocks, Deep Scan probes all 65536 registers (slow), ESS Probe tests battery/grid register candidates.'
-      }
-    };
-
-    var _lang = 'en';
-
-    function applyLang(lang) {
-      _lang = lang;
-      var t = i18n[lang] || i18n.en;
-      document.getElementById('t-title').textContent = t.title;
-      document.getElementById('t-disclaimer').textContent = t.disclaimer;
-      document.getElementById('t-section-local').textContent = t.sectionLocal;
-      document.getElementById('t-label-ip').textContent = t.labelIp;
-      document.getElementById('t-hint-ip').textContent = t.hintIp;
-      document.getElementById('t-label-port').textContent = t.labelPort;
-      document.getElementById('t-hint-port').textContent = t.hintPort;
-      document.getElementById('t-section-cloud').textContent = t.sectionCloud;
-      document.getElementById('t-label-username').textContent = t.labelUsername;
-      document.getElementById('t-hint-username').textContent = t.hintUsername;
-      document.getElementById('t-label-password').textContent = t.labelPassword;
-      document.getElementById('t-hint-password').textContent = t.hintPassword;
-      document.getElementById('t-label-url').textContent = t.labelUrl;
-      document.getElementById('t-hint-url').textContent = t.hintUrl;
-      document.getElementById('save').textContent = t.save;
-      document.getElementById('lang-toggle').textContent = lang === 'nl' ? 'EN' : 'NL';
-      if (document.getElementById('t-section-log')) document.getElementById('t-section-log').textContent = t.sectionLog || 'Logging';
-      if (document.getElementById('btn-refresh-log')) document.getElementById('btn-refresh-log').textContent = t.refreshLog || 'Refresh';
-      if (document.getElementById('btn-copy-log')) document.getElementById('btn-copy-log').textContent = t.copyLog || 'Copy';
-      if (document.getElementById('btn-clear-log')) document.getElementById('btn-clear-log').textContent = t.clearLog || 'Clear';
-      if (document.getElementById('t-section-diag')) document.getElementById('t-section-diag').textContent = t.sectionDiag || 'Diagnostics';
-      if (document.getElementById('t-hint-diag')) document.getElementById('t-hint-diag').textContent = t.hintDiag || '';
-      if (document.getElementById('btn-modbus-scan')) document.getElementById('btn-modbus-scan').textContent = t.modbusScan || 'Quick Scan';
-      if (document.getElementById('btn-deep-scan')) document.getElementById('btn-deep-scan').textContent = t.deepScan || 'Deep Scan';
-      if (document.getElementById('btn-ess-probe')) document.getElementById('btn-ess-probe').textContent = t.essProbe || 'ESS Probe';
-      if (document.getElementById('btn-copy-scan')) document.getElementById('btn-copy-scan').textContent = t.copyScan || 'Copy';
-      if (document.getElementById('btn-clear-scan')) document.getElementById('btn-clear-scan').textContent = t.clearScan || 'Clear';
-      if (document.getElementById('t-section-validation')) document.getElementById('t-section-validation').textContent = t.sectionValidation || 'Modbus Validation';
-      if (document.getElementById('t-hint-validation')) document.getElementById('t-hint-validation').textContent = t.hintValidation || '';
-      if (document.getElementById('t-label-val-interval')) document.getElementById('t-label-val-interval').textContent = t.labelValInterval || 'Validation interval (seconds)';
-      if (document.getElementById('t-hint-val-interval')) document.getElementById('t-hint-val-interval').textContent = t.hintValInterval || '';
-      if (document.getElementById('btn-start-validation')) document.getElementById('btn-start-validation').textContent = t.startValidation || 'Start';
-      if (document.getElementById('btn-stop-validation')) document.getElementById('btn-stop-validation').textContent = t.stopValidation || 'Stop';
-      if (document.getElementById('btn-export-validation')) document.getElementById('btn-export-validation').textContent = t.exportValidation || 'Export';
-      if (document.getElementById('btn-clear-validation')) document.getElementById('btn-clear-validation').textContent = t.clearValidation || 'Clear';
+    function showStatus(elId, msg, type) {
+      const el = document.getElementById(elId);
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.className = 'status-bar ' + (type || '');
     }
 
-    function toggleLang() {
-      applyLang(_lang === 'nl' ? 'en' : 'nl');
-    }
-
-    function updateSaveButton() {
-      var ip = document.getElementById('gateway_ip').value.trim();
-      var user = document.getElementById('cloud_username').value.trim();
-      var pass = document.getElementById('cloud_password').value;
-      var btn = document.getElementById('save');
-      var ready = !!(ip || user || pass);
-      btn.style.background = ready ? '#61BA1A' : '#ccc';
-      btn.style.color = ready ? '#fff' : '#888';
-      btn.style.cursor = ready ? 'pointer' : 'not-allowed';
-      btn.style.opacity = ready ? '1' : '0.6';
-    }
-
-    var _homeyRef = null;
-
-    function refreshLog() {
-      if (!_homeyRef) return;
-      _homeyRef.get('app_log', function(err, logs) {
-        var box = document.getElementById('log-box');
-        if (err || !logs || !logs.length) {
-          box.textContent = '(no log entries)';
-          return;
-        }
-        box.textContent = logs.join('\n');
-        box.scrollTop = box.scrollHeight;
-      });
-    }
-
-    function copyLog() {
-      var text = document.getElementById('log-box').textContent || '';
-      if (!text) return;
-      _copyText(text, 'copy-toast');
-    }
-
-    function clearLog() {
-      if (!_homeyRef) return;
-      _homeyRef.set('app_log', [], function(err) {
-        document.getElementById('log-box').textContent = '(no log entries)';
-      });
-    }
-
-    function copyScan() {
-      var box = document.getElementById('scan-result');
-      var text = box.textContent || '';
-      if (!text) return;
-      _copyText(text, 'scan-copy-toast');
-    }
-
-    function _copyText(text, toastId) {
-      var t = i18n[_lang] || i18n.en;
-      function showToast() {
-        var toast = document.getElementById(toastId);
-        if (toast) {
-          toast.textContent = t.copied || 'Copied!';
-          toast.style.display = 'inline';
-          setTimeout(function() { toast.style.display = 'none'; }, 2000);
-        }
-      }
-      // Try modern clipboard API first, then fall back
+    async function testLogin() {
+      const email = document.getElementById('testEmail').value.trim();
+      const pw = document.getElementById('testPassword').value;
+      if (!email || !pw) return;
+      showStatus('loginResult', 'Logging in...', '');
       try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(showToast).catch(function() {
-            _fallbackCopy(text); showToast();
-          });
-          return;
+        const res = await Homey.api('POST', '/login', { email, password: pw });
+        if (res.success) {
+          showStatus('loginResult', 'Login successful!', 'running');
+        } else {
+          showStatus('loginResult', 'Login failed: ' + (res.error || 'unknown'), 'stopped');
         }
-      } catch (e) { /* ignore */ }
-      _fallbackCopy(text);
-      showToast();
-    }
-
-    function _fallbackCopy(text) {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      ta.style.top = '0';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      try { document.execCommand('copy'); } catch (e) { /* ignore */ }
-      document.body.removeChild(ta);
-    }
-
-    function clearScan() {
-      var resultBox = document.getElementById('scan-result');
-      resultBox.textContent = '';
-      resultBox.style.display = 'none';
-      if (_homeyRef) {
-        _homeyRef.set('modbus_scan_result', null, function() {});
-        _homeyRef.set('modbus_deep_scan_result', null, function() {});
-        _homeyRef.set('modbus_ess_probe_result', null, function() {});
+      } catch (err) {
+        showStatus('loginResult', 'Error: ' + err.message, 'stopped');
       }
     }
 
-    function _runScanGeneric(triggerKey, resultKey, btn, statusText, maxPolls) {
-      if (!_homeyRef) return;
-      var t = i18n[_lang] || i18n.en;
-      var resultBox = document.getElementById('scan-result');
-      var origText = btn.textContent;
-      btn.textContent = statusText;
-      btn.disabled = true;
-      btn.style.opacity = '0.6';
-      resultBox.style.display = 'block';
-      resultBox.textContent = statusText;
-
-      _homeyRef.set(resultKey, null, function() {});
-      _homeyRef.set(triggerKey, Date.now(), function(err) {
-        if (err) {
-          resultBox.textContent = (t.scanError || 'Scan failed: ') + err.message;
-          btn.textContent = origText;
-          btn.disabled = false;
-          btn.style.opacity = '1';
-          return;
-        }
-        var polls = 0;
-        var poller = setInterval(function() {
-          polls++;
-          _homeyRef.get(resultKey, function(err2, result) {
-            if (result || polls > (maxPolls || 30)) {
-              clearInterval(poller);
-              btn.textContent = origText;
-              btn.disabled = false;
-              btn.style.opacity = '1';
-              if (result) {
-                resultBox.textContent = JSON.stringify(result, null, 2);
-              } else {
-                resultBox.textContent = 'Timeout \u2014 no result received.';
-              }
-            }
-          });
-        }, 2000);
-      });
-    }
-
-    function runModbusScan() {
-      var t = i18n[_lang] || i18n.en;
-      _runScanGeneric('run_modbus_scan', 'modbus_scan_result',
-        document.getElementById('btn-modbus-scan'),
-        t.scanning || 'Scanning...', 30);
-    }
-
-    function runDeepScan() {
-      var t = i18n[_lang] || i18n.en;
-      _runScanGeneric('run_modbus_deep_scan', 'modbus_deep_scan_result',
-        document.getElementById('btn-deep-scan'),
-        t.deepScanning || 'Deep scan running...', 120);
-    }
-
-    function runEssProbe() {
-      var t = i18n[_lang] || i18n.en;
-      _runScanGeneric('run_modbus_ess_probe', 'modbus_ess_probe_result',
-        document.getElementById('btn-ess-probe'),
-        t.essProbing || 'Testing ESS registers...', 30);
-    }
-
-    function startValidation() {
-      if (!_homeyRef) return;
-      var interval = parseInt(document.getElementById('validation_interval').value) || 60;
-      _homeyRef.set('validation_interval', Math.max(30, Math.min(300, interval)), function() {});
-      _homeyRef.set('start_modbus_validation', Date.now(), function(err) {
-        if (err) {
-          document.getElementById('validation-status').innerHTML = '<span class="error">' + err.message + '</span>';
-        }
-        // Poll for status updates
-        setTimeout(refreshValidationStatus, 2000);
-      });
-    }
-
-    function stopValidation() {
-      if (!_homeyRef) return;
-      _homeyRef.set('stop_modbus_validation', Date.now(), function() {
-        setTimeout(refreshValidationStatus, 1000);
-      });
-    }
-
-    function exportValidation() {
-      if (!_homeyRef) return;
-      var resultBox = document.getElementById('validation-result');
-      resultBox.style.display = 'block';
-      resultBox.textContent = 'Exporting...';
-      _homeyRef.set('export_validation_data', Date.now(), function() {
-        setTimeout(function() {
-          _homeyRef.get('validation_export', function(err, data) {
-            if (data) {
-              resultBox.textContent = JSON.stringify(data, null, 2);
-            } else {
-              resultBox.textContent = 'No data available.';
-            }
-          });
-        }, 1500);
-      });
-    }
-
-    function copyValidation() {
-      var box = document.getElementById('validation-result');
-      var text = box.textContent || '';
-      if (!text || text === '(no data)') return;
-      _copyText(text, 'validation-copy-toast');
-    }
-
-    function clearValidation() {
-      if (!_homeyRef) return;
-      _homeyRef.set('clear_validation_data', Date.now(), function() {
-        document.getElementById('validation-result').style.display = 'none';
-        document.getElementById('validation-result').textContent = '';
-        document.getElementById('confidence-container').style.display = 'none';
-        refreshValidationStatus();
-      });
-    }
-
-    function refreshValidationStatus() {
-      if (!_homeyRef) return;
-      var t = i18n[_lang] || i18n.en;
-      _homeyRef.get('validation_status', function(err, status) {
-        var el = document.getElementById('validation-status');
-        if (!status) {
-          el.innerHTML = '<span class="stopped">' + (t.validationStopped || 'Stopped') + '</span> \u2014 0 snapshots';
-          return;
-        }
-        if (status.error) {
-          el.innerHTML = '<span class="error">Error: ' + status.error + '</span>';
-          return;
-        }
-        var stateSpan = status.running
-          ? '<span class="running">\u25CF ' + (t.validationRunning || 'Running') + '</span>'
-          : '<span class="stopped">' + (t.validationStopped || 'Stopped') + '</span>';
-        var info = stateSpan + ' \u2014 ' + (status.snapshotCount || 0) + ' snapshots';
-        if (status.lastSnapshot) info += ' \u2014 last: ' + status.lastSnapshot.replace('T', ' ').substring(0, 19);
-        if (status.lastDurationMs) info += ' (' + status.lastDurationMs + 'ms)';
-        if (status.intervalSec) info += ' \u2014 every ' + status.intervalSec + 's';
-        el.innerHTML = info;
-      });
-
-      // Refresh confidence table
-      _homeyRef.get('validation_confidence', function(err, confidence) {
-        var container = document.getElementById('confidence-container');
-        var body = document.getElementById('confidence-body');
-        if (!confidence || Object.keys(confidence).length === 0) {
-          container.style.display = 'none';
-          return;
-        }
-        container.style.display = 'block';
-        body.innerHTML = '';
-        var entries = Object.entries(confidence).sort(function(a, b) {
-          var order = { high: 0, medium: 1, low: 2, unresolved: 3 };
-          return (order[a[1].level] || 3) - (order[b[1].level] || 3);
+    async function startDiag() {
+      const ip = document.getElementById('diagIp').value.trim();
+      if (!ip) { alert('Please enter a Gateway IP'); return; }
+      try {
+        await Homey.api('POST', '/diagnostics/start', {
+          gatewayIp: ip,
+          intervalMs: parseInt(document.getElementById('diagInterval').value) || 60,
+          dtuSn: document.getElementById('diagDtuSn').value.trim() || undefined,
+          modbusUnitId: parseInt(document.getElementById('diagUnitId').value) || 1,
         });
-        entries.forEach(function(entry) {
-          var key = entry[0];
-          var c = entry[1];
-          var cls = 'conf-' + (c.level || 'unresolved');
-          var row = '<tr>'
-            + '<td><code>' + key + '</code></td>'
-            + '<td>' + (c.apiField || '-') + '</td>'
-            + '<td>' + c.samples + '</td>'
-            + '<td>' + c.matchRate + '%</td>'
-            + '<td>' + c.avgAbsDiff + '</td>'
-            + '<td class="' + cls + '">' + (c.level || 'unresolved').toUpperCase() + '</td>'
-            + '</tr>';
-          body.innerHTML += row;
-        });
-      });
+        document.getElementById('btnStart').disabled = true;
+        document.getElementById('btnStop').disabled = false;
+        refreshStatus();
+      } catch (err) {
+        showStatus('diagStatus', 'Start failed: ' + err.message, 'stopped');
+      }
     }
 
-    // Auto-refresh validation status every 5 seconds when page is open
-    var _validationRefreshTimer = null;
-
-    function onHomeyReady(Homey) {
-      _homeyRef = Homey;
-
-      Homey.getLanguage(function(err, lang) {
-        if (!err && lang) {
-          var short = (lang || '').split('-')[0].toLowerCase();
-          applyLang(short === 'nl' ? 'nl' : 'en');
-        }
-      });
-
-      var fields = ['gateway_ip', 'gateway_port', 'cloud_username', 'cloud_password', 'cloud_api_url', 'validation_interval'];
-      var loaded = 0;
-      fields.forEach(function(key) {
-        Homey.get(key, function(err, value) {
-          if (!err && value != null) {
-            var el = document.getElementById(key);
-            if (el) el.value = value;
-          }
-          loaded++;
-          if (loaded >= fields.length) updateSaveButton();
-        });
-      });
-
-      // Wire up input listeners for Save button
-      ['gateway_ip', 'cloud_username', 'cloud_password'].forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) { el.addEventListener('input', updateSaveButton); el.addEventListener('change', updateSaveButton); }
-      });
-
-      // Load logs
-      refreshLog();
-
-      document.getElementById('save').addEventListener('click', function() {
-        var url = document.getElementById('cloud_api_url').value.trim();
-        var statusEl = document.getElementById('status');
-        var t = i18n[_lang] || i18n.en;
-
-        if (url.endsWith('/')) url = url.replace(/\/+$/, '');
-
-        if (url && !/^https?:\/\/.+/.test(url)) {
-          statusEl.textContent = t.invalidUrl;
-          statusEl.className = 'status err';
-          statusEl.style.display = 'block';
-          return;
-        }
-
-        var ip       = document.getElementById('gateway_ip').value.trim() || null;
-        var port     = parseInt(document.getElementById('gateway_port').value) || 10081;
-        var username = document.getElementById('cloud_username').value.trim() || null;
-        var password = document.getElementById('cloud_password').value || null;
-
-        var pending = 0;
-        var failed = false;
-
-        function saveKey(key, val) {
-          pending++;
-          Homey.set(key, val, function(err) {
-            if (err && !failed) {
-              failed = true;
-              statusEl.textContent = t.saveFailed + err.message;
-              statusEl.className = 'status err';
-              statusEl.style.display = 'block';
-            }
-            pending--;
-            if (pending === 0 && !failed) {
-              statusEl.textContent = t.saveOk;
-              statusEl.className = 'status ok';
-              statusEl.style.display = 'block';
-            }
-          });
-        }
-
-        saveKey('gateway_ip', ip);
-        saveKey('gateway_port', port);
-        saveKey('cloud_username', username);
-        saveKey('cloud_password', password);
-        saveKey('cloud_api_url', url || null);
-      });
-
-      updateSaveButton();
-
-      // Load validation status
-      refreshValidationStatus();
-      _validationRefreshTimer = setInterval(refreshValidationStatus, 5000);
-
-      Homey.ready();
+    async function stopDiag() {
+      try {
+        await Homey.api('POST', '/diagnostics/stop');
+        document.getElementById('btnStart').disabled = false;
+        document.getElementById('btnStop').disabled = true;
+        refreshStatus();
+      } catch (err) {
+        showStatus('diagStatus', 'Stop failed: ' + err.message, 'stopped');
+      }
     }
+
+    async function exportDiag() {
+      try {
+        const data = await Homey.api('GET', '/diagnostics/export');
+        const json = JSON.stringify(data, null, 2);
+        document.getElementById('diagOutput').textContent = json;
+        document.getElementById('diagOutput').style.display = 'block';
+
+        // Copy to clipboard
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(json).catch(() => {});
+        }
+      } catch (err) {
+        showStatus('diagStatus', 'Export failed: ' + err.message, 'stopped');
+      }
+    }
+
+    async function clearDiag() {
+      if (!confirm('Clear all collected snapshots?')) return;
+      try {
+        await Homey.api('POST', '/diagnostics/clear');
+        document.getElementById('diagOutput').style.display = 'none';
+        refreshStatus();
+      } catch (err) {
+        showStatus('diagStatus', 'Clear failed: ' + err.message, 'stopped');
+      }
+    }
+
+    async function refreshStatus() {
+      try {
+        const st = await Homey.api('GET', '/diagnostics');
+        const running = st.running;
+        const count = st.snapshotCount || 0;
+        const last = st.lastSnapshot ? new Date(st.lastSnapshot).toLocaleTimeString() : '-';
+        showStatus('diagStatus',
+          'Status: ' + (running ? 'RUNNING' : 'stopped') +
+          ' | Snapshots: ' + count +
+          ' | Last: ' + last,
+          running ? 'running' : 'stopped'
+        );
+        document.getElementById('btnStart').disabled = running;
+        document.getElementById('btnStop').disabled = !running;
+      } catch (_) {}
+    }
+
+    // Auto-refresh status on page load
+    refreshStatus();
+    setInterval(refreshStatus, 5000);
   </script>
 </body>
 </html>

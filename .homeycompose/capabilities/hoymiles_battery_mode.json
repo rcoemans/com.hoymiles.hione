@@ -1,0 +1,19 @@
+{
+  "type": "enum",
+  "title": { "en": "Battery Mode", "nl": "Batterijmodus" },
+  "values": [
+    { "id": "1", "title": { "en": "Self-Consumption", "nl": "Eigen verbruik" } },
+    { "id": "2", "title": { "en": "Economy", "nl": "Economie" } },
+    { "id": "3", "title": { "en": "Backup", "nl": "Noodstroom" } },
+    { "id": "4", "title": { "en": "Off-Grid", "nl": "Off-Grid" } },
+    { "id": "5", "title": { "en": "Force Charge", "nl": "Geforceerd laden" } },
+    { "id": "6", "title": { "en": "Force Discharge", "nl": "Geforceerd ontladen" } },
+    { "id": "7", "title": { "en": "Peak Shaving", "nl": "Pieksturing" } },
+    { "id": "8", "title": { "en": "Time of Use", "nl": "Tijdafhankelijk" } }
+  ],
+  "insights": false,
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "icon": "/assets/performance.svg"
+}

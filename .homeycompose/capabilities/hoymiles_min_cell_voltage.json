@@ -1,0 +1,11 @@
+{
+  "type": "number",
+  "title": { "en": "Min Cell Voltage", "nl": "Min celspanning" },
+  "units": "V",
+  "insights": true,
+  "decimals": 3,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/power.svg"
+}

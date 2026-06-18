@@ -1,0 +1,9 @@
+{
+  "type": "string",
+  "title": { "en": "Fault Code", "nl": "Foutcode" },
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/alarm.svg"
+}

@@ -1,0 +1,48 @@
+{
+  "name": { "en": "HiOne Battery", "nl": "HiOne Batterij" },
+  "class": "other",
+  "capabilities": [
+    "measure_battery",
+    "measure_power",
+    "hoymiles_battery_soh",
+    "hoymiles_battery_voltage",
+    "hoymiles_battery_current",
+    "hoymiles_battery_state",
+    "hoymiles_max_cell_voltage",
+    "hoymiles_min_cell_voltage",
+    "hoymiles_max_cell_temp",
+    "hoymiles_min_cell_temp",
+    "hoymiles_fault_code",
+    "hoymiles_last_update"
+  ],
+  "capabilitiesOptions": {
+    "measure_battery": {
+      "title": { "en": "Battery SoC", "nl": "Accu laadniveau" }
+    },
+    "measure_power": {
+      "title": { "en": "Battery Power", "nl": "Accuvermogen" }
+    }
+  },
+  "images": {
+    "small": "/drivers/battery/assets/icon.svg",
+    "large": "/drivers/battery/assets/icon.svg"
+  },
+  "pair": [
+    { "id": "select_parent" },
+    { "id": "list_devices", "template": "list_devices", "navigation": { "next": "add_devices" } },
+    { "id": "add_devices", "template": "add_devices" }
+  ],
+  "settings": [
+    {
+      "type": "group",
+      "label": { "en": "System info", "nl": "Systeeminfo" },
+      "children": [
+        { "id": "appliance", "type": "label", "label": { "en": "Appliance", "nl": "Apparaat" }, "value": "-" },
+        { "id": "model", "type": "label", "label": { "en": "Model", "nl": "Model" }, "value": "-" },
+        { "id": "serial_number", "type": "label", "label": { "en": "Serial number", "nl": "Serienummer" }, "value": "-" },
+        { "id": "firmware_version", "type": "label", "label": { "en": "Firmware version", "nl": "Firmwareversie" }, "value": "-" },
+        { "id": "hardware_version", "type": "label", "label": { "en": "Hardware version", "nl": "Hardwareversie" }, "value": "-" }
+      ]
+    }
+  ]
+}

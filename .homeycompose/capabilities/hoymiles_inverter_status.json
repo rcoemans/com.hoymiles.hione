@@ -1,0 +1,16 @@
+{
+  "type": "enum",
+  "title": { "en": "Inverter Status", "nl": "Omvormerstatus" },
+  "values": [
+    { "id": "producing", "title": { "en": "Producing", "nl": "Producerend" } },
+    { "id": "standby", "title": { "en": "Standby", "nl": "Stand-by" } },
+    { "id": "fault", "title": { "en": "Fault", "nl": "Storing" } },
+    { "id": "offline", "title": { "en": "Offline", "nl": "Offline" } },
+    { "id": "unknown", "title": { "en": "Unknown", "nl": "Onbekend" } }
+  ],
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/on-off-button.svg"
+}

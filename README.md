@@ -1,6 +1,6 @@
 # Hoymiles HiOne — Homey App
 
-Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage system (BESS) from Homey.
+Monitor and control your **Hoymiles HiOne** battery energy storage system (BESS) from Homey via Cloud, Modbus TCP and Protobuf.
 
 [![Homey App](https://img.shields.io/badge/Homey-App%20Store-00A94F?logo=homey)](https://homey.app/a/com.hoymiles.hione)
 [![Homey App Test](https://img.shields.io/badge/Homey-Test%20App-FFA500?logo=homey)](https://homey.app/en-nl/app/com.hoymiles.hione/Hoymiles-HiOne/test/)
@@ -13,41 +13,60 @@ Monitor and control your **Hoymiles HiOne** all-in-one battery energy storage sy
 > **This is an unofficial, community-developed integration.**
 >
 > - Not affiliated with, endorsed by, or supported by **Hoymiles Power Electronics Inc.**
-> - Uses the reverse-engineered S-Miles Cloud API (`neapi.hoymiles.com`) and/or local DTU communication, neither of which are publicly documented.
-> - Hoymiles may change or discontinue these interfaces at any time without notice — app functionality may break as a result.
-> - Your **S-Miles Cloud credentials** are stored securely in Homey's encrypted device store. They are only sent to the official Hoymiles API and never to any third party.
-> - Use at your own risk. The developers accept no liability for data loss, incorrect readings, or unintended battery mode changes.
+> - Uses the reverse-engineered S-Miles Cloud API and/or local DTU communication, neither of which are publicly documented.
+> - Hoymiles may change or discontinue these interfaces at any time without notice.
+> - Your **S-Miles Cloud credentials** are stored securely in Homey's encrypted device store and are only sent to the official Hoymiles API.
+> - Use at your own risk.
 
 ## Features
 
-- **Real-time monitoring**: PV power, battery state-of-charge, battery charge/discharge power, grid import/export (signed and split), home load
-- **Energy totals**: daily, monthly, yearly, and lifetime total
-- **Calculated insights**: self-powered percentage, battery runtime estimate, time-to-full estimate, power balance, energy independence state
+### Multi-device architecture
+
+v2.0.0 introduces a multi-device architecture. Each component of the HiOne system is a separate Homey device:
+
+| Driver | Homey class | Description |
+|---|---|---|
+| **Station** | `battery` | Main plant — PV, battery, grid, load, energy, modes, settings |
+| **Inverter** | `solarpanel` | Per-inverter — 3-phase voltage/current/power, frequency, temperature |
+| **Gateway** | `other` | HiBox/DTS — online status, system state |
+| **Battery** | `other` | Per-battery module — SoC, SoH, voltage, current, cell data |
+
+### Monitoring & control
+
+- **Real-time monitoring**: PV power, battery SoC, charge/discharge power, grid import/export (signed and split), home load
+- **Energy totals**: daily, monthly, yearly, and lifetime
+- **Calculated insights**: self-powered percentage, battery runtime estimate, time-to-full estimate, power balance
 - **Financial & environmental**: profit today/total, CO₂ reduction
-- **Settable battery parameters**: Reserve SoC, Max SoC, Max Power, Grid Limit sliders on the device card
-- **Battery mode control** via Flows:
-  - Self-Consumption, Economy, Backup, Off-Grid, Self-Consumption + Max Power, Backup + Max Power, Peak Shaving, Time of Use
-- **Flow triggers**: battery started/stopped charging, battery started/stopped discharging, SoC changed, SoC crossed threshold, grid started importing/exporting, PV production started/stopped, gateway online/offline, connection source changed, battery mode changed
-- **Flow conditions**: battery is/is not charging, battery is/is not discharging, SoC above/below threshold, PV power above threshold, load power above threshold, grid is/is not importing, grid is/is not exporting, battery mode is/is not, gateway is/is not online, connection is/is not local
-- **Flow actions**: set battery mode, set reserve SoC, set max SoC, set max power, set grid limit, set peak shaving parameters, set time-of-use period, set inverter power limit, set inverter on/off, set relay, refresh data, prefer local/cloud connection, enable/disable cloud fallback
-- **Three connection modes**:
-  - **Local (LAN)** — direct connection to the HiBox gateway via IP. Supports protobuf (port 10081) and **Modbus TCP** (port 502, for DTS-G3 sticks). No cloud account needed. Works offline.
-  - **Local + Cloud** — local as primary, S-Miles Cloud as fallback. Best reliability.
-  - **Cloud only** — via S-Miles Cloud API. Requires a hoymiles.com account.
-- **Modbus TCP support** for DTS-G3 sticks — automatic fallback when protobuf is unavailable
-- **Homey Energy integration** — `homeBattery` with `meter_power.charged` and `meter_power.discharged` for proper battery energy tracking in Homey's Energy dashboard
-- **Cloud login hardening** — exponential backoff after failed login attempts (up to 12 hours for account lockout) to protect your S-Miles account
-- **Register scan diagnostic** — discover available Modbus registers on your DTS-G3 stick from the app settings page
-- **Connection source indicator**: see whether data comes from local or cloud
+- **Settable battery parameters**: Battery mode, Reserve SoC, Max SoC, Max Charge/Discharge Power, Grid Limit
+- **8 battery modes**: Self-Consumption, Economy, Backup, Off-Grid, Force Charge, Force Discharge, Peak Shaving, Time of Use
+
+### Connection modes
+
+| Mode | Description |
+|---|---|
+| **Cloud Only** | Via S-Miles Cloud API. Requires a hoymiles.com account. |
+| **Hybrid** | Cloud + local LAN. Best reliability. |
+| **Local Only** | Direct to HiBox/DTS gateway. No cloud account needed. |
+
+Local protocols supported:
+- **Protobuf** (port 10081) — proprietary binary protocol
+- **Modbus TCP** (port 502) — for DTS-G3 sticks
+
+### Homey integration
+
+- **Homey Energy** — `homeBattery` with `meter_power.charged` and `meter_power.discharged`
+- **14 flow triggers** — battery state changes, SoC thresholds, grid/PV events, gateway online/offline, connection source, mode changes
+- **11 flow conditions** — battery state, SoC, grid, PV/load power, mode, gateway, connection
+- **12 flow actions** — set mode, SoC, power, grid limit, peak shaving, ToU period, inverter on/off, power limit, relay, refresh
 
 ## Requirements
 
 - Homey Pro (2019 or 2023) with firmware >= 12.0.0
-- Hoymiles **HiOne** all-in-one BESS (tested: 3-phase models with HiBox-63T-G3 gateway)
-- For cloud/hybrid mode: an active **S-Miles Cloud** account (the same credentials used in the Hoymiles app)
-- For local mode: the IP address of the HiBox gateway on your LAN
+- Hoymiles **HiOne** BESS with HiBox or DTS gateway
+- For cloud/hybrid mode: an active **S-Miles Cloud** account
+- For local mode: the IP address of the gateway on your LAN
 
-> **Compatibility note**: This app was designed for the HiOne (HiBox-63T-G3 gateway). Other Hoymiles products (DTU, microinverters, HYT series) are *not* supported.
+> **Compatibility note**: Designed for the HiOne (HiBox-63T-G3 gateway). Other Hoymiles products (DTU, microinverters, HYT series) are *not* supported.
 
 ## Installation
 
@@ -65,299 +84,187 @@ homey login
 homey app install
 ```
 
-## Adding a device
+## Adding devices
 
-After installing the app, you need to add a device to start monitoring your HiOne:
+### Step 1: Add a Station (required first)
 
-1. Open the Homey app on your phone
-2. Go to **Devices** (bottom bar)
-3. Tap the **+** button (top right) to add a new device
-4. Search for **"Hoymiles HiOne"** or find it under the **Energy** category
-5. Tap **HiOne Station**
-6. Choose your connection mode:
-   - **Local (LAN)** — enter the IP address of your HiBox gateway and port (default 10081). Find the IP in your router under connected devices, look for `DTUBI-...` or `HiBox`.
-   - **Local + Cloud** — enter the gateway IP and port first, then log in with your S-Miles Cloud credentials
-   - **Cloud only** — log in with your S-Miles Cloud email and password
-7. Select your station from the list
-8. Done — data refreshes every 60 seconds
+1. Open the Homey app → **Devices** → tap **+**
+2. Search for **"Hoymiles HiOne"** → tap **HiOne Station**
+3. Log in with your **S-Miles Cloud** email and password
+4. Select your station from the list
+5. Optionally configure local LAN connection (gateway IP, protocol, port)
+6. Done — data refreshes every 60 seconds (configurable 30–300s)
 
-### Device naming
+### Step 2: Add child devices (optional)
 
-The device name reflects the connection mode:
-- **Local**: `{Plant name} (Local {IP})` — e.g. *Coemans (Local 192.168.1.116)*
-- **Hybrid**: `{Plant name} (Hybrid {IP})` — e.g. *Coemans (Hybrid 192.168.1.116)*
-- **Cloud only**: `{Plant name} (Cloud)` — e.g. *Coemans (Cloud)*
+After the Station is added, you can add **Inverter**, **Gateway**, and **Battery** devices:
+
+1. Tap **+** → search for **"Hoymiles HiOne"** → select the device type
+2. Select the parent Station
+3. The app auto-discovers the connected devices
+4. Done — child devices receive data from the same polling service
 
 ### Finding your HiBox IP address
 
-The HiBox-63T-G3 gateway connects to your local network via Ethernet. To find its IP:
+Check your router's admin page under connected/DHCP devices. Look for a device named `DTUBI-...` or `HiBox`. Default port: **10081** (Protobuf) or **502** (Modbus TCP).
 
-- Check your router's admin page under connected/DHCP devices
-- Look for a device named `DTUBI-...` or `HiBox`
-- The local connection uses TCP port **10081** by default (configurable during pairing and in device settings)
-
-> **Tip**: For the most reliable experience, choose **Local + Cloud**. The app will use your local network for fast data retrieval, and fall back to the cloud if the gateway is temporarily unreachable.
+> **Tip**: Choose **Hybrid** mode for the best experience — local for speed, cloud as fallback.
 
 ## Data & capabilities
 
-### Standard capabilities
+### Station capabilities (37)
 
-| Capability | Description | Unit |
-|---|---|---|
-| Battery SoC | Battery state of charge | % |
-| PV Power | Current solar panel output | W |
-| Total Energy | Lifetime energy produced | kWh |
+| Category | Capabilities |
+|---|---|
+| **Power** | PV power, battery power, grid power, load power, battery charge/discharge power (split), grid import/export power (split), power balance |
+| **Energy** | Daily, monthly, yearly, total energy, CO₂ reduction, profit today/total |
+| **Battery** | SoC (%), battery state (charging/discharging/idle), battery mode (8 modes), battery flow text, battery runtime, time to full |
+| **Grid** | Grid state (importing/exporting/neutral) |
+| **Settings** | Reserve SoC, max SoC, max charge power, max discharge power, grid limit (all settable) |
+| **System** | System state, connection source, gateway online, last update, alarm, self-powered % |
 
-### Custom capabilities
+### Inverter capabilities (15)
 
-| Capability | Description | Unit |
-|---|---|---|
-| PV Power | Current solar panel output | W |
-| Battery Power | Battery charge (+) / discharge (-) power | W |
-| Battery Charge Power | Charge power (positive split value) | W |
-| Battery Discharge Power | Discharge power (positive split value) | W |
-| Grid Power | Grid import (+) / export (-) power | W |
-| Grid Import Power | Import power (positive split value) | W |
-| Grid Export Power | Export power (positive split value) | W |
-| Load Power | Current home consumption | W |
-| Daily Energy | Energy produced today | kWh |
-| Monthly Energy | Energy produced this month | kWh |
-| Yearly Energy | Energy produced this year | kWh |
-| Total Energy | Lifetime energy produced | kWh |
-| CO₂ Reduction | Carbon dioxide reduction | kg |
-| Profit Today | Financial savings today | currency |
-| Profit Total | Financial savings total | currency |
-| Reserve SoC | Minimum battery level (settable) | % |
-| Max SoC | Maximum battery level (settable) | % |
-| Max Power | Max charge/discharge power (settable) | % |
-| Grid Limit | Grid power limit for Peak Shaving (settable) | W |
-| Battery Mode | Current operating mode | — |
-| Battery State | Charging / Discharging / Idle / Standby / Fault | — |
-| Grid State | Importing / Exporting / Neutral | — |
-| Connection Source | Local (LAN) or Cloud | — |
-| Gateway Online | Whether the gateway is online (cloud device status or local connectivity) | — |
-| System State | Online (local/cloud) / Degraded / Offline / Syncing / Error | — |
-| System Alarm | Active when polling fails or system is offline | — |
-| Last Update | Timestamp of the last successful poll | — |
+3-phase voltage/current/power (A, B, C), frequency, temperature, bus voltage, inverter status, last update
 
-### Calculated capabilities
+### Gateway capabilities (4)
 
-| Capability | Description | Unit |
-|---|---|---|
-| Self-Powered | Percentage of load covered by solar + battery | % |
-| Battery Runtime | Estimated time until battery is empty (when discharging) | h |
-| Time to Full | Estimated time until battery is fully charged (when charging) | h |
-| Power Balance | PV + grid + battery - load | W |
-| Energy Independence | Self-sufficient / Partly importing / Battery supported / Exporting surplus | — |
+Gateway online, system state, alarm, last update
+
+### Battery capabilities (12)
+
+SoC, SoH, voltage, current, max/min cell voltage, max/min cell temp, battery state, fault code, power, last update
 
 ## Flow cards
 
-### Triggers
+### Triggers (14)
 
-- **Battery started/stopped charging**
-- **Battery started/stopped discharging**
-- **Battery SoC changed** (with SoC token)
-- **Battery SoC dropped below / rose above threshold** (configurable %)
-- **Grid started importing / exporting**
-- **PV production started / stopped**
-- **Gateway went offline / came online**
-- **Connection source changed** (with source token)
-- **Battery mode changed** (with mode token)
+- Battery started/stopped charging/discharging
+- Battery SoC rose above / dropped below threshold
+- Battery mode changed (with mode token)
+- Grid started importing / exporting
+- PV production started / stopped
+- Gateway came online / went offline
+- Connection source changed (with source token)
 
-### Conditions
+### Conditions (11)
 
-- Battery **is/is not** charging
-- Battery **is/is not** discharging
-- Battery SoC **is/is not** above threshold
-- Battery SoC **is/is not** below threshold
-- Grid **is/is not** importing power
-- Grid **is/is not** exporting power
-- PV power **is/is not** above threshold
-- Load power **is/is not** above threshold
-- Battery mode **is/is not** a specific mode
-- Gateway **is/is not** online
-- Connection **is/is not** local (LAN)
+- Battery is/is not charging/discharging
+- Battery SoC is/is not above/below threshold
+- Grid is/is not importing/exporting
+- PV/load power is/is not above threshold
+- Battery mode is/is not a specific mode
+- Gateway is/is not online
+- Connection is/is not local
 
-### Actions
+### Actions (12)
 
-- **Set battery mode** — change the battery operating mode (Self-Consumption, Economy, Backup, Off-Grid, Self-Consumption + Max Power, Backup + Max Power, Peak Shaving, Time of Use)
-- **Set reserve SoC** — set the minimum battery state of charge
-- **Set max SoC** — set the maximum battery state of charge
-- **Set max power** — set the max charge/discharge power percentage
-- **Set grid limit** — set the grid power limit for Peak Shaving (W)
-- **Set peak shaving parameters** — configure and activate Peak Shaving with reserve SoC, max SoC, and grid limit
-- **Set time-of-use period** — configure charge schedule and activate Time of Use mode
-- **Set inverter power limit** — set inverter output limit (2-100%, writes to EEPROM)
-- **Set inverter state** — turn inverter on or off
-- **Set relay** — enable/disable the dry contact relay output
-- **Refresh data now** — immediately poll the latest data
-- **Prefer local connection** — attempt to reconnect via local gateway
-- **Prefer cloud connection** — switch to cloud API
-- **Enable/disable cloud fallback** — control automatic fallback behaviour
+- **Set battery mode** — Self-Consumption, Economy, Backup, Off-Grid, Force Charge, Force Discharge, Peak Shaving, Time of Use
+- **Set reserve SoC / max SoC** — battery charge limits
+- **Set max charge / discharge power** — power limits (%)
+- **Set grid limit** — Peak Shaving grid limit (W)
+- **Set peak shaving parameters** — reserve SoC + max SoC + grid limit
+- **Set time-of-use period** — full charge/discharge schedule
+- **Set inverter state** — turn on/off by serial number
+- **Set inverter power limit** — output limit (2–100%)
+- **Set relay** — enable/disable dry contact output
+- **Refresh data now** — immediate poll
 
 ## Device settings
 
+Station device settings (editable without re-pairing):
+
 | Setting | Description | Default |
 |---|---|---|
-| Connection mode | How the device connects: Local (LAN), Hybrid (local + cloud), or Cloud only | Hybrid |
-| Email | S-Miles Cloud login email (editable after pairing) | — |
-| Password | S-Miles Cloud password (stored securely on Homey) | — |
-| Gateway IP address | Local LAN IP of the HiBox gateway (optional) | — |
-| Gateway port | TCP port of the HiBox gateway | 10081 |
-| Cloud API URL | Base URL of the S-Miles Cloud API | `https://neapi.hoymiles.com` |
-| Poll interval | How often to fetch data (30–300 seconds) | 60 |
-| DTU info | Serial number, firmware version, hardware version (read-only) | — |
-| Inverter info | Serial number, model, firmware version, hardware version (read-only) | — |
-| Gateway info (HiBox) | Serial number, model, firmware version, hardware version (read-only) | — |
-| Battery info | Model, number of batteries (read-only) | — |
+| Connection mode | Cloud Only, Hybrid, or Local Only | Cloud |
+| Gateway IP | Local LAN IP of the HiBox/DTS gateway | — |
+| Protocol | Protobuf or Modbus TCP | Protobuf |
+| Port | TCP port | 10081 |
+| Modbus Unit ID | Modbus slave address | 1 |
+| Cloud API URL | S-Miles Cloud API base URL | `https://neapi.hoymiles.com` |
+| Poll interval | 30–300 seconds | 60 |
 
-Device info (DTU, Inverter, Gateway, Battery) is populated automatically from the S-Miles Cloud API device listing endpoint and/or the local protobuf gateway.
-
-The connection mode determines which data source the device uses. You can change this after pairing without re-adding the device. Cloud credentials can also be viewed and changed in the device settings screen. The device tolerates up to 2 consecutive poll failures before marking itself unavailable (showing the specific error reason), and automatically recovers when the connection is restored.
-
-The "Last update" timestamp uses the Homey's configured timezone so it always matches your local time.
+System info labels (read-only): model, serial number, firmware version, hardware version, connected devices.
 
 ## App settings
 
-The app settings page (Homey > Apps > Hoymiles HiOne > Settings) allows you to configure app-level defaults for new device pairings and view diagnostic logs.
+The app settings page (Homey > Apps > Hoymiles HiOne > Settings) provides:
 
-### Logging
-
-The app captures all API and device log messages in a ring buffer (last 200 entries). Open the app settings page to view, copy, or clear the log. This is useful for diagnosing cloud API issues, authentication failures, and data retrieval problems.
-
-### Diagnostics
-
-The diagnostics section includes a **Modbus Register Scan** button to discover available data points on a connected DTS-G3 stick. Scan results can be copied to clipboard or cleared using the dedicated buttons.
-
-### Modbus Validation (Developer mode)
-
-The **Modbus Validation** section is a developer/diagnostics tool for reverse-engineering Modbus TCP register mappings. It captures Cloud API data and local Modbus TCP candidate register data simultaneously, then compares both datasets to identify which Modbus registers correspond to known API values.
-
-Features:
-- **Simultaneous capture**: API and Modbus data are fetched in the same poll cycle using `Promise.allSettled` to minimize timing skew
-- **Candidate registers**: reads ~20 pre-identified register candidates (daily energy, SoC, battery power, grid power, load power, mode, voltage, frequency, temperature) based on deep scan analysis
-- **Confidence scoring**: automatically calculates match rates per register over time. Registers are classified as HIGH (≥95% match), MEDIUM (≥75%), LOW (≥50%), or UNRESOLVED
-- **Ring buffer storage**: stores up to 5,000 snapshots (~24–48 hours at 30s intervals)
-- **Export**: generates a comprehensive JSON report with all snapshots, deltas, and confidence scores for external analysis
-- **Live status**: the settings page auto-refreshes every 5 seconds showing snapshot count, last capture time, and a confidence score table
-
-To use:
-1. Ensure you have a paired HiOne device with both cloud credentials and local gateway IP configured
-2. Open the app settings page
-3. Set the validation interval (30–300 seconds, default 60)
-4. Click **Start** to begin capturing
-5. Let it run for 24–48 hours across different operating conditions (PV active/inactive, charging/discharging, grid import/export)
-6. Click **Export** to download the collected data
-7. Click **Stop** when done
-
-The validation engine does **not** modify any production capabilities. It is purely diagnostic — register mappings are only promoted to production after manual review and confirmation.
+- **Test Cloud Login** — verify S-Miles Cloud credentials
+- **Diagnostics** — Modbus TCP + Protobuf snapshot collector for data correlation and register discovery
+  - Configure gateway IP, interval, DTU serial, Modbus unit ID
+  - **Start/Stop** snapshot collection
+  - **Export** collected data as JSON for analysis
+  - **Clear** all snapshots
 
 ## How it works
 
+### Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│  app.ts (HoymilesHiOneApp)                  │
+│  ├── PollingService (per-plant polling)      │
+│  ├── DiagnosticsEngine (snapshot collector)  │
+│  └── Flow card registrations                │
+├─────────────────────────────────────────────┤
+│  Station device.ts ←── data snapshots       │
+│  Inverter device.ts ←── data snapshots      │
+│  Gateway device.ts ←── data snapshots       │
+│  Battery device.ts ←── data snapshots       │
+├─────────────────────────────────────────────┤
+│  lib/                                       │
+│  ├── HoymilesApi.js    (Cloud REST client)  │
+│  ├── ModbusTcpClient.js (Modbus TCP)        │
+│  ├── ProtobufClient.js  (Port 10081)        │
+│  ├── DataNormalizer.js   (Validation)       │
+│  ├── PollingService.js   (Polling engine)   │
+│  ├── DiagnosticsEngine.js (Diagnostics)     │
+│  └── HttpClient.js       (HTTP wrapper)     │
+└─────────────────────────────────────────────┘
+```
+
 ### S-Miles Cloud API
 
-The app communicates with the Hoymiles cloud via the REST API at `neapi.hoymiles.com` using a built-in HTTP client (Node.js `https` module) with automatic redirect following for maximum runtime compatibility. Authentication uses an automatic multi-profile strategy:
+Authentication uses an automatic multi-profile strategy with 4 modes tried in order:
 
-1. **v3 Web** — pre-inspection + credential hash without app-version headers (tried first)
-2. **v3 S-Miles Installer** — same v3 flow with S-Miles Installer app headers
-3. **v3 S-Miles Home** — same v3 flow via EU consumer gateway (`euapi.hoymiles.com`) with genuine S-Miles Home app identity
+1. **v3 Web** — standard web login headers
+2. **v3 S-Miles Installer** — Installer app headers
+3. **v3 S-Miles Home** — EU consumer gateway (`euapi.hoymiles.com`)
 4. **Legacy v0** — MD5-hashed password (fallback for older accounts)
 
-The app tries each method in order and uses the first one that succeeds. The token is valid for 2 hours and refreshes automatically. If a data request fails with an authentication error, the app automatically re-authenticates and retries the request. If all methods fail, the error message shows the outcome of every attempt for easy debugging.
+Argon2id (salted v3) is fully supported via the `hash-wasm` library. If the server returns a salt challenge, the app computes the Argon2id hash (time_cost=3, memory_cost=32768, parallelism=1) and retries.
 
-Accounts that require Argon2id (salted v3) are fully supported — the app uses the `hash-wasm` library for WASM-based Argon2id key derivation (time_cost=3, memory_cost=32768, parallelism=1). If the pre-inspection response includes a salt, the app decodes it (hex or base64) and computes the credential hash accordingly.
+Token auto-refresh on expiry with transparent re-authentication.
 
 Key endpoints:
-- Login and authentication (v3 pre-inspection + login, or legacy v0)
-- User validation (`/iam/api/1/user/me`)
-- Station listing and real-time data (power flows, SoC, energy totals)
-- Battery mode read/write
+- `/iam/pub/3/auth/login` — v3 authentication
+- `/pvm-data/api/0/station/select_by_condition` — station listing
+- `/pvm-data/api/0/station/data/count_station_real_data` — real-time power/energy
+- `/pvm-data/api/0/station/data/count_device_by_station` — device listing
+- `/pvm-ctl/api/0/dev/setting/read` and `/write` — battery settings R/W with job polling
 
-Cloud data field mapping (based on verified API structure):
-- `data.reflux_station_data.pv_power` → PV power (W)
-- `data.reflux_station_data.bms_power` → Battery power (W)
-- `data.reflux_station_data.bms_soc` → Battery SoC (%)
-- `data.reflux_station_data.grid_power` → Grid power (W, + import / − export)
-- `data.reflux_station_data.load_power` → Home load (W)
-- `data.today_eq` → Daily energy (Wh integer → converted to kWh)
-- `data.total_eq` → Total energy (Wh integer → converted to kWh)
-- `data.tou_mode` → Battery work mode (1=Self-Consumption, 2=Economy, 3=Backup, 4=Off-Grid, 5=Self-Consumption + Max Power, 6=Backup + Max Power, 7=Peak Shaving, 8=Time of Use)
+### Local API (Protobuf, port 10081)
 
-Device listing endpoint (`/pvm/api/0/dev/select_by_page`) returns DTU, inverter, gateway, and battery info (serial, model, firmware, hardware) per station.
+Binary frame protocol with `HW` magic header. Supports:
+- Real-time data retrieval
+- Inverter power limit control
+- Inverter on/off control
+- No authentication required on LAN
 
-### Local API (HiBox gateway)
+### Modbus TCP (port 502)
 
-For local communication, the app connects to the HiBox-63T-G3 gateway over TCP (default port 10081) using protobuf-encoded messages. This is the same protocol used by the Hoymiles mobile app on your local network.
-
-- No authentication required on the local network
-- Messages use a binary frame with `HM` header, command ID, sequence number, and CRC-16/ARC checksum
-- Real-time data, energy storage data, and battery mode control are all available locally
-- The port is configurable in device settings (default: 10081)
-- Polling interval: 60 seconds (aggressive polling below 30s can disrupt cloud connectivity)
-
-### Modbus TCP (DTS-G3 stick) — Experimental
-
-As an alternative to the protobuf protocol, the app supports **Modbus TCP** communication on port 502. This is primarily used by the **DTS-G3** data transfer stick and other Hoymiles DTU devices that support the Modbus TCP interface.
-
-- FC03 (Read Holding Registers) and FC04 (Read Input Registers) are supported
-- **Confirmed registers** (DTU-Pro V1.2 spec): DTU info (0x0000), micro-inverter PV port data (0x1000+), plant aggregate (0x2000+)
-- **ESS/battery registers are NOT mapped** — the DTU-Pro register map covers micro-inverters only. HiOne battery, grid, load, and mode data is not available via Modbus TCP (use protobuf or cloud instead)
-- **HiBox compatibility note**: the HiBox gateway responds to Modbus TCP but does NOT follow the DTU-Pro register layout. Plant aggregate (0x2000) and ESS blocks (0x3000–0x6000) are not supported. PV port registers may contain non-standard data. The app validates all Modbus values with per-field plausibility checks and cross-validates grid indicators (voltage/frequency) to detect incompatible register layouts.
-- The app returns **confidence metadata** for each data field: `confirmed` (from verified registers), `none` (no mapping or unreliable data)
-- If protobuf communication fails, the app falls back to Modbus TCP — only confirmed PV power and validated energy values are used; unreliable energy and ESS fields are skipped to preserve previous cloud/protobuf values
-- **Hybrid top-up**: when Modbus TCP connects but has no ESS/energy mapping, the app automatically fetches missing data (battery, grid, load, energy) from the cloud API. The data source shows as `local+cloud`
-- **Export scan report**: generates a comprehensive, shareable JSON report combining known blocks scan + ESS probe for community register discovery efforts
-- Three diagnostic tools in app settings:
-  - **Quick Scan**: checks known DTU-Pro register blocks + ESS candidate blocks
-  - **Deep Scan**: probes all 65,536 registers (0x0000–0xFFFF) with ASCII decoding, signed interpretation, and FC03/FC04 testing
-  - **ESS Probe**: tests candidate ESS register blocks (0x3000–0x6000) with strict plausibility validation
-
-### Cloud login hardening
-
-To protect your S-Miles Cloud account from repeated failed login attempts (which can trigger account lockout by Hoymiles), the app implements an exponential backoff strategy:
-
-- **First failure**: 30-second wait before next attempt
-- **Subsequent failures**: wait time doubles each time (30s → 60s → 120s → ...)
-- **Account lockout detected**: 12-hour cooldown to prevent further damage
-- **Successful login**: backoff resets immediately
-- Backoff is also reset when you change credentials in device settings
-
-## Known limitations
-
-| Limitation | Detail |
-|---|---|
-| Unofficial API | May break if Hoymiles updates their backend or local protocol |
-| Write operations | Battery mode, reserve SoC, max SoC, max power, grid limit, power limit, inverter on/off, and relay are supported via cloud and/or local protocol |
-| Device re-pair | Existing devices automatically migrate new capabilities on app update; re-pairing is only needed if the device class changes |
-| HiOne only | Not tested with DTU, micro-inverters, or HYT series |
-| Local polling | Intervals below 30 seconds can disrupt cloud and mobile app connectivity |
-| Battery capacity | Battery runtime estimates use 30 kWh default capacity (HiOne 4×8 kWh). Actual reserve and max SoC from cloud settings are used for precise estimates |
-
-## Security considerations
-
-- **Cloud credentials** are stored in Homey's encrypted device store and are only transmitted to the official Hoymiles S-Miles Cloud API (`neapi.hoymiles.com` and `euapi.hoymiles.com`). They are never sent to any third party.
-- **Local communication** does not require authentication. Anyone on your local network with access to the HiBox gateway IP can read data and control the battery mode. This is a limitation of the HiBox gateway, not of this app.
-- The password is hashed (Argon2id, SHA-256 or MD5, depending on the authentication profile) before being sent to the Hoymiles cloud API. The raw password is never transmitted.
+FC03 (Read Holding Registers) for DTU-Pro compatible devices:
+- DTU info (0x0000), PV ports (0x1000+), Plant aggregate (0x2000+)
+- ESS candidate blocks (0x3000–0x6000) probed but not confirmed on HiBox
+- Per-field plausibility validation rejects garbage data
 
 ### Data validation
 
-All incoming data (cloud and Modbus TCP) passes through plausibility validation before updating Homey capabilities:
-
-| Field | Valid range | Action if invalid |
-|---|---|---|
-| PV power | -500 to 50,000 W | Rejected, set to 0 |
-| Battery power | -50,000 to 50,000 W | Rejected, set to 0 |
-| Grid power | -50,000 to 50,000 W | Rejected, set to 0 |
-| Load power | -500 to 50,000 W | Rejected, set to 0 |
-| Battery SoC | 0 to 100% | Clamped |
-| Daily energy | 0 to 200 kWh | Rejected, set to 0 |
-| Total energy | 0 to 100,000 kWh | Rejected, set to 0 |
-
-Additionally:
-- Daily energy is cross-checked against total energy (daily ≤ total)
-- A ±10 W deadband prevents state flickering on battery charge/discharge and grid import/export splits
-- Modbus energy validation: rejects values > 100 MWh (catches the 613,426 kWh garbage from incompatible register layouts)
-- All rejections are logged with the raw value, mapped value, source, and reason
+All values pass through `DataNormalizer.js`:
+- ±10 W deadband prevents state flickering on battery/grid splits
+- Plausibility ranges: PV 0–100kW, battery ±50kW, grid ±100kW, SoC 0–100%, energy 0–200kWh daily
+- Invalid values are rejected (not set to zero) to preserve previous good values
 
 ### Signed power conventions
 
@@ -368,7 +275,21 @@ Additionally:
 | `grid_power > 0` | Importing from grid |
 | `grid_power < 0` | Exporting to grid |
 
-A ±10 W deadband is applied: values within the deadband are treated as idle/neutral. Split positive values (`battery_charge_power`, `battery_discharge_power`, `grid_import_power`, `grid_export_power`) are derived from the signed values with this deadband for easier use in Flows.
+## Known limitations
+
+| Limitation | Detail |
+|---|---|
+| Unofficial API | May break if Hoymiles updates their backend or local protocol |
+| HiOne only | Not tested with DTU, micro-inverters, or HYT series |
+| Local polling | Intervals below 30 seconds can disrupt cloud and mobile app connectivity |
+| Battery capacity | Runtime estimates use 30 kWh default (HiOne 4×8 kWh) |
+| Modbus ESS | Battery/grid/load data not available via Modbus TCP on HiBox — use Protobuf or Cloud |
+
+## Security
+
+- **Cloud credentials** are stored in Homey's encrypted device store and only transmitted to the official Hoymiles S-Miles Cloud API
+- **Local communication** does not require authentication (HiBox limitation)
+- Passwords are hashed (Argon2id or MD5) before transmission — raw passwords are never sent
 
 ## Credits
 
@@ -379,8 +300,6 @@ If you like this, consider [buying me a coffee](https://buymeacoffee.com/kabxpqq
 Pull requests and issue reports are welcome on [GitHub](https://github.com/rcoemans/com.hoymiles.hione).
 
 ## Acknowledgements
-
-This Homey app builds on existing community efforts around the Hoymiles ecosystem.
 
 - **Inspiration:** [Hoymiles HiOne — Homey App](https://github.com/ItsRaYnor/homey-app-hoymiles-hione)
 - **Local protocol reference:** [hoymiles-wifi](https://github.com/suaveolent/hoymiles-wifi) — Python library for local DTU communication via protobuf (MIT)

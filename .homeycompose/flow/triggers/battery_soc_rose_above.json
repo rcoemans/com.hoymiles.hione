@@ -1,0 +1,8 @@
+{
+  "title": { "en": "Battery SoC rose above", "nl": "Accu SoC steeg boven" },
+  "titleFormatted": { "en": "Battery SoC rose above [[soc]]%", "nl": "Accu SoC steeg boven [[soc]]%" },
+  "args": [
+    { "name": "device", "type": "device", "filter": "driver_id=station" },
+    { "name": "soc", "type": "number", "min": 0, "max": 100, "step": 1, "title": { "en": "SoC (%)", "nl": "SoC (%)" } }
+  ]
+}

@@ -1,6 +1,6 @@
 {
-  "id": "com.hoymiles.hione-vork",
-  "version": "1.1.1",
+  "id": "com.hoymiles.hione",
+  "version": "2.0.0",
   "compatibility": ">=12.0.0",
   "sdk": 3,
   "platforms": [
@@ -12,8 +12,8 @@
     "nl": "Hoymiles HiOne"
   },
   "description": {
-    "en": "Local insights and smart automation for your Hoymiles HiOne home battery system.",
-    "nl": "Lokale inzichten en slimme automatisering voor je Hoymiles HiOne thuisbatterij."
+    "en": "Monitor and control your Hoymiles HiOne battery system via Cloud, Modbus TCP and Protobuf.",
+    "nl": "Monitor en beheer je Hoymiles HiOne batterijsysteem via Cloud, Modbus TCP en Protobuf."
   },
   "tags": {
     "en": [
@@ -23,20 +23,54 @@
       "battery",
       "bess",
       "energy",
-      "smiles"
+      "smiles",
+      "inverter",
+      "modbus"
     ],
     "nl": [
       "hoymiles",
       "hione",
       "zonnepanelen",
       "batterij",
-      "energie"
+      "energie",
+      "omvormer",
+      "modbus"
     ]
   },
   "category": [
     "energy"
   ],
   "permissions": [],
+  "api": {
+    "testLogin": {
+      "method": "POST",
+      "path": "/login"
+    },
+    "forgetLogin": {
+      "method": "POST",
+      "path": "/logout"
+    },
+    "getDiagnostics": {
+      "method": "GET",
+      "path": "/diagnostics"
+    },
+    "startDiagnostics": {
+      "method": "POST",
+      "path": "/diagnostics/start"
+    },
+    "stopDiagnostics": {
+      "method": "POST",
+      "path": "/diagnostics/stop"
+    },
+    "clearDiagnostics": {
+      "method": "POST",
+      "path": "/diagnostics/clear"
+    },
+    "exportDiagnostics": {
+      "method": "GET",
+      "path": "/diagnostics/export"
+    }
+  },
   "images": {
     "small": "/assets/images/small.png",
     "large": "/assets/images/large.png",

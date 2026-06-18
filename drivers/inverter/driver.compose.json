@@ -1,0 +1,48 @@
+{
+  "name": { "en": "HiOne Inverter", "nl": "HiOne Omvormer" },
+  "class": "solarpanel",
+  "capabilities": [
+    "measure_power",
+    "hoymiles_phase_a_voltage",
+    "hoymiles_phase_b_voltage",
+    "hoymiles_phase_c_voltage",
+    "hoymiles_phase_a_current",
+    "hoymiles_phase_b_current",
+    "hoymiles_phase_c_current",
+    "hoymiles_phase_a_power",
+    "hoymiles_phase_b_power",
+    "hoymiles_phase_c_power",
+    "hoymiles_frequency",
+    "hoymiles_temperature",
+    "hoymiles_bus_voltage",
+    "hoymiles_inverter_status",
+    "hoymiles_last_update"
+  ],
+  "capabilitiesOptions": {
+    "measure_power": {
+      "title": { "en": "Total Active Power", "nl": "Totaal actief vermogen" }
+    }
+  },
+  "images": {
+    "small": "/drivers/inverter/assets/icon.svg",
+    "large": "/drivers/inverter/assets/icon.svg"
+  },
+  "pair": [
+    { "id": "select_parent" },
+    { "id": "list_devices", "template": "list_devices", "navigation": { "next": "add_devices" } },
+    { "id": "add_devices", "template": "add_devices" }
+  ],
+  "settings": [
+    {
+      "type": "group",
+      "label": { "en": "System info", "nl": "Systeeminfo" },
+      "children": [
+        { "id": "appliance", "type": "label", "label": { "en": "Appliance", "nl": "Apparaat" }, "value": "-" },
+        { "id": "model", "type": "label", "label": { "en": "Model", "nl": "Model" }, "value": "-" },
+        { "id": "serial_number", "type": "label", "label": { "en": "Serial number", "nl": "Serienummer" }, "value": "-" },
+        { "id": "firmware_version", "type": "label", "label": { "en": "Firmware version", "nl": "Firmwareversie" }, "value": "-" },
+        { "id": "hardware_version", "type": "label", "label": { "en": "Hardware version", "nl": "Hardwareversie" }, "value": "-" }
+      ]
+    }
+  ]
+}

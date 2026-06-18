@@ -1,0 +1,11 @@
+{
+  "type": "number",
+  "title": { "en": "Min Cell Temperature", "nl": "Min celtemperatuur" },
+  "units": "°C",
+  "insights": true,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/thermometer.svg"
+}

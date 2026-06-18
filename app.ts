@@ -1,470 +1,254 @@
-'use strict';
-
 import Homey from 'homey';
 
-const HoymilesApi      = require('./lib/HoymilesApi');
-const ModbusTcpClient  = require('./lib/ModbusTcpClient');
-const ModbusValidator  = require('./lib/ModbusValidator');
+const { PollingService } = require('./lib/PollingService');
+const { DiagnosticsEngine } = require('./lib/DiagnosticsEngine');
+const { BATTERY_MODES } = require('./lib/HoymilesApi');
 
-const LOG_MAX = 200;
+class HoymilesHiOneApp extends Homey.App {
+  pollingService!: any;
+  diagnostics!: any;
 
-module.exports = class HoymilesHiOneApp extends Homey.App {
+  _triggerBatteryModeChanged!: any;
+  _triggerBatterySocRoseAbove!: any;
+  _triggerBatterySocDroppedBelow!: any;
+  _triggerBatteryStartedCharging!: any;
+  _triggerBatteryStartedDischarging!: any;
+  _triggerBatteryStoppedCharging!: any;
+  _triggerBatteryStoppedDischarging!: any;
+  _triggerConnectionSourceChanged!: any;
+  _triggerGatewayCameOnline!: any;
+  _triggerGatewayWentOffline!: any;
+  _triggerGridStartedExporting!: any;
+  _triggerGridStartedImporting!: any;
+  _triggerPvProductionStarted!: any;
+  _triggerPvProductionStopped!: any;
 
   async onInit() {
-    this.log('Hoymiles HiOne app started');
+    this.log('HoymilesHiOneApp v2.0.0 initialising...');
 
-    // ── App-level log ring buffer (safe: no class fields, no log interception) ──
-    const logBuf: string[] = this.homey.settings.get('app_log') || [];
-    const self = this;
-
-    (this as any).appendLog = function (level: string, ...args: any[]) {
-      try {
-        const ts = new Date().toISOString().replace('T', ' ').substring(0, 19);
-        const msg = `[${ts}] [${level}] ${args.map((a: any) => typeof a === 'string' ? a : JSON.stringify(a)).join(' ')}`;
-        logBuf.push(msg);
-        if (logBuf.length > LOG_MAX) logBuf.splice(0, logBuf.length - LOG_MAX);
-        self.homey.settings.set('app_log', logBuf);
-      } catch (_) { /* never crash the app for logging */ }
-    };
-
-    (this as any).clearLog = function () {
-      logBuf.length = 0;
-      self.homey.settings.set('app_log', []);
-    };
-
-    // Shared API instance; drivers can access via this.homey.app.api
-    (this as any).api = new HoymilesApi({
-      log:   (...args: any[]) => { this.log(...args); (this as any).appendLog('INFO', ...args); },
-      error: (...args: any[]) => { this.error(...args); (this as any).appendLog('ERROR', ...args); },
+    this.pollingService = new PollingService({
+      log: this.log.bind(this),
+      error: this.error.bind(this),
     });
 
-    // ── Action cards ──────────────────────────────────────────────────────
+    this.diagnostics = new DiagnosticsEngine({
+      log: this.log.bind(this),
+      error: this.error.bind(this),
+    });
 
-    this.homey.flow
-      .getActionCard('set_battery_mode')
-      .registerRunListener(async ({ device, mode }: any) => {
-        return device.setBatteryMode(mode);
+    this._registerFlowCards();
+
+    this.log('HoymilesHiOneApp initialised');
+  }
+
+  async onUninit() {
+    this.diagnostics.stop();
+  }
+
+  _registerFlowCards() {
+    // ── TRIGGERS ──
+    // Most triggers fire from the device driver, so we just get references
+    this._triggerBatteryModeChanged     = this.homey.flow.getDeviceTriggerCard('battery_mode_changed');
+    this._triggerBatterySocRoseAbove    = this.homey.flow.getDeviceTriggerCard('battery_soc_rose_above');
+    this._triggerBatterySocDroppedBelow = this.homey.flow.getDeviceTriggerCard('battery_soc_dropped_below');
+    this._triggerBatteryStartedCharging      = this.homey.flow.getDeviceTriggerCard('battery_started_charging');
+    this._triggerBatteryStartedDischarging   = this.homey.flow.getDeviceTriggerCard('battery_started_discharging');
+    this._triggerBatteryStoppedCharging      = this.homey.flow.getDeviceTriggerCard('battery_stopped_charging');
+    this._triggerBatteryStoppedDischarging   = this.homey.flow.getDeviceTriggerCard('battery_stopped_discharging');
+    this._triggerConnectionSourceChanged     = this.homey.flow.getDeviceTriggerCard('connection_source_changed');
+    this._triggerGatewayCameOnline    = this.homey.flow.getDeviceTriggerCard('gateway_came_online');
+    this._triggerGatewayWentOffline   = this.homey.flow.getDeviceTriggerCard('gateway_went_offline');
+    this._triggerGridStartedExporting = this.homey.flow.getDeviceTriggerCard('grid_started_exporting');
+    this._triggerGridStartedImporting = this.homey.flow.getDeviceTriggerCard('grid_started_importing');
+    this._triggerPvProductionStarted  = this.homey.flow.getDeviceTriggerCard('pv_production_started');
+    this._triggerPvProductionStopped  = this.homey.flow.getDeviceTriggerCard('pv_production_stopped');
+
+    // SoC threshold triggers need a runListener to evaluate the threshold arg
+    this._triggerBatterySocRoseAbove.registerRunListener(async (args: any, state: any) => {
+      return state.soc >= args.soc;
+    });
+    this._triggerBatterySocDroppedBelow.registerRunListener(async (args: any, state: any) => {
+      return state.soc <= args.soc;
+    });
+
+    // ── CONDITIONS ──
+    const condBatteryModeIs = this.homey.flow.getConditionCard('battery_mode_is');
+    condBatteryModeIs.registerRunListener(async (args: any, state: any) => {
+      const device = args.device;
+      const current = await device.getCapabilityValue('hoymiles_battery_mode');
+      return current === args.mode;
+    });
+
+    const condBatteryCharging = this.homey.flow.getConditionCard('battery_charging');
+    condBatteryCharging.registerRunListener(async (args: any) => {
+      const state = await args.device.getCapabilityValue('hoymiles_battery_state');
+      return state === 'charging';
+    });
+
+    const condBatteryDischarging = this.homey.flow.getConditionCard('battery_discharging');
+    condBatteryDischarging.registerRunListener(async (args: any) => {
+      const state = await args.device.getCapabilityValue('hoymiles_battery_state');
+      return state === 'discharging';
+    });
+
+    const condSocAbove = this.homey.flow.getConditionCard('battery_soc_above');
+    condSocAbove.registerRunListener(async (args: any) => {
+      const soc = await args.device.getCapabilityValue('measure_battery');
+      return (soc || 0) >= args.soc;
+    });
+
+    const condSocBelow = this.homey.flow.getConditionCard('battery_soc_below');
+    condSocBelow.registerRunListener(async (args: any) => {
+      const soc = await args.device.getCapabilityValue('measure_battery');
+      return (soc || 0) <= args.soc;
+    });
+
+    const condConnectionLocal = this.homey.flow.getConditionCard('connection_is_local');
+    condConnectionLocal.registerRunListener(async (args: any) => {
+      const src = await args.device.getCapabilityValue('hoymiles_connection_source');
+      return src === 'local';
+    });
+
+    const condGatewayOnline = this.homey.flow.getConditionCard('gateway_is_online');
+    condGatewayOnline.registerRunListener(async (args: any) => {
+      return await args.device.getCapabilityValue('hoymiles_gateway_online') === true;
+    });
+
+    const condGridExporting = this.homey.flow.getConditionCard('grid_is_exporting');
+    condGridExporting.registerRunListener(async (args: any) => {
+      const state = await args.device.getCapabilityValue('hoymiles_grid_state');
+      return state === 'exporting';
+    });
+
+    const condGridImporting = this.homey.flow.getConditionCard('grid_is_importing');
+    condGridImporting.registerRunListener(async (args: any) => {
+      const state = await args.device.getCapabilityValue('hoymiles_grid_state');
+      return state === 'importing';
+    });
+
+    const condLoadPowerAbove = this.homey.flow.getConditionCard('load_power_above');
+    condLoadPowerAbove.registerRunListener(async (args: any) => {
+      const power = await args.device.getCapabilityValue('hoymiles_load_power');
+      return (power || 0) >= args.watts;
+    });
+
+    const condPvPowerAbove = this.homey.flow.getConditionCard('pv_power_above');
+    condPvPowerAbove.registerRunListener(async (args: any) => {
+      const power = await args.device.getCapabilityValue('hoymiles_pv_power');
+      return (power || 0) >= args.watts;
+    });
+
+    // ── ACTIONS ──
+    const actSetBatteryMode = this.homey.flow.getActionCard('set_battery_mode');
+    actSetBatteryMode.registerRunListener(async (args: any) => {
+      await args.device.onActionSetBatteryMode(args.mode);
+    });
+
+    const actSetReserveSoc = this.homey.flow.getActionCard('set_reserve_soc');
+    actSetReserveSoc.registerRunListener(async (args: any) => {
+      await args.device.onActionSetReserveSoc(args.soc);
+    });
+
+    const actSetMaxSoc = this.homey.flow.getActionCard('set_max_soc');
+    actSetMaxSoc.registerRunListener(async (args: any) => {
+      await args.device.onActionSetMaxSoc(args.soc);
+    });
+
+    const actSetMaxChargePower = this.homey.flow.getActionCard('set_max_charge_power');
+    actSetMaxChargePower.registerRunListener(async (args: any) => {
+      await args.device.onActionSetMaxChargePower(args.power);
+    });
+
+    const actSetMaxDischargePower = this.homey.flow.getActionCard('set_max_discharge_power');
+    actSetMaxDischargePower.registerRunListener(async (args: any) => {
+      await args.device.onActionSetMaxDischargePower(args.power);
+    });
+
+    const actSetGridLimit = this.homey.flow.getActionCard('set_grid_limit');
+    actSetGridLimit.registerRunListener(async (args: any) => {
+      await args.device.onActionSetGridLimit(args.watts);
+    });
+
+    const actRefreshData = this.homey.flow.getActionCard('refresh_data');
+    actRefreshData.registerRunListener(async (args: any) => {
+      await args.device.onActionRefreshData();
+    });
+
+    const actSetInverterState = this.homey.flow.getActionCard('set_inverter_state');
+    actSetInverterState.registerRunListener(async (args: any) => {
+      await args.device.onActionSetInverterState(args.serial, args.state === 'on');
+    });
+
+    const actSetTouPeriod = this.homey.flow.getActionCard('set_tou_period');
+    actSetTouPeriod.registerRunListener(async (args: any) => {
+      await args.device.onActionSetTouPeriod({
+        chargeFrom:     args.charge_from,
+        chargeTo:       args.charge_to,
+        chargePower:    args.charge_power,
+        chargeSoc:      args.charge_soc,
+        dischargeFrom:  args.discharge_from,
+        dischargeTo:    args.discharge_to,
+        dischargePower: args.discharge_power,
+        dischargeSoc:   args.discharge_soc,
       });
+    });
 
-    this.homey.flow
-      .getActionCard('refresh_data')
-      .registerRunListener(async ({ device }: any) => {
-        return device.pollNow();
+    const actSetPeakShaving = this.homey.flow.getActionCard('set_peak_shaving');
+    actSetPeakShaving.registerRunListener(async (args: any) => {
+      await args.device.onActionSetPeakShaving({
+        reserveSoc: args.reserve_soc,
+        maxSoc:     args.max_soc,
+        gridLimit:  args.meter_power,
       });
+    });
 
-    this.homey.flow
-      .getActionCard('prefer_local_connection')
-      .registerRunListener(async ({ device }: any) => {
-        return device.preferLocal();
-      });
+    const actSetRelay = this.homey.flow.getActionCard('set_relay');
+    actSetRelay.registerRunListener(async (args: any) => {
+      await args.device.onActionSetRelay(args.state === 'on');
+    });
 
-    this.homey.flow
-      .getActionCard('prefer_cloud_connection')
-      .registerRunListener(async ({ device }: any) => {
-        return device.preferCloud();
-      });
-
-    this.homey.flow
-      .getActionCard('enable_cloud_fallback')
-      .registerRunListener(async ({ device }: any) => {
-        return device.setCloudFallback(true);
-      });
-
-    this.homey.flow
-      .getActionCard('disable_cloud_fallback')
-      .registerRunListener(async ({ device }: any) => {
-        return device.setCloudFallback(false);
-      });
-
-    this.homey.flow
-      .getActionCard('set_reserve_soc')
-      .registerRunListener(async ({ device, soc }: any) => {
-        return device.setReserveSoc(Number(soc));
-      });
-
-    this.homey.flow
-      .getActionCard('set_max_soc')
-      .registerRunListener(async ({ device, soc }: any) => {
-        return device.setMaxSoc(Number(soc));
-      });
-
-    this.homey.flow
-      .getActionCard('set_max_power')
-      .registerRunListener(async ({ device, power }: any) => {
-        return device.setMaxPower(Number(power));
-      });
-
-    this.homey.flow
-      .getActionCard('set_grid_limit')
-      .registerRunListener(async ({ device, limit }: any) => {
-        return device.setGridLimit(Number(limit));
-      });
-
-    this.homey.flow
-      .getActionCard('set_peak_shaving')
-      .registerRunListener(async ({ device, reserve_soc, max_soc, grid_limit }: any) => {
-        return device.setPeakShaving(Number(reserve_soc), Number(max_soc), Number(grid_limit));
-      });
-
-    this.homey.flow
-      .getActionCard('set_tou_period')
-      .registerRunListener(async ({ device, charge_from, charge_to, charge_power }: any) => {
-        return device.setTouPeriod(charge_from, charge_to, Number(charge_power));
-      });
-
-    this.homey.flow
-      .getActionCard('set_power_limit')
-      .registerRunListener(async ({ device, limit }: any) => {
-        return device.setPowerLimit(Number(limit));
-      });
-
-    this.homey.flow
-      .getActionCard('set_inverter_state')
-      .registerRunListener(async ({ device, state }: any) => {
-        return device.setInverterState(state === 'on');
-      });
-
-    this.homey.flow
-      .getActionCard('set_relay')
-      .registerRunListener(async ({ device, state }: any) => {
-        return device.setRelay(state === 'on');
-      });
-
-    // ── Condition cards ───────────────────────────────────────────────────
-
-    this.homey.flow
-      .getConditionCard('battery_charging')
-      .registerRunListener(async ({ device }: any) => {
-        const bp = device.getCapabilityValue('hione_battery_power') ?? 0;
-        return bp > 10;
-      });
-
-    this.homey.flow
-      .getConditionCard('battery_discharging')
-      .registerRunListener(async ({ device }: any) => {
-        const bp = device.getCapabilityValue('hione_battery_power') ?? 0;
-        return bp < -10;
-      });
-
-    this.homey.flow
-      .getConditionCard('battery_soc_above')
-      .registerRunListener(async ({ device, threshold }: any) => {
-        const soc = device.getCapabilityValue('measure_battery') ?? 0;
-        return soc > threshold;
-      });
-
-    this.homey.flow
-      .getConditionCard('battery_soc_below')
-      .registerRunListener(async ({ device, threshold }: any) => {
-        const soc = device.getCapabilityValue('measure_battery') ?? 0;
-        return soc < threshold;
-      });
-
-    this.homey.flow
-      .getConditionCard('grid_importing')
-      .registerRunListener(async ({ device }: any) => {
-        const gp = device.getCapabilityValue('hione_grid_power') ?? 0;
-        return gp > 10;
-      });
-
-    this.homey.flow
-      .getConditionCard('grid_exporting')
-      .registerRunListener(async ({ device }: any) => {
-        const gp = device.getCapabilityValue('hione_grid_power') ?? 0;
-        return gp < -10;
-      });
-
-    this.homey.flow
-      .getConditionCard('pv_power_above')
-      .registerRunListener(async ({ device, threshold }: any) => {
-        const pv = device.getCapabilityValue('hione_pv_power') ?? 0;
-        return pv > threshold;
-      });
-
-    this.homey.flow
-      .getConditionCard('load_power_above')
-      .registerRunListener(async ({ device, threshold }: any) => {
-        const lp = device.getCapabilityValue('hione_load_power') ?? 0;
-        return lp > threshold;
-      });
-
-    this.homey.flow
-      .getConditionCard('battery_mode_is')
-      .registerRunListener(async ({ device, mode }: any) => {
-        return device.getCapabilityValue('hione_battery_mode') === String(mode);
-      });
-
-    this.homey.flow
-      .getConditionCard('gateway_online')
-      .registerRunListener(async ({ device }: any) => {
-        return device.getCapabilityValue('hione_gateway_online') === true;
-      });
-
-    this.homey.flow
-      .getConditionCard('connection_is_local')
-      .registerRunListener(async ({ device }: any) => {
-        return device.getCapabilityValue('hione_connection_source') === 'local';
-      });
-
-    // ── Trigger cards with thresholds ─────────────────────────────────────
-
-    this.homey.flow
-      .getDeviceTriggerCard('battery_soc_below_threshold')
-      .registerRunListener(async ({ device, threshold }: any) => {
-        const soc = device.getCapabilityValue('measure_battery') ?? 0;
-        return soc < threshold;
-      });
-
-    this.homey.flow
-      .getDeviceTriggerCard('battery_soc_above_threshold')
-      .registerRunListener(async ({ device, threshold }: any) => {
-        const soc = device.getCapabilityValue('measure_battery') ?? 0;
-        return soc > threshold;
-      });
-
-    // ── Modbus validation engine ──────────────────────────────────────────
-    (this as any)._validator = null;
-    (this as any)._validationInterval = null;
-
-    // ── Settings API: Modbus register scan diagnostic ───────────────────
-    this.homey.settings.on('set', (key: string) => {
-      if (key === 'run_modbus_scan') {
-        this._runModbusScan().catch(() => {});
-      }
-      if (key === 'run_modbus_deep_scan') {
-        this._runModbusDeepScan().catch(() => {});
-      }
-      if (key === 'run_modbus_ess_probe') {
-        this._runModbusEssProbe().catch(() => {});
-      }
-      if (key === 'start_modbus_validation') {
-        this._startModbusValidation().catch(() => {});
-      }
-      if (key === 'stop_modbus_validation') {
-        this._stopModbusValidation();
-      }
-      if (key === 'export_validation_data') {
-        this._exportValidationData();
-      }
-      if (key === 'clear_validation_data') {
-        this._clearValidationData();
-      }
+    const actSetPowerLimit = this.homey.flow.getActionCard('set_power_limit');
+    actSetPowerLimit.registerRunListener(async (args: any) => {
+      await args.device.onActionSetPowerLimit(args.limit);
     });
   }
 
-  private _createModbusClient(): any {
-    const gatewayIp = this.homey.settings.get('gateway_ip');
-    if (!gatewayIp) return null;
-    return new ModbusTcpClient({
-      host: gatewayIp,
-      log:   (...args: any[]) => { this.log(...args); (this as any).appendLog?.('INFO', ...args); },
-      error: (...args: any[]) => { this.error(...args); (this as any).appendLog?.('ERROR', ...args); },
-    });
-  }
-
-  private async _runModbusScan() {
+  // Public API for diagnostics (called from api.js)
+  async apiLogin(body: any) {
+    // Test login only — used by settings page
+    const { HoymilesApi } = require('./lib/HoymilesApi');
+    const api = new HoymilesApi({ log: this.log.bind(this), error: this.error.bind(this) });
     try {
-      (this as any).appendLog?.('INFO', 'Modbus register scan requested...');
-      const client = this._createModbusClient();
-      if (!client) {
-        this.homey.settings.set('modbus_scan_result', { error: 'No gateway IP configured in app settings. Set the Gateway IP address first.' });
-        return;
-      }
-
-      const gatewayIp = this.homey.settings.get('gateway_ip');
-      (this as any).appendLog?.('INFO', `Scanning Modbus registers at ${gatewayIp}:502 (known blocks + ESS candidates)...`);
-      const result = await client.scanKnownBlocks();
-
-      if (result && Object.keys(result).length > 0) {
-        this.homey.settings.set('modbus_scan_result', result);
-        (this as any).appendLog?.('INFO', 'Modbus scan completed: ' + JSON.stringify(result).substring(0, 500));
-      } else {
-        this.homey.settings.set('modbus_scan_result', { error: 'No data returned from Modbus scan. The gateway at ' + gatewayIp + ' may not support Modbus TCP on port 502.' });
-        (this as any).appendLog?.('INFO', 'Modbus scan completed but no data returned');
-      }
+      await api.login(body.email, body.password, body.mode || 'auto');
+      return { success: true };
     } catch (err: any) {
-      this.homey.settings.set('modbus_scan_result', { error: 'Scan failed: ' + err.message });
-      (this as any).appendLog?.('ERROR', 'Modbus scan failed: ' + err.message);
+      return { success: false, error: err.message };
     }
   }
 
-  private async _runModbusDeepScan() {
-    try {
-      (this as any).appendLog?.('INFO', 'Modbus DEEP scan requested (0x0000–0xFFFF) — this may take a while...');
-      const client = this._createModbusClient();
-      if (!client) {
-        this.homey.settings.set('modbus_deep_scan_result', { error: 'No gateway IP configured in app settings.' });
-        return;
-      }
-
-      const result = await client.deepScan();
-      this.homey.settings.set('modbus_deep_scan_result', result);
-      (this as any).appendLog?.('INFO', `Deep scan complete: ${result.summary.totalNonZero} non-zero registers in ${result.summary.totalReadable} readable`);
-    } catch (err: any) {
-      this.homey.settings.set('modbus_deep_scan_result', { error: 'Deep scan failed: ' + err.message });
-      (this as any).appendLog?.('ERROR', 'Modbus deep scan failed: ' + err.message);
-    }
+  apiGetDiagnostics() {
+    return this.diagnostics.getStatus();
   }
 
-  // ── Modbus Validation Engine ──────────────────────────────────────────────
-
-  private async _startModbusValidation() {
-    try {
-      const intervalSec = this.homey.settings.get('validation_interval') || 60;
-      (this as any).appendLog?.('INFO', `Modbus validation starting (interval: ${intervalSec}s)...`);
-
-      // Create validator if needed
-      if (!(this as any)._validator) {
-        (this as any)._validator = new ModbusValidator({
-          log: (...args: any[]) => { this.log(...args); (this as any).appendLog?.('INFO', ...args); },
-          error: (...args: any[]) => { this.error(...args); (this as any).appendLog?.('ERROR', ...args); },
-        });
-
-        // Restore previous state
-        const savedSnapshots = this.homey.settings.get('validation_snapshots');
-        const savedConfidence = this.homey.settings.get('validation_confidence');
-        if (savedSnapshots || savedConfidence) {
-          (this as any)._validator.loadState(savedSnapshots, savedConfidence);
-        }
-      }
-
-      // Find the first HiOne device for its hybrid instance
-      const driver = this.homey.drivers.getDriver('hione');
-      const devices = driver.getDevices();
-      if (!devices || devices.length === 0) {
-        this.homey.settings.set('validation_status', { running: false, error: 'No HiOne device found. Add a device first.' });
-        (this as any).appendLog?.('ERROR', 'Validation: No HiOne device found');
-        return;
-      }
-
-      const device = devices[0] as any;
-      const hybrid = device._hybrid;
-      if (!hybrid) {
-        this.homey.settings.set('validation_status', { running: false, error: 'Device hybrid not initialized' });
-        return;
-      }
-
-      // Stop existing interval
-      if ((this as any)._validationInterval) {
-        clearInterval((this as any)._validationInterval);
-      }
-
-      // Run first snapshot immediately
-      await this._runValidationCycle(hybrid);
-
-      // Start periodic collection
-      (this as any)._validationInterval = setInterval(async () => {
-        await this._runValidationCycle(hybrid);
-      }, intervalSec * 1000);
-
-      this.homey.settings.set('validation_status', {
-        running: true,
-        startedAt: new Date().toISOString(),
-        intervalSec,
-        snapshotCount: (this as any)._validator.getSnapshots().length,
-      });
-      (this as any).appendLog?.('INFO', 'Modbus validation started');
-    } catch (err: any) {
-      this.homey.settings.set('validation_status', { running: false, error: err.message });
-      (this as any).appendLog?.('ERROR', 'Validation start failed: ' + err.message);
-    }
+  apiStartDiagnostics(body: any) {
+    const config = body || {};
+    this.diagnostics.start(config, (config.intervalMs || 60) * 1000);
+    return { started: true };
   }
 
-  private async _runValidationCycle(hybrid: any) {
-    try {
-      const validator = (this as any)._validator;
-      if (!validator) return;
-
-      const snapshot = await hybrid.collectValidationSnapshot(validator);
-      if (!snapshot) return;
-
-      // Save state periodically (every 10 snapshots to reduce settings writes)
-      const count = validator.getSnapshots().length;
-      if (count % 10 === 0 || count <= 3) {
-        this.homey.settings.set('validation_snapshots', validator.getSnapshots());
-        this.homey.settings.set('validation_confidence', validator.getConfidence());
-      }
-
-      // Update status
-      this.homey.settings.set('validation_status', {
-        running: true,
-        startedAt: this.homey.settings.get('validation_status')?.startedAt,
-        intervalSec: this.homey.settings.get('validation_status')?.intervalSec,
-        snapshotCount: count,
-        lastSnapshot: snapshot.timestampStart,
-        lastDurationMs: snapshot.durationMs,
-      });
-
-      // Log deltas summary
-      if (snapshot.deltas) {
-        const keys = Object.keys(snapshot.deltas);
-        const exactMatches = keys.filter(k => snapshot.deltas[k].absDiff === 0).length;
-        (this as any).appendLog?.('VALID', `Snapshot #${count}: ${exactMatches}/${keys.length} exact matches, duration=${snapshot.durationMs}ms`);
-      }
-
-    } catch (err: any) {
-      (this as any).appendLog?.('ERROR', 'Validation cycle failed: ' + err.message);
-    }
+  apiStopDiagnostics() {
+    this.diagnostics.stop();
+    return { stopped: true };
   }
 
-  private _stopModbusValidation() {
-    if ((this as any)._validationInterval) {
-      clearInterval((this as any)._validationInterval);
-      (this as any)._validationInterval = null;
-    }
-
-    // Persist final state
-    const validator = (this as any)._validator;
-    if (validator) {
-      this.homey.settings.set('validation_snapshots', validator.getSnapshots());
-      this.homey.settings.set('validation_confidence', validator.getConfidence());
-    }
-
-    this.homey.settings.set('validation_status', {
-      running: false,
-      stoppedAt: new Date().toISOString(),
-      snapshotCount: validator ? validator.getSnapshots().length : 0,
-    });
-    (this as any).appendLog?.('INFO', 'Modbus validation stopped');
+  apiClearDiagnostics() {
+    this.diagnostics.clear();
+    return { cleared: true };
   }
 
-  private _exportValidationData() {
-    const validator = (this as any)._validator;
-    if (!validator) {
-      this.homey.settings.set('validation_export', { error: 'No validation data. Start validation first.' });
-      return;
-    }
-    const data = validator.exportData();
-    this.homey.settings.set('validation_export', data);
-    (this as any).appendLog?.('INFO', `Validation data exported: ${data.snapshots.length} snapshots, ${Object.keys(data.confidence).length} candidates`);
+  apiExportDiagnostics() {
+    return this.diagnostics.export();
   }
-
-  private _clearValidationData() {
-    const validator = (this as any)._validator;
-    if (validator) validator.clearData();
-    this.homey.settings.set('validation_snapshots', null);
-    this.homey.settings.set('validation_confidence', null);
-    this.homey.settings.set('validation_export', null);
-    this.homey.settings.set('validation_status', { running: false, snapshotCount: 0 });
-    (this as any).appendLog?.('INFO', 'Validation data cleared');
-  }
-
-  private async _runModbusEssProbe() {
-    try {
-      (this as any).appendLog?.('INFO', 'Modbus ESS probe requested (experimental)...');
-      const client = this._createModbusClient();
-      if (!client) {
-        this.homey.settings.set('modbus_ess_probe_result', { error: 'No gateway IP configured in app settings.' });
-        return;
-      }
-
-      const result = await client.probeEssRegisters();
-      this.homey.settings.set('modbus_ess_probe_result', result || { found: false, message: 'No plausible ESS data found in candidate register blocks.' });
-      (this as any).appendLog?.('INFO', 'ESS probe complete: ' + (result?.found ? `Found at ${result.block}` : 'No ESS data found'));
-    } catch (err: any) {
-      this.homey.settings.set('modbus_ess_probe_result', { error: 'ESS probe failed: ' + err.message });
-      (this as any).appendLog?.('ERROR', 'Modbus ESS probe failed: ' + err.message);
-    }
-  }
-
 }
+
+module.exports = HoymilesHiOneApp;

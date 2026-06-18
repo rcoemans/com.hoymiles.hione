@@ -1,0 +1,14 @@
+{
+  "type": "number",
+  "title": { "en": "Grid Power Limit", "nl": "Netvermogensgrens" },
+  "units": "W",
+  "min": 0,
+  "max": 50000,
+  "step": 100,
+  "decimals": 0,
+  "insights": false,
+  "getable": true,
+  "setable": true,
+  "uiComponent": "slider",
+  "icon": "/assets/power.svg"
+}

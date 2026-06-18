@@ -1,0 +1,11 @@
+{
+  "type": "number",
+  "title": { "en": "Battery Charge Power", "nl": "Accu laadvermogen" },
+  "units": "W",
+  "insights": true,
+  "decimals": 0,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/power.svg"
+}

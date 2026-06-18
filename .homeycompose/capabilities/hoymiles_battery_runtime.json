@@ -1,0 +1,11 @@
+{
+  "type": "number",
+  "title": { "en": "Battery Runtime", "nl": "Accurestduur" },
+  "units": "h",
+  "insights": true,
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/graph.svg"
+}

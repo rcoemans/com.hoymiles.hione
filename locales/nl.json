@@ -4,17 +4,31 @@
     "login_failed": "Inloggen mislukt. Controleer je S-Miles Cloud e-mail en wachtwoord.",
     "missing_credentials": "Ontbrekende inloggegevens. Koppel het apparaat opnieuw.",
     "local_unreachable": "Lokale gateway onbereikbaar. Controleer het IP-adres in de apparaatinstellingen.",
-    "set_mode_failed": "Kan de batterijmodus niet wijzigen. Probeer het later opnieuw."
+    "set_mode_failed": "Kan de batterijmodus niet wijzigen. Probeer het later opnieuw.",
+    "api_timeout": "API-verzoek is verlopen. De server is mogelijk bezet.",
+    "no_stations": "Geen stations gevonden. Controleer je S-Miles Cloud account.",
+    "no_gateway_ip": "Geen gateway IP geconfigureerd. Stel het IP in via apparaatinstellingen."
   },
   "pair": {
     "login_title": "Inloggen bij S-Miles Cloud",
-    "login_disclaimer": "Deze app gebruikt een niet-officiële API. Je inloggegevens worden alleen verstuurd naar hoymiles.com."
+    "login_disclaimer": "Deze app gebruikt een niet-officiële API. Je inloggegevens worden alleen verstuurd naar hoymiles.com.",
+    "select_station": "Selecteer station",
+    "configure_local": "Lokale verbinding instellen",
+    "select_parent": "Selecteer bovenliggend station"
   },
   "status": {
     "initializing": "Initialiseren...",
     "polling": "Gegevens ophalen...",
     "connected_local": "Verbonden (lokaal)",
     "connected_cloud": "Verbonden (cloud)",
-    "offline": "Offline"
+    "connected_hybrid": "Verbonden (hybride)",
+    "offline": "Offline",
+    "error": "Fout"
+  },
+  "diagnostics": {
+    "started": "Diagnostiek-verzameling gestart",
+    "stopped": "Diagnostiek-verzameling gestopt",
+    "cleared": "Diagnostiekgegevens gewist",
+    "exported": "Diagnostiekgegevens geëxporteerd"
   }
 }
