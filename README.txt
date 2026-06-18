@@ -29,6 +29,9 @@ ADDING DEVICES
 6. After the Station is added, add Inverter/Gateway/Battery devices linked to that station
 7. Data refreshes every 60 seconds (configurable 30-300s)
 
+AUTHENTICATION
+Login uses the modern two-step v3 S-Miles Cloud flow: pre-inspect (nonce) + credential hash. Three client profiles are tried automatically (Web, S-Miles Installer, S-Miles Home). Argon2id salted accounts and legacy v0 MD5 fallback are supported. Passwords are hashed client-side — raw passwords are never sent.
+
 DEVICE SETTINGS
 Connection mode, gateway IP, protocol, port, poll interval, and cloud API URL can all be changed in the Station device settings without re-pairing. Default cloud API URL is https://euapi.hoymiles.com (auto-detected during login). System info (model, serial, firmware) is shown as read-only labels.
 

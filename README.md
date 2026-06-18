@@ -226,18 +226,25 @@ The app settings page (Homey > Apps > Hoymiles HiOne > Settings) provides:
 
 ### S-Miles Cloud API
 
-Authentication uses an automatic multi-profile strategy with 4 modes tried in order:
+Authentication uses a modern **two-step v3 flow** with automatic multi-profile fallback:
 
-1. **v3 Web** — standard web login headers
-2. **v3 S-Miles Installer** — Installer app headers
-3. **v3 S-Miles Home** — EU consumer gateway (`euapi.hoymiles.com`)
-4. **Legacy v0** — MD5-hashed password (fallback for older accounts)
+1. **Pre-inspect** — `POST /iam/pub/3/auth/pre-insp` with `{ u: email }` to obtain a one-time nonce (and optional Argon2 salt)
+2. **Login** — `POST /iam/pub/3/auth/login` with `{ u: email, ch: credentialHash, n: nonce }`
 
-Argon2id (salted v3) is fully supported via the `hash-wasm` library. If the server returns a salt challenge, the app computes the Argon2id hash (time_cost=3, memory_cost=32768, parallelism=1) and retries.
+Three client profiles are tried in order:
+
+1. **Web** — generic web client headers
+2. **S-Miles Installer** — Installer app headers (`App-Version: 3.7.1`, `X-App-Version: 3.7.1`, `X-Client-Type: mobile`)
+3. **S-Miles Home** — EU consumer gateway (`euapi.hoymiles.com`, `User-Agent: sma/ad/2.10.0/159/0`)
+
+After all v3 profiles, a **Legacy v0** fallback (`POST /iam/pub/0/auth/login` with MD5-hashed password) is attempted for older accounts.
+
+**Argon2id** (salted v3) is fully supported via the `hash-wasm` library. If the pre-inspect returns a salt, the app computes the Argon2id hash (time_cost=3, memory_cost=32768, parallelism=1, hash_length=32). **Unsalted** accounts use `md5(pw).sha256_base64(pw)` or `sha256_hex(pw)` credential hashes.
 
 Token auto-refresh on expiry with transparent re-authentication.
 
 Key endpoints:
+- `/iam/pub/3/auth/pre-insp` — pre-inspection (nonce + optional salt)
 - `/iam/pub/3/auth/login` — v3 authentication
 - `/pvm-data/api/0/station/select_by_condition` — station listing
 - `/pvm-data/api/0/station/data/count_station_real_data` — real-time power/energy

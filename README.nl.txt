@@ -29,6 +29,9 @@ APPARATEN TOEVOEGEN
 6. Na het toevoegen van het Station kun je Omvormer/Gateway/Batterij apparaten toevoegen die gekoppeld zijn aan dat station
 7. Data wordt elke 60 seconden vernieuwd (instelbaar 30-300s)
 
+AUTHENTICATIE
+Inloggen gebruikt de moderne tweestaps v3 S-Miles Cloud flow: pre-inspectie (nonce) + credential hash. Drie clientprofielen worden automatisch geprobeerd (Web, S-Miles Installer, S-Miles Home). Argon2id gezouten accounts en legacy v0 MD5-terugval worden ondersteund. Wachtwoorden worden client-side gehasht — ruwe wachtwoorden worden nooit verzonden.
+
 APPARAATINSTELLINGEN
 Verbindingsmodus, gateway IP, protocol, poort, poll-interval en cloud API URL kunnen allemaal in de Station-apparaatinstellingen gewijzigd worden zonder opnieuw te koppelen. Standaard cloud API URL is https://euapi.hoymiles.com (automatisch gedetecteerd tijdens inloggen). Systeeminfo (model, serienummer, firmware) wordt als alleen-lezen labels weergegeven.
 
