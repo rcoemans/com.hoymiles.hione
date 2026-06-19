@@ -199,16 +199,18 @@ class StationDevice extends Homey.Device {
 
     try {
       const api = await this._getApi();
-      const result = await api.readBatterySetting(this._getStationId(), this._getDtuSn());
+      // readBatterySetting no longer requires dtuSn — uses action 1013
+      const result = await api.readBatterySetting(this._getStationId());
       if (!result) return;
 
-      // Populate slider capabilities with current device settings
-      if (result.reserve_soc != null) await this._setCapSafe('hoymiles_reserve_soc', result.reserve_soc / 100);
-      if (result.max_soc != null) await this._setCapSafe('hoymiles_max_soc', result.max_soc / 100);
-      if (result.charge_power != null) await this._setCapSafe('hoymiles_max_charge_power', result.charge_power / 100);
-      if (result.discharge_power != null) await this._setCapSafe('hoymiles_max_discharge_power', result.discharge_power / 100);
-      if (result.meter_power != null) await this._setCapSafe('hoymiles_grid_limit', result.meter_power);
-      if (result.working_mode != null) await this._setCapSafe('hoymiles_battery_mode', String(result.working_mode));
+      // Populate slider capabilities. Values are already 0–100 percentages.
+      // Homey slider capabilities store 0–1 (50% = 0.5), so divide by 100.
+      if (result.reserveSoc != null) await this._setCapSafe('hoymiles_reserve_soc', result.reserveSoc / 100);
+      if (result.maxSoc != null) await this._setCapSafe('hoymiles_max_soc', result.maxSoc / 100);
+      if (result.maxChargePower != null) await this._setCapSafe('hoymiles_max_charge_power', result.maxChargePower / 100);
+      if (result.maxDischargePower != null) await this._setCapSafe('hoymiles_max_discharge_power', result.maxDischargePower / 100);
+      if (result.meterPower != null) await this._setCapSafe('hoymiles_grid_limit', result.meterPower);
+      if (result.mode != null) await this._setCapSafe('hoymiles_battery_mode', String(result.mode));
     } catch (err: any) {
       // Non-fatal: silently skip if settings read fails
       this._lastSettingsRead = 0; // retry next poll
