@@ -38,6 +38,7 @@
     "hoymiles_gateway_online",
     "hoymiles_last_update",
     "hoymiles_fault_code",
+    "hoymiles_fault_explanation",
     "alarm_generic"
   ],
   "capabilitiesOptions": {

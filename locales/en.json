@@ -48,6 +48,12 @@
     "copy": "Copy",
     "copied": "Copied!"
   },
+  "capabilities": {
+    "hoymiles_fault_explanation": {
+      "title": "Fault Explanation",
+      "hint": "Human-readable explanation of the active fault code. Use this in flows for home automation. Empty when no fault is active."
+    }
+  },
   "flow": {
     "battery_soc_changed": "Battery SoC changed",
     "connection_is_cloud": "Connection is cloud",

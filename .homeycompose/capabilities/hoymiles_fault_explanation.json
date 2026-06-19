@@ -1,0 +1,13 @@
+{
+  "type": "string",
+  "title": { "en": "Fault Explanation", "nl": "Foutomschrijving" },
+  "hint": {
+    "en": "Human-readable explanation of the active fault code. Use this in flows for home automation. Empty when no fault is active.",
+    "nl": "Leesbare omschrijving van de actieve foutcode. Gebruik dit in flows voor domotica. Leeg als er geen fout actief is."
+  },
+  "insights": false,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/alarm.svg"
+}

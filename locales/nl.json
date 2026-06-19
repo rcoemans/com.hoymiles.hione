@@ -48,6 +48,12 @@
     "copy": "Kopiëren",
     "copied": "Gekopieerd!"
   },
+  "capabilities": {
+    "hoymiles_fault_explanation": {
+      "title": "Foutomschrijving",
+      "hint": "Leesbare omschrijving van de actieve foutcode. Gebruik dit in flows voor domotica. Leeg als er geen fout actief is."
+    }
+  },
   "flow": {
     "battery_soc_changed": "Accu SoC gewijzigd",
     "connection_is_cloud": "Verbinding is cloud",

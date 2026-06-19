@@ -1,10 +1,10 @@
 import Homey from 'homey';
 
 const { batteryRuntime, timeToFull, DEADBAND_WATTS } = require('../../lib/DataNormalizer');
-const { BATTERY_MODES } = require('../../lib/HoymilesApi');
+const { BATTERY_MODES, getFaultExplanation } = require('../../lib/HoymilesApi');
 const { ProtobufClient } = require('../../lib/ProtobufClient');
 
-const SETTINGS_READ_INTERVAL_MS = 5 * 60 * 1000; // read settings from API max once per 5 min
+const SETTINGS_READ_INTERVAL_MS = 60 * 1000; // read settings from API max once per minute
 
 class StationDevice extends Homey.Device {
   _prevBatteryState: string | null = null;
@@ -20,6 +20,9 @@ class StationDevice extends Homey.Device {
 
     this._registerCapabilityListeners();
     this._registerWithPollingService();
+    // Read battery settings (mode + slider values) immediately on startup,
+    // independently of the poll cycle. Fire-and-forget — don't block init.
+    this._readSettingsThrottled().catch(() => {});
   }
 
   async onUninit() {
@@ -147,10 +150,8 @@ class StationDevice extends Homey.Device {
       await this._setCapSafe('meter_power.charged', d.batteryChargeEnergy);
       await this._setCapSafe('meter_power.discharged', d.batteryDischargeEnergy);
 
-      // Battery mode (highlights active mode in picker)
-      if (d.touMode != null) {
-        await this._setCapSafe('hoymiles_battery_mode', String(d.touMode));
-      }
+      // Battery mode comes from readBatterySetting (slow async), not realtime data.
+      // It is updated by _readSettingsThrottled() below.
 
       // Calculated values
       const reserveSoc = (await this.getCapabilityValue('hoymiles_reserve_soc')) || 0.1;
@@ -181,11 +182,15 @@ class StationDevice extends Homey.Device {
       // Fault code / alarm
       const rawData = snapshot.cloud?.raw || {};
       const faultCode = rawData.alarm_code || rawData.fault_code || rawData.error_code || rawData.alarm || null;
-      await this._setCapSafe('alarm_generic', !!faultCode);
-      await this._setCapSafe('hoymiles_fault_code', faultCode ? String(faultCode) : '');
+      const faultCodeStr = faultCode != null && faultCode !== 0 ? String(faultCode) : '';
+      const faultExplanation = getFaultExplanation(faultCode);
+      await this._setCapSafe('alarm_generic', !!faultCodeStr);
+      await this._setCapSafe('hoymiles_fault_code', faultCodeStr);
+      await this._setCapSafe('hoymiles_fault_explanation', faultExplanation);
 
-      // Read battery settings from API (throttled to once per 5 minutes)
-      await this._readSettingsThrottled();
+      // Read battery settings (mode + sliders) on its own cadence — fire-and-forget
+      // to avoid blocking the snapshot callback with the slow async API call.
+      this._readSettingsThrottled().catch(() => {});
 
     } catch (err: any) {
       this.error('Snapshot processing error:', err.message);
@@ -340,36 +345,49 @@ class StationDevice extends Homey.Device {
     const app = this.homey.app as any;
     const label = BATTERY_MODES[Number(mode)] || mode;
     app._triggerBatteryModeChanged?.trigger(this, { mode: label }).catch(() => {});
+    // Force re-read of settings so sliders reflect the newly activated mode
+    this._lastSettingsRead = 0;
+    this._readSettingsThrottled().catch(() => {});
   }
 
   async onActionSetReserveSoc(soc: number) {
     const api = await this._getApi();
     await api.setReserveSoc(this._getStationId(), this._getDtuSn(), soc);
     await this._setCapSafe('hoymiles_reserve_soc', soc / 100);
+    this._lastSettingsRead = 0;
+    this._readSettingsThrottled().catch(() => {});
   }
 
   async onActionSetMaxSoc(soc: number) {
     const api = await this._getApi();
     await api.setMaxSoc(this._getStationId(), this._getDtuSn(), soc);
     await this._setCapSafe('hoymiles_max_soc', soc / 100);
+    this._lastSettingsRead = 0;
+    this._readSettingsThrottled().catch(() => {});
   }
 
   async onActionSetMaxChargePower(power: number) {
     const api = await this._getApi();
     await api.setMaxChargePower(this._getStationId(), this._getDtuSn(), power);
     await this._setCapSafe('hoymiles_max_charge_power', power / 100);
+    this._lastSettingsRead = 0;
+    this._readSettingsThrottled().catch(() => {});
   }
 
   async onActionSetMaxDischargePower(power: number) {
     const api = await this._getApi();
     await api.setMaxDischargePower(this._getStationId(), this._getDtuSn(), power);
     await this._setCapSafe('hoymiles_max_discharge_power', power / 100);
+    this._lastSettingsRead = 0;
+    this._readSettingsThrottled().catch(() => {});
   }
 
   async onActionSetGridLimit(watts: number) {
     const api = await this._getApi();
     await api.setGridLimit(this._getStationId(), this._getDtuSn(), watts);
     await this._setCapSafe('hoymiles_grid_limit', watts);
+    this._lastSettingsRead = 0;
+    this._readSettingsThrottled().catch(() => {});
   }
 
   async onActionRefreshData() {
