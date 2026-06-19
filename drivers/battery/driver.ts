@@ -32,7 +32,7 @@ class BatteryDriver extends Homey.Driver {
       const batteries = deviceList.filter((d: any) => d.type === 'battery');
 
       return batteries.map((bat: any) => ({
-        name: bat.name || `Battery ${bat.sn}`,
+        name: `Battery ${bat.sn || bat.model || '?'}`,
         data: {
           id: `${parentDevice.getData().plantId}:battery:${bat.sn}`,
           plantId: parentDevice.getData().plantId,
@@ -41,11 +41,13 @@ class BatteryDriver extends Homey.Driver {
           sn: bat.sn,
         },
         settings: {
-          appliance: 'Battery',
-          model: bat.model || '-',
-          serial_number: bat.sn || '-',
-          firmware_version: bat.firmware || '-',
-          hardware_version: bat.hardware || '-',
+          system_info: [
+            'Appliance: Battery',
+            `Model: ${bat.model || '-'}`,
+            `Serial: ${bat.sn || '-'}`,
+            `Firmware: ${bat.firmware || '-'}`,
+            `Hardware: ${bat.hardware || '-'}`,
+          ].join('\n'),
         },
       }));
     });

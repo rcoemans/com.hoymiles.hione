@@ -4,6 +4,8 @@ const { batteryRuntime, timeToFull, DEADBAND_WATTS } = require('../../lib/DataNo
 const { BATTERY_MODES } = require('../../lib/HoymilesApi');
 const { ProtobufClient } = require('../../lib/ProtobufClient');
 
+const SETTINGS_READ_INTERVAL_MS = 5 * 60 * 1000; // read settings from API max once per 5 min
+
 class StationDevice extends Homey.Device {
   _prevBatteryState: string | null = null;
   _prevGridState: string | null = null;
@@ -11,6 +13,7 @@ class StationDevice extends Homey.Device {
   _prevPvProducing: boolean | null = null;
   _prevGatewayOnline: boolean | null = null;
   _prevConnectionSource: string | null = null;
+  _lastSettingsRead: number = 0;
 
   async onInit() {
     this.log('StationDevice initialised:', this.getName());
@@ -20,22 +23,22 @@ class StationDevice extends Homey.Device {
   }
 
   async onUninit() {
-    const plantId = this.getData().plantId;
+    const { plantId, id } = this.getData();
     const app = this.homey.app as any;
-    app.pollingService.removeListener(plantId, this.getData().id);
+    app.pollingService.removeListener(plantId, id);
   }
 
   async onSettings({ oldSettings, newSettings, changedKeys }: any) {
-    const plantId = this.getData().plantId;
-    const app = this.homey.app as any;
-
-    if (changedKeys.includes('poll_interval') ||
-        changedKeys.includes('connection_mode') ||
-        changedKeys.includes('gateway_ip') ||
-        changedKeys.includes('local_protocol') ||
-        changedKeys.includes('local_port') ||
-        changedKeys.includes('modbus_unit_id') ||
-        changedKeys.includes('cloud_api_url')) {
+    const relevantKeys = [
+      'poll_interval', 'connection_mode', 'gateway_ip',
+      'protobuf_port', 'modbus_port', 'modbus_unit_id',
+      'cloud_api_url', 'dtu_sn',
+    ];
+    if (changedKeys.some((k: string) => relevantKeys.includes(k))) {
+      // Update store with new DTU SN if changed
+      if (changedKeys.includes('dtu_sn')) {
+        await this.setStoreValue('dtuSn', newSettings.dtu_sn || '');
+      }
       this._registerWithPollingService();
     }
   }
@@ -47,22 +50,22 @@ class StationDevice extends Homey.Device {
     const store = this.getStore();
 
     const config = {
-      stationId:      store.stationId || data.plantId,
-      email:          store.email,
-      password:       store.password,
-      authMode:       store.authMode,
-      dtuSn:          store.dtuSn || '',
+      stationId: store.stationId || data.plantId,
+      email: store.email,
+      password: store.password,
+      authMode: store.authMode,
+      dtuSn: settings.dtu_sn || store.dtuSn || '',
       connectionMode: settings.connection_mode || 'cloud',
-      gatewayIp:      settings.gateway_ip || '',
-      localProtocol:  settings.local_protocol || 'protobuf',
-      localPort:      settings.local_port || 10081,
-      modbusUnitId:   settings.modbus_unit_id || 1,
-      cloudApiUrl:    settings.cloud_api_url || 'https://neapi.hoymiles.com',
+      gatewayIp: settings.gateway_ip || '',
+      protobufPort: settings.protobuf_port || 10081,
+      modbusPort: settings.modbus_port || 502,
+      modbusUnitId: settings.modbus_unit_id || 1,
+      cloudApiUrl: settings.cloud_api_url || 'https://neapi.hoymiles.com',
     };
 
     app.pollingService.registerPlant(data.plantId, config);
     app.pollingService.addListener(data.plantId, data.id, (snapshot: any) => {
-      this._onSnapshot(snapshot);
+      this._onSnapshot(snapshot).catch((err: any) => this.error('Snapshot error:', err.message));
     });
 
     const intervalMs = (settings.poll_interval || 60) * 1000;
@@ -87,10 +90,10 @@ class StationDevice extends Homey.Device {
       this._prevConnectionSource = src;
 
       // System state
-      const sysState = src === 'cloud' ? 'online_cloud'
-        : src === 'local' ? 'online_local'
-        : src === 'hybrid' ? 'online_hybrid'
-        : 'unknown';
+      let sysState = 'unknown';
+      if (src === 'cloud') sysState = 'online_cloud';
+      else if (src === 'local') sysState = 'online_local';
+      else if (src === 'hybrid') sysState = 'online_hybrid';
       await this._setCapSafe('hoymiles_system_state', sysState);
 
       // Power values
@@ -104,24 +107,22 @@ class StationDevice extends Homey.Device {
       await this._setCapSafe('hoymiles_grid_export_power', d.gridExportPower);
 
       // SoC
-      const soc = d.batterySoc;
+      const { batterySoc: soc } = d;
       await this._setCapSafe('measure_battery', soc);
 
       // Battery state
-      const battState = d.batteryState;
+      const { batteryState: battState } = d;
       await this._setCapSafe('hoymiles_battery_state', battState);
       this._checkBatteryStateTriggers(battState);
 
       // Battery flow text
-      const flowText = battState === 'charging'
-        ? `⚡ Charging ${d.batteryChargePower || 0}W`
-        : battState === 'discharging'
-          ? `🔋 Discharging ${d.batteryDischargePower || 0}W`
-          : '— Idle';
+      let flowText = 'Idle';
+      if (battState === 'charging') flowText = `Charging ${d.batteryChargePower || 0}W`;
+      else if (battState === 'discharging') flowText = `Discharging ${d.batteryDischargePower || 0}W`;
       await this._setCapSafe('hoymiles_battery_flow', flowText);
 
       // Grid state
-      const gridState = d.gridState;
+      const { gridState } = d;
       await this._setCapSafe('hoymiles_grid_state', gridState);
       this._checkGridStateTriggers(gridState);
 
@@ -146,15 +147,14 @@ class StationDevice extends Homey.Device {
       await this._setCapSafe('meter_power.charged', d.batteryChargeEnergy);
       await this._setCapSafe('meter_power.discharged', d.batteryDischargeEnergy);
 
-      // Battery mode
+      // Battery mode (highlights active mode in picker)
       if (d.touMode != null) {
         await this._setCapSafe('hoymiles_battery_mode', String(d.touMode));
       }
 
       // Calculated values
-      const settings = this.getSettings();
       const reserveSoc = (await this.getCapabilityValue('hoymiles_reserve_soc')) || 0.1;
-      const maxSoc     = (await this.getCapabilityValue('hoymiles_max_soc')) || 1;
+      const maxSoc = (await this.getCapabilityValue('hoymiles_max_soc')) || 1;
 
       await this._setCapSafe('hoymiles_self_powered_pct', d.selfPoweredPct);
       await this._setCapSafe('hoymiles_power_balance', d.powerBalance);
@@ -178,17 +178,49 @@ class StationDevice extends Homey.Device {
       // Timestamp
       await this._setCapSafe('hoymiles_last_update', new Date().toLocaleTimeString());
 
-      // Alarm
-      await this._setCapSafe('alarm_generic', false);
+      // Fault code / alarm
+      const rawData = snapshot.cloud?.raw || {};
+      const faultCode = rawData.alarm_code || rawData.fault_code || rawData.error_code || rawData.alarm || null;
+      await this._setCapSafe('alarm_generic', !!faultCode);
+      await this._setCapSafe('hoymiles_fault_code', faultCode ? String(faultCode) : '');
+
+      // Read battery settings from API (throttled to once per 5 minutes)
+      await this._readSettingsThrottled();
 
     } catch (err: any) {
       this.error('Snapshot processing error:', err.message);
     }
   }
 
+  async _readSettingsThrottled() {
+    const now = Date.now();
+    if (now - this._lastSettingsRead < SETTINGS_READ_INTERVAL_MS) return;
+    this._lastSettingsRead = now;
+
+    try {
+      const api = await this._getApi();
+      const result = await api.readBatterySetting(this._getStationId(), this._getDtuSn());
+      if (!result) return;
+
+      // Populate slider capabilities with current device settings
+      if (result.reserve_soc != null) await this._setCapSafe('hoymiles_reserve_soc', result.reserve_soc / 100);
+      if (result.max_soc != null) await this._setCapSafe('hoymiles_max_soc', result.max_soc / 100);
+      if (result.charge_power != null) await this._setCapSafe('hoymiles_max_charge_power', result.charge_power / 100);
+      if (result.discharge_power != null) await this._setCapSafe('hoymiles_max_discharge_power', result.discharge_power / 100);
+      if (result.meter_power != null) await this._setCapSafe('hoymiles_grid_limit', result.meter_power);
+      if (result.working_mode != null) await this._setCapSafe('hoymiles_battery_mode', String(result.working_mode));
+    } catch (err: any) {
+      // Non-fatal: silently skip if settings read fails
+      this._lastSettingsRead = 0; // retry next poll
+    }
+  }
+
   _checkBatteryStateTriggers(current: string) {
     const prev = this._prevBatteryState;
-    if (prev === null) { this._prevBatteryState = current; return; }
+    if (prev === null) {
+      this._prevBatteryState = current;
+      return;
+    }
     if (prev === current) return;
 
     const app = this.homey.app as any;
@@ -209,7 +241,10 @@ class StationDevice extends Homey.Device {
 
   _checkGridStateTriggers(current: string) {
     const prev = this._prevGridState;
-    if (prev === null) { this._prevGridState = current; return; }
+    if (prev === null) {
+      this._prevGridState = current;
+      return;
+    }
     if (prev === current) return;
 
     const app = this.homey.app as any;
@@ -226,6 +261,9 @@ class StationDevice extends Homey.Device {
     if (soc == null || this._prevSoc == null) return;
     const app = this.homey.app as any;
 
+    if (soc !== this._prevSoc) {
+      app._triggerBatterySocChanged?.trigger(this, { soc }).catch(() => {});
+    }
     if (soc > this._prevSoc) {
       app._triggerBatterySocRoseAbove?.trigger(this, {}, { soc }).catch(() => {});
     }
@@ -235,7 +273,10 @@ class StationDevice extends Homey.Device {
   }
 
   _checkPvTriggers(producing: boolean) {
-    if (this._prevPvProducing === null) { this._prevPvProducing = producing; return; }
+    if (this._prevPvProducing === null) {
+      this._prevPvProducing = producing;
+      return;
+    }
     if (producing === this._prevPvProducing) return;
 
     const app = this.homey.app as any;
@@ -276,14 +317,19 @@ class StationDevice extends Homey.Device {
 
   async _getApi() {
     const app = this.homey.app as any;
-    const plantId = this.getData().plantId;
+    const { plantId } = this.getData();
     return app.pollingService.ensureLoggedIn(plantId);
   }
 
-  _getStationId() { return this.getStoreValue('stationId') || this.getData().plantId; }
-  _getDtuSn()     { return this.getStoreValue('dtuSn') || ''; }
+  _getStationId() {
+    return this.getStoreValue('stationId') || this.getData().plantId;
+  }
 
-  // ── Action handlers (called from flow cards and capability listeners) ──
+  _getDtuSn() {
+    return this.getSettings().dtu_sn || this.getStoreValue('dtuSn') || '';
+  }
+
+  // ── Action handlers ──
 
   async onActionSetBatteryMode(mode: string) {
     const api = await this._getApi();
@@ -334,7 +380,7 @@ class StationDevice extends Homey.Device {
     if (!settings.gateway_ip) throw new Error('No gateway IP configured');
     const client = new ProtobufClient({
       host: settings.gateway_ip,
-      port: settings.local_port || 10081,
+      port: settings.protobuf_port || 10081,
       log: this.log.bind(this),
       error: this.error.bind(this),
     });
@@ -361,7 +407,7 @@ class StationDevice extends Homey.Device {
     if (!settings.gateway_ip) throw new Error('No gateway IP configured');
     const client = new ProtobufClient({
       host: settings.gateway_ip,
-      port: settings.local_port || 10081,
+      port: settings.protobuf_port || 10081,
       log: this.log.bind(this),
       error: this.error.bind(this),
     });
@@ -370,6 +416,11 @@ class StationDevice extends Homey.Device {
     for (const inv of inverters) {
       await client.setInverterPowerLimit(this._getDtuSn(), inv.sn, limitPercent);
     }
+  }
+
+  async onActionSetConnectionMode(mode: string) {
+    await this.setSettings({ connection_mode: mode });
+    this._registerWithPollingService();
   }
 
   async _setCapSafe(cap: string, value: any) {

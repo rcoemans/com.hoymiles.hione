@@ -32,7 +32,7 @@ class InverterDriver extends Homey.Driver {
       const inverters = deviceList.filter((d: any) => d.type === 'inverter');
 
       return inverters.map((inv: any) => ({
-        name: inv.name || `Inverter ${inv.sn}`,
+        name: `Inverter ${inv.sn || inv.model || '?'}`,
         data: {
           id: `${parentDevice.getData().plantId}:inverter:${inv.sn}`,
           plantId: parentDevice.getData().plantId,
@@ -41,11 +41,13 @@ class InverterDriver extends Homey.Driver {
           sn: inv.sn,
         },
         settings: {
-          appliance: 'Inverter',
-          model: inv.model || '-',
-          serial_number: inv.sn || '-',
-          firmware_version: inv.firmware || '-',
-          hardware_version: inv.hardware || '-',
+          system_info: [
+            'Appliance: Inverter',
+            `Model: ${inv.model || '-'}`,
+            `Serial: ${inv.sn || '-'}`,
+            `Firmware: ${inv.firmware || '-'}`,
+            `Hardware: ${inv.hardware || '-'}`,
+          ].join('\n'),
         },
       }));
     });

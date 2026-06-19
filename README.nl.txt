@@ -8,11 +8,12 @@ FUNCTIES
 - Instelbare parameters: Batterijmodus, Reserve SoC, Max SoC, Max Laad-/Ontlaadvermogen, Netlimiet
 - Berekende inzichten: zelfvoorzieningspercentage, accurestduur, tijd tot vol, vermogensbalans
 - Batterijmodi: Eigen verbruik, Economie, Noodstroom, Off-Grid, Geforceerd laden, Geforceerd ontladen, Pieksturing, Tijdafhankelijk
-- Drie verbindingsmodi: Alleen Cloud, Hybride (Cloud + Lokaal LAN), Alleen lokaal
-- Lokale protocollen: Protobuf (poort 10081) en Modbus TCP (poort 502)
+- Drie verbindingsmodi: Alleen Cloud, Hybride (Cloud primair + lokaal LAN als fallback), Alleen lokaal
+- Lokale protocollen: Protobuf (poort 10081) voor batterijgegevens + Modbus TCP (poort 502) voor PV/omvormer — beide worden tegelijk gebruikt
 - Homey Energy integratie: homeBattery met meter_power.charged/discharged
-- Diagnostiek: Modbus/Protobuf snapshot-verzamelaar voor datacorrelatie en registerontdekking
-- Flow triggers, condities en acties voor volledige automatisering
+- App-instellingen: inloggegevens opslaan/herstellen, Cloud API URL instellen, taalkeuze (NL/EN)
+- Diagnostiek: Modbus/Protobuf snapshot-verzamelaar met correlatiesrapport voor protocol reverse-engineering
+- 15 flow triggers, 12 condities, 18 acties voor volledige automatisering
 
 VEREISTEN
 - Homey Pro (2019 of 2023) met firmware >= 12.0.0

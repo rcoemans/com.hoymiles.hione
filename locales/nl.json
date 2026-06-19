@@ -30,5 +30,32 @@
     "stopped": "Diagnostiek-verzameling gestopt",
     "cleared": "Diagnostiekgegevens gewist",
     "exported": "Diagnostiekgegevens geëxporteerd"
+  },
+  "settings": {
+    "save": "Opslaan",
+    "saved": "Opgeslagen!",
+    "logout": "Uitloggen",
+    "logged_out": "Uitgelogd.",
+    "test_login": "Login testen",
+    "login_ok": "Inloggen geslaagd!",
+    "login_fail": "Inloggen mislukt: ",
+    "cloud_api_url_hint": "Overschrijf het standaard Hoymiles API-eindpunt. Laat de standaard staan tenzij je weet wat je doet.",
+    "dtu_sn_hint": "Serienummer van de DTU gateway (bijv. 112700000001). Te vinden op het apparaatlabel. Vereist voor Protobuf-protocol.",
+    "modbus_unit_id_hint": "Modbus slave-adres. Standaard: 1. Alleen wijzigen als je meerdere Modbus-apparaten op dezelfde bus hebt.",
+    "protobuf_port_hint": "TCP-poort voor Hoymiles binair protocol. Standaard: 10081.",
+    "modbus_port_hint": "TCP-poort voor Modbus-communicatie. Standaard: 502.",
+    "generate_report": "Rapport genereren",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd!"
+  },
+  "flow": {
+    "battery_soc_changed": "Accu SoC gewijzigd",
+    "connection_is_cloud": "Verbinding is cloud",
+    "prefer_cloud": "Geef voorkeur aan cloudverbinding",
+    "prefer_local": "Geef voorkeur aan lokale verbinding",
+    "enable_cloud_fallback": "Cloud fallback inschakelen",
+    "disable_cloud_fallback": "Cloud fallback uitschakelen",
+    "enable_local_fallback": "Lokale fallback inschakelen",
+    "disable_local_fallback": "Lokale fallback uitschakelen"
   }
 }

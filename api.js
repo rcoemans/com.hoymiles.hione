@@ -5,8 +5,20 @@ module.exports = {
     return homey.app.apiLogin(body);
   },
 
-  async forgetLogin({ homey }) {
-    return { success: true };
+  async saveLogin({ homey, body }) {
+    return homey.app.apiSaveLogin(body);
+  },
+
+  async logout({ homey }) {
+    return homey.app.apiLogout();
+  },
+
+  async getSettings({ homey }) {
+    return homey.app.apiGetSettings();
+  },
+
+  async saveDiagSettings({ homey, body }) {
+    return homey.app.apiSaveDiagSettings(body);
   },
 
   async getDiagnostics({ homey }) {
@@ -27,5 +39,9 @@ module.exports = {
 
   async exportDiagnostics({ homey }) {
     return homey.app.apiExportDiagnostics();
+  },
+
+  async getDiagnosticsReport({ homey }) {
+    return homey.app.apiGetDiagnosticsReport();
   },
 };

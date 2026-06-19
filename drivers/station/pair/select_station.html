@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #fff; color: #333; }
-    h2 { margin-bottom: 16px; font-size: 18px; }
-    .station-list { list-style: none; padding: 0; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; color: #1a1a1a; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    h2 { font-size: 18px; }
+    .lang-toggle { font-size: 11px; font-weight: 600; cursor: pointer; color: #666; border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px; background: #f5f5f5; }
+    .station-list { list-style: none; padding: 0; margin: 8px 0 0; }
     .station-list li { padding: 14px 16px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
     .station-list li:hover { background: #f5f5f5; }
     .station-list li.selected { background: #e8f5e9; border-color: #61BA1A; }
@@ -12,46 +16,62 @@
     .station-id { font-size: 12px; color: #888; }
     .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; transition: background 0.2s; }
     .btn-primary { background: #ccc; color: #fff; }
-    .btn-primary.active { background: #61BA1A; cursor: pointer; }
+    .btn-primary.active { background: #61BA1A; }
     .loading { text-align: center; padding: 40px; color: #888; }
   </style>
 </head>
 <body>
-  <h2 id="title">Select station</h2>
+  <div class="header">
+    <h2 id="t-title">Select station</h2>
+    <button class="lang-toggle" id="langBtn" onclick="toggleLang()">NL</button>
+  </div>
+
   <div id="loading" class="loading">Loading stations...</div>
   <ul class="station-list" id="stationList" style="display:none;"></ul>
   <button class="btn btn-primary" id="nextBtn" disabled>
-    <span id="btnText">Next</span>
+    <span id="t-btnText">Next</span>
   </button>
 
   <script>
-    var _lang = 'en';
+    var _lang      = 'en';
     var selectedId = null;
-    var stations = [];
+    var stations   = [];
 
     var i18n = {
-      en: { title: 'Select station', loading: 'Loading stations...', next: 'Next', none: 'No stations found' },
-      nl: { title: 'Selecteer station', loading: 'Stations laden...', next: 'Volgende', none: 'Geen stations gevonden' }
+      en: { title: 'Select station', loading: 'Loading stations...', next: 'Next', none: 'No stations found. Check your S-Miles Cloud account.', langSwitch: 'NL' },
+      nl: { title: 'Selecteer station', loading: 'Stations laden...', next: 'Volgende', none: 'Geen stations gevonden. Controleer je S-Miles Cloud account.', langSwitch: 'EN' }
     };
 
+    function t(key) { return (i18n[_lang] || i18n.en)[key] || key; }
+
     function applyLang() {
-      var t = i18n[_lang] || i18n.en;
-      document.getElementById('title').textContent = t.title;
-      document.getElementById('loading').textContent = t.loading;
-      document.getElementById('btnText').textContent = t.next;
+      document.getElementById('t-title').textContent   = t('title');
+      document.getElementById('t-btnText').textContent = t('next');
+      document.getElementById('langBtn').textContent   = t('langSwitch');
+      var loadEl = document.getElementById('loading');
+      if (loadEl.style.display !== 'none') loadEl.textContent = t('loading');
+    }
+
+    function toggleLang() {
+      _lang = _lang === 'en' ? 'nl' : 'en';
+      applyLang();
+      renderStations();
     }
 
     function renderStations() {
       var list = document.getElementById('stationList');
-      var t = i18n[_lang] || i18n.en;
       list.innerHTML = '';
       if (stations.length === 0) {
-        list.innerHTML = '<li>' + t.none + '</li>';
+        list.innerHTML = '<li>' + t('none') + '</li>';
+        document.getElementById('loading').style.display = 'none';
+        list.style.display = 'block';
+        return;
       }
       for (var i = 0; i < stations.length; i++) {
         (function(s) {
           var li = document.createElement('li');
-          li.innerHTML = '<div class="station-name">' + (s.name || 'Station') + '</div><div class="station-id">ID: ' + s.id + '</div>';
+          li.innerHTML = '<div class="station-name">' + (s.name || 'Station') + '</div>' +
+                         '<div class="station-id">ID: ' + s.id + '</div>';
           li.addEventListener('click', function() {
             selectedId = s.id;
             var items = document.querySelectorAll('.station-list li');
@@ -77,7 +97,7 @@
     document.getElementById('nextBtn').addEventListener('click', doNext);
 
     Homey.getLanguage().then(function(lang) {
-      if (lang) { _lang = lang.substring(0, 2); }
+      if (lang) _lang = lang.substring(0, 2);
       applyLang();
     }).catch(function() { applyLang(); });
 

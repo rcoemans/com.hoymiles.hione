@@ -1,0 +1,12 @@
+{
+  "title": {
+    "en": "Battery SoC changed",
+    "nl": "Accu SoC gewijzigd"
+  },
+  "tokens": [
+    { "name": "soc", "type": "number", "title": { "en": "SoC (%)", "nl": "SoC (%)" } }
+  ],
+  "args": [
+    { "name": "device", "type": "device", "filter": "driver_id=station" }
+  ]
+}

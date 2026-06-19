@@ -46,9 +46,21 @@
       "method": "POST",
       "path": "/login"
     },
-    "forgetLogin": {
+    "saveLogin": {
+      "method": "POST",
+      "path": "/settings/save-login"
+    },
+    "logout": {
       "method": "POST",
       "path": "/logout"
+    },
+    "getSettings": {
+      "method": "GET",
+      "path": "/settings"
+    },
+    "saveDiagSettings": {
+      "method": "POST",
+      "path": "/settings/diagnostics"
     },
     "getDiagnostics": {
       "method": "GET",
@@ -69,6 +81,10 @@
     "exportDiagnostics": {
       "method": "GET",
       "path": "/diagnostics/export"
+    },
+    "getDiagnosticsReport": {
+      "method": "GET",
+      "path": "/diagnostics/report"
     }
   },
   "images": {

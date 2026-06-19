@@ -37,6 +37,7 @@
     "hoymiles_connection_source",
     "hoymiles_gateway_online",
     "hoymiles_last_update",
+    "hoymiles_fault_code",
     "alarm_generic"
   ],
   "capabilitiesOptions": {
@@ -82,12 +83,12 @@
           "id": "connection_mode",
           "type": "dropdown",
           "label": { "en": "Connection mode", "nl": "Verbindingsmodus" },
-          "hint": { "en": "Cloud Only: S-Miles Cloud API. Hybrid: Cloud + Local LAN. Local Only: LAN only.", "nl": "Cloud Only: S-Miles Cloud API. Hybride: Cloud + Lokaal LAN. Lokaal: alleen LAN." },
+          "hint": { "en": "Cloud Only: S-Miles Cloud API. Hybrid: Cloud primary, Local LAN fallback. Local Only: LAN only.", "nl": "Alleen Cloud: S-Miles Cloud API. Hybride: Cloud primair, lokaal LAN als fallback. Alleen lokaal: alleen LAN." },
           "value": "cloud",
           "values": [
-            { "id": "cloud", "label": { "en": "Cloud Only", "nl": "Alleen Cloud" } },
-            { "id": "hybrid", "label": { "en": "Hybrid", "nl": "Hybride" } },
-            { "id": "local", "label": { "en": "Local Only", "nl": "Alleen lokaal" } }
+            { "id": "cloud",  "label": { "en": "Cloud Only",         "nl": "Alleen Cloud" } },
+            { "id": "hybrid", "label": { "en": "Hybrid (Cloud + Local)", "nl": "Hybride (Cloud + Lokaal)" } },
+            { "id": "local",  "label": { "en": "Local Only",         "nl": "Alleen Lokaal" } }
           ]
         },
         {
@@ -113,27 +114,35 @@
           "value": ""
         },
         {
-          "id": "local_protocol",
-          "type": "dropdown",
-          "label": { "en": "Local protocol", "nl": "Lokaal protocol" },
-          "value": "protobuf",
-          "values": [
-            { "id": "protobuf", "label": { "en": "Protobuf (port 10081)", "nl": "Protobuf (poort 10081)" } },
-            { "id": "modbus", "label": { "en": "Modbus TCP (port 502)", "nl": "Modbus TCP (poort 502)" } }
-          ]
+          "id": "dtu_sn",
+          "type": "text",
+          "label": { "en": "DTU Serial Number", "nl": "DTU Serienummer" },
+          "hint": { "en": "Serial number of your DTU gateway (e.g. 112700000001). Found on the device label. Required for Protobuf protocol.", "nl": "Serienummer van de DTU gateway (bijv. 112700000001). Te vinden op het apparaatlabel. Vereist voor Protobuf-protocol." },
+          "value": ""
         },
         {
-          "id": "local_port",
+          "id": "protobuf_port",
           "type": "number",
-          "label": { "en": "Port", "nl": "Poort" },
-          "hint": { "en": "Default: 10081 (Protobuf) or 502 (Modbus).", "nl": "Standaard: 10081 (Protobuf) of 502 (Modbus)." },
-          "value": 10081
+          "label": { "en": "Protobuf Port", "nl": "Protobuf Poort" },
+          "hint": { "en": "TCP port for Hoymiles binary protocol. Default: 10081.", "nl": "TCP-poort voor Hoymiles binair protocol. Standaard: 10081." },
+          "value": 10081,
+          "min": 1,
+          "max": 65535
+        },
+        {
+          "id": "modbus_port",
+          "type": "number",
+          "label": { "en": "Modbus Port", "nl": "Modbus Poort" },
+          "hint": { "en": "TCP port for Modbus communication. Default: 502.", "nl": "TCP-poort voor Modbus-communicatie. Standaard: 502." },
+          "value": 502,
+          "min": 1,
+          "max": 65535
         },
         {
           "id": "modbus_unit_id",
           "type": "number",
           "label": { "en": "Modbus Unit-ID", "nl": "Modbus Unit-ID" },
-          "hint": { "en": "Modbus slave address. Default: 1.", "nl": "Modbus slave-adres. Standaard: 1." },
+          "hint": { "en": "Modbus slave address. Default: 1. Only change if you have multiple Modbus devices on the same bus.", "nl": "Modbus slave-adres. Standaard: 1. Alleen wijzigen als je meerdere Modbus-apparaten op dezelfde bus hebt." },
           "value": 1,
           "min": 1,
           "max": 247
@@ -157,12 +166,18 @@
       "type": "group",
       "label": { "en": "System info", "nl": "Systeeminfo" },
       "children": [
-        { "id": "appliance", "type": "label", "label": { "en": "Appliance", "nl": "Apparaat" }, "value": "-" },
-        { "id": "model", "type": "label", "label": { "en": "Model", "nl": "Model" }, "value": "-" },
-        { "id": "serial_number", "type": "label", "label": { "en": "Serial number", "nl": "Serienummer" }, "value": "-" },
-        { "id": "firmware_version", "type": "label", "label": { "en": "Firmware version", "nl": "Firmwareversie" }, "value": "-" },
-        { "id": "hardware_version", "type": "label", "label": { "en": "Hardware version", "nl": "Hardwareversie" }, "value": "-" },
-        { "id": "connected_devices", "type": "textarea", "label": { "en": "Connected devices", "nl": "Gekoppelde apparaten" }, "value": "-" }
+        {
+          "id": "system_info",
+          "type": "textarea",
+          "label": { "en": "Device information", "nl": "Apparaatinformatie" },
+          "value": "-"
+        },
+        {
+          "id": "connected_devices",
+          "type": "textarea",
+          "label": { "en": "Connected devices", "nl": "Gekoppelde apparaten" },
+          "value": "-"
+        }
       ]
     }
   ]

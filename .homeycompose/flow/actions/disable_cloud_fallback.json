@@ -1,0 +1,13 @@
+{
+  "title": {
+    "en": "Disable cloud fallback",
+    "nl": "Cloud fallback uitschakelen"
+  },
+  "hint": {
+    "en": "If in Hybrid mode, switches to Local Only (removes cloud fallback).",
+    "nl": "Als in hybridemodus, schakelt naar Alleen Lokaal (verwijdert cloud fallback)."
+  },
+  "args": [
+    { "name": "device", "type": "device", "filter": "driver_id=station" }
+  ]
+}

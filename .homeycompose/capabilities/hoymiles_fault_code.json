@@ -1,6 +1,10 @@
 {
   "type": "string",
   "title": { "en": "Fault Code", "nl": "Foutcode" },
+  "hint": {
+    "en": "Active fault or alarm code from the device. Empty when no alarm is active.",
+    "nl": "Actieve fout- of alarmcode van het apparaat. Leeg als er geen alarm actief is."
+  },
   "insights": false,
   "getable": true,
   "setable": false,

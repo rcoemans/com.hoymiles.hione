@@ -2,7 +2,7 @@ import Homey from 'homey';
 
 const { PollingService } = require('./lib/PollingService');
 const { DiagnosticsEngine } = require('./lib/DiagnosticsEngine');
-const { BATTERY_MODES } = require('./lib/HoymilesApi');
+const { HoymilesApi } = require('./lib/HoymilesApi');
 
 class HoymilesHiOneApp extends Homey.App {
   pollingService!: any;
@@ -11,6 +11,7 @@ class HoymilesHiOneApp extends Homey.App {
   _triggerBatteryModeChanged!: any;
   _triggerBatterySocRoseAbove!: any;
   _triggerBatterySocDroppedBelow!: any;
+  _triggerBatterySocChanged!: any;
   _triggerBatteryStartedCharging!: any;
   _triggerBatteryStartedDischarging!: any;
   _triggerBatteryStoppedCharging!: any;
@@ -24,7 +25,7 @@ class HoymilesHiOneApp extends Homey.App {
   _triggerPvProductionStopped!: any;
 
   async onInit() {
-    this.log('HoymilesHiOneApp v2.0.0 initialising...');
+    this.log('HoymilesHiOneApp v2.1.0 initialising...');
 
     this.pollingService = new PollingService({
       log: this.log.bind(this),
@@ -47,21 +48,21 @@ class HoymilesHiOneApp extends Homey.App {
 
   _registerFlowCards() {
     // ── TRIGGERS ──
-    // Most triggers fire from the device driver, so we just get references
-    this._triggerBatteryModeChanged     = this.homey.flow.getDeviceTriggerCard('battery_mode_changed');
-    this._triggerBatterySocRoseAbove    = this.homey.flow.getDeviceTriggerCard('battery_soc_rose_above');
+    this._triggerBatteryModeChanged = this.homey.flow.getDeviceTriggerCard('battery_mode_changed');
+    this._triggerBatterySocRoseAbove = this.homey.flow.getDeviceTriggerCard('battery_soc_rose_above');
     this._triggerBatterySocDroppedBelow = this.homey.flow.getDeviceTriggerCard('battery_soc_dropped_below');
-    this._triggerBatteryStartedCharging      = this.homey.flow.getDeviceTriggerCard('battery_started_charging');
-    this._triggerBatteryStartedDischarging   = this.homey.flow.getDeviceTriggerCard('battery_started_discharging');
-    this._triggerBatteryStoppedCharging      = this.homey.flow.getDeviceTriggerCard('battery_stopped_charging');
-    this._triggerBatteryStoppedDischarging   = this.homey.flow.getDeviceTriggerCard('battery_stopped_discharging');
-    this._triggerConnectionSourceChanged     = this.homey.flow.getDeviceTriggerCard('connection_source_changed');
-    this._triggerGatewayCameOnline    = this.homey.flow.getDeviceTriggerCard('gateway_came_online');
-    this._triggerGatewayWentOffline   = this.homey.flow.getDeviceTriggerCard('gateway_went_offline');
+    this._triggerBatterySocChanged = this.homey.flow.getDeviceTriggerCard('battery_soc_changed');
+    this._triggerBatteryStartedCharging = this.homey.flow.getDeviceTriggerCard('battery_started_charging');
+    this._triggerBatteryStartedDischarging = this.homey.flow.getDeviceTriggerCard('battery_started_discharging');
+    this._triggerBatteryStoppedCharging = this.homey.flow.getDeviceTriggerCard('battery_stopped_charging');
+    this._triggerBatteryStoppedDischarging = this.homey.flow.getDeviceTriggerCard('battery_stopped_discharging');
+    this._triggerConnectionSourceChanged = this.homey.flow.getDeviceTriggerCard('connection_source_changed');
+    this._triggerGatewayCameOnline = this.homey.flow.getDeviceTriggerCard('gateway_came_online');
+    this._triggerGatewayWentOffline = this.homey.flow.getDeviceTriggerCard('gateway_went_offline');
     this._triggerGridStartedExporting = this.homey.flow.getDeviceTriggerCard('grid_started_exporting');
     this._triggerGridStartedImporting = this.homey.flow.getDeviceTriggerCard('grid_started_importing');
-    this._triggerPvProductionStarted  = this.homey.flow.getDeviceTriggerCard('pv_production_started');
-    this._triggerPvProductionStopped  = this.homey.flow.getDeviceTriggerCard('pv_production_stopped');
+    this._triggerPvProductionStarted = this.homey.flow.getDeviceTriggerCard('pv_production_started');
+    this._triggerPvProductionStopped = this.homey.flow.getDeviceTriggerCard('pv_production_stopped');
 
     // SoC threshold triggers need a runListener to evaluate the threshold arg
     this._triggerBatterySocRoseAbove.registerRunListener(async (args: any, state: any) => {
@@ -74,7 +75,7 @@ class HoymilesHiOneApp extends Homey.App {
     // ── CONDITIONS ──
     const condBatteryModeIs = this.homey.flow.getConditionCard('battery_mode_is');
     condBatteryModeIs.registerRunListener(async (args: any, state: any) => {
-      const device = args.device;
+      const { device } = args;
       const current = await device.getCapabilityValue('hoymiles_battery_mode');
       return current === args.mode;
     });
@@ -107,6 +108,12 @@ class HoymilesHiOneApp extends Homey.App {
     condConnectionLocal.registerRunListener(async (args: any) => {
       const src = await args.device.getCapabilityValue('hoymiles_connection_source');
       return src === 'local';
+    });
+
+    const condConnectionCloud = this.homey.flow.getConditionCard('connection_is_cloud');
+    condConnectionCloud.registerRunListener(async (args: any) => {
+      const src = await args.device.getCapabilityValue('hoymiles_connection_source');
+      return src === 'cloud' || src === 'hybrid';
     });
 
     const condGatewayOnline = this.homey.flow.getConditionCard('gateway_is_online');
@@ -182,14 +189,14 @@ class HoymilesHiOneApp extends Homey.App {
     const actSetTouPeriod = this.homey.flow.getActionCard('set_tou_period');
     actSetTouPeriod.registerRunListener(async (args: any) => {
       await args.device.onActionSetTouPeriod({
-        chargeFrom:     args.charge_from,
-        chargeTo:       args.charge_to,
-        chargePower:    args.charge_power,
-        chargeSoc:      args.charge_soc,
-        dischargeFrom:  args.discharge_from,
-        dischargeTo:    args.discharge_to,
+        chargeFrom: args.charge_from,
+        chargeTo: args.charge_to,
+        chargePower: args.charge_power,
+        chargeSoc: args.charge_soc,
+        dischargeFrom: args.discharge_from,
+        dischargeTo: args.discharge_to,
         dischargePower: args.discharge_power,
-        dischargeSoc:   args.discharge_soc,
+        dischargeSoc: args.discharge_soc,
       });
     });
 
@@ -197,8 +204,8 @@ class HoymilesHiOneApp extends Homey.App {
     actSetPeakShaving.registerRunListener(async (args: any) => {
       await args.device.onActionSetPeakShaving({
         reserveSoc: args.reserve_soc,
-        maxSoc:     args.max_soc,
-        gridLimit:  args.meter_power,
+        maxSoc: args.max_soc,
+        gridLimit: args.meter_power,
       });
     });
 
@@ -211,12 +218,44 @@ class HoymilesHiOneApp extends Homey.App {
     actSetPowerLimit.registerRunListener(async (args: any) => {
       await args.device.onActionSetPowerLimit(args.limit);
     });
+
+    // Connection mode actions
+    const actPreferCloud = this.homey.flow.getActionCard('prefer_cloud_connection');
+    actPreferCloud.registerRunListener(async (args: any) => {
+      await args.device.onActionSetConnectionMode('cloud');
+    });
+
+    const actPreferLocal = this.homey.flow.getActionCard('prefer_local_connection');
+    actPreferLocal.registerRunListener(async (args: any) => {
+      await args.device.onActionSetConnectionMode('local');
+    });
+
+    const actEnableCloudFallback = this.homey.flow.getActionCard('enable_cloud_fallback');
+    actEnableCloudFallback.registerRunListener(async (args: any) => {
+      await args.device.onActionSetConnectionMode('hybrid');
+    });
+
+    const actDisableCloudFallback = this.homey.flow.getActionCard('disable_cloud_fallback');
+    actDisableCloudFallback.registerRunListener(async (args: any) => {
+      const current = await args.device.getSetting('connection_mode');
+      if (current === 'hybrid') await args.device.onActionSetConnectionMode('local');
+    });
+
+    const actEnableLocalFallback = this.homey.flow.getActionCard('enable_local_fallback');
+    actEnableLocalFallback.registerRunListener(async (args: any) => {
+      await args.device.onActionSetConnectionMode('hybrid');
+    });
+
+    const actDisableLocalFallback = this.homey.flow.getActionCard('disable_local_fallback');
+    actDisableLocalFallback.registerRunListener(async (args: any) => {
+      const current = await args.device.getSetting('connection_mode');
+      if (current === 'hybrid') await args.device.onActionSetConnectionMode('cloud');
+    });
   }
 
-  // Public API for diagnostics (called from api.js)
+  // ── Public API for settings page (called from api.js) ──
+
   async apiLogin(body: any) {
-    // Test login only — used by settings page
-    const { HoymilesApi } = require('./lib/HoymilesApi');
     const api = new HoymilesApi({ log: this.log.bind(this), error: this.error.bind(this) });
     try {
       await api.login(body.email, body.password, body.mode || 'auto');
@@ -224,6 +263,42 @@ class HoymilesHiOneApp extends Homey.App {
     } catch (err: any) {
       return { success: false, error: err.message };
     }
+  }
+
+  async apiSaveLogin(body: any) {
+    if (body.email) this.homey.settings.set('saved_email', body.email);
+    if (body.password) this.homey.settings.set('saved_password', body.password);
+    if (body.apiUrl) this.homey.settings.set('cloud_api_url', body.apiUrl);
+    return { success: true };
+  }
+
+  async apiLogout() {
+    this.homey.settings.unset('saved_email');
+    this.homey.settings.unset('saved_password');
+    return { success: true };
+  }
+
+  async apiGetSettings() {
+    return {
+      email: this.homey.settings.get('saved_email') || '',
+      apiUrl: this.homey.settings.get('cloud_api_url') || 'https://neapi.hoymiles.com',
+      diagIp: this.homey.settings.get('diag_ip') || '',
+      diagInterval: this.homey.settings.get('diag_interval') || 60,
+      diagDtuSn: this.homey.settings.get('diag_dtu_sn') || '',
+      diagUnitId: this.homey.settings.get('diag_unit_id') || 1,
+      diagModbusPort: this.homey.settings.get('diag_modbus_port') || 502,
+      diagProtobufPort: this.homey.settings.get('diag_protobuf_port') || 10081,
+    };
+  }
+
+  async apiSaveDiagSettings(body: any) {
+    if (body.diagIp != null) this.homey.settings.set('diag_ip', body.diagIp);
+    if (body.diagInterval != null) this.homey.settings.set('diag_interval', body.diagInterval);
+    if (body.diagDtuSn != null) this.homey.settings.set('diag_dtu_sn', body.diagDtuSn);
+    if (body.diagUnitId != null) this.homey.settings.set('diag_unit_id', body.diagUnitId);
+    if (body.diagModbusPort != null) this.homey.settings.set('diag_modbus_port', body.diagModbusPort);
+    if (body.diagProtobufPort != null) this.homey.settings.set('diag_protobuf_port', body.diagProtobufPort);
+    return { success: true };
   }
 
   apiGetDiagnostics() {
@@ -248,6 +323,10 @@ class HoymilesHiOneApp extends Homey.App {
 
   apiExportDiagnostics() {
     return this.diagnostics.export();
+  }
+
+  apiGetDiagnosticsReport() {
+    return this.diagnostics.generateReport();
   }
 }
 

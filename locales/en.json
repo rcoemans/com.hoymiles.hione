@@ -30,5 +30,32 @@
     "stopped": "Diagnostics collection stopped",
     "cleared": "Diagnostics data cleared",
     "exported": "Diagnostics data exported"
+  },
+  "settings": {
+    "save": "Save",
+    "saved": "Saved!",
+    "logout": "Log off",
+    "logged_out": "Logged off.",
+    "test_login": "Test Login",
+    "login_ok": "Login successful!",
+    "login_fail": "Login failed: ",
+    "cloud_api_url_hint": "Override the default Hoymiles API endpoint. Leave as default unless you know what you are changing.",
+    "dtu_sn_hint": "Serial number of your DTU gateway (e.g. 112700000001). Found on the device label. Required for Protobuf protocol.",
+    "modbus_unit_id_hint": "Modbus slave address. Default: 1. Only change if you have multiple Modbus devices on the same bus.",
+    "protobuf_port_hint": "TCP port for Hoymiles binary protocol. Default: 10081.",
+    "modbus_port_hint": "TCP port for Modbus communication. Default: 502.",
+    "generate_report": "Generate Report",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "flow": {
+    "battery_soc_changed": "Battery SoC changed",
+    "connection_is_cloud": "Connection is cloud",
+    "prefer_cloud": "Prefer cloud connection",
+    "prefer_local": "Prefer local connection",
+    "enable_cloud_fallback": "Enable cloud fallback",
+    "disable_cloud_fallback": "Disable cloud fallback",
+    "enable_local_fallback": "Enable local fallback",
+    "disable_local_fallback": "Disable local fallback"
   }
 }

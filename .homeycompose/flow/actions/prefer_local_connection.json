@@ -1,0 +1,13 @@
+{
+  "title": {
+    "en": "Prefer local connection",
+    "nl": "Geef voorkeur aan lokale verbinding"
+  },
+  "hint": {
+    "en": "Switches the connection mode to 'Local Only'.",
+    "nl": "Schakelt de verbindingsmodus naar 'Alleen Lokaal'."
+  },
+  "args": [
+    { "name": "device", "type": "device", "filter": "driver_id=station" }
+  ]
+}

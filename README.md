@@ -45,12 +45,14 @@ v2.0.0 introduces a multi-device architecture. Each component of the HiOne syste
 | Mode | Description |
 |---|---|
 | **Cloud Only** | Via S-Miles Cloud API. Requires a hoymiles.com account. |
-| **Hybrid** | Cloud + local LAN. Best reliability. |
+| **Hybrid** | Cloud is **primary**; local LAN is **fallback** when cloud is unavailable. Best reliability. |
 | **Local Only** | Direct to HiBox/DTS gateway. No cloud account needed. |
 
-Local protocols supported:
-- **Protobuf** (port 10081) — proprietary binary protocol
-- **Modbus TCP** (port 502) — for DTS-G3 sticks
+In Hybrid and Local modes, **both protocols are used simultaneously**:
+- **Protobuf** (port 10081) — battery SoC, power, state (most reliable local source)
+- **Modbus TCP** (port 502) — PV/inverter data
+
+Ports for both protocols are configurable independently.
 
 ### Homey integration
 
@@ -137,17 +139,18 @@ SoC, SoH, voltage, current, max/min cell voltage, max/min cell temp, battery sta
 
 ## Flow cards
 
-### Triggers (14)
+### Triggers (15)
 
 - Battery started/stopped charging/discharging
 - Battery SoC rose above / dropped below threshold
+- **Battery SoC changed** (with SoC token)
 - Battery mode changed (with mode token)
 - Grid started importing / exporting
 - PV production started / stopped
 - Gateway came online / went offline
 - Connection source changed (with source token)
 
-### Conditions (11)
+### Conditions (12)
 
 - Battery is/is not charging/discharging
 - Battery SoC is/is not above/below threshold
@@ -156,8 +159,9 @@ SoC, SoH, voltage, current, max/min cell voltage, max/min cell temp, battery sta
 - Battery mode is/is not a specific mode
 - Gateway is/is not online
 - Connection is/is not local
+- **Connection is/is not cloud**
 
-### Actions (12)
+### Actions (18)
 
 - **Set battery mode** — Self-Consumption, Economy, Backup, Off-Grid, Force Charge, Force Discharge, Peak Shaving, Time of Use
 - **Set reserve SoC / max SoC** — battery charge limits
@@ -169,6 +173,10 @@ SoC, SoH, voltage, current, max/min cell voltage, max/min cell temp, battery sta
 - **Set inverter power limit** — output limit (2–100%)
 - **Set relay** — enable/disable dry contact output
 - **Refresh data now** — immediate poll
+- **Prefer cloud connection** — switch to Cloud Only mode
+- **Prefer local connection** — switch to Local Only mode
+- **Enable/Disable cloud fallback** — toggle Hybrid mode
+- **Enable/Disable local fallback** — toggle Hybrid mode
 
 ## Device settings
 
@@ -178,24 +186,28 @@ Station device settings (editable without re-pairing):
 |---|---|---|
 | Connection mode | Cloud Only, Hybrid, or Local Only | Cloud |
 | Gateway IP | Local LAN IP of the HiBox/DTS gateway | — |
-| Protocol | Protobuf or Modbus TCP | Protobuf |
-| Port | TCP port | 10081 |
+| DTU Serial Number | Serial of DTU gateway (required for Protobuf) | — |
+| Protobuf Port | Port for Hoymiles binary protocol | 10081 |
+| Modbus Port | Port for Modbus TCP | 502 |
 | Modbus Unit ID | Modbus slave address | 1 |
 | Cloud API URL | S-Miles Cloud API base URL (auto-detected during login) | `https://neapi.hoymiles.com` |
 | Poll interval | 30–300 seconds | 60 |
 
-System info labels (read-only): model, serial number, firmware version, hardware version, connected devices.
+System info (read-only textarea): appliance, model, serial number, firmware version, hardware version. Connected devices list shown separately.
 
 ## App settings
 
 The app settings page (Homey > Apps > Hoymiles HiOne > Settings) provides:
 
-- **Test Cloud Login** — verify S-Miles Cloud credentials
+- **Cloud Credentials** — test login, save/restore email + password, configure Cloud API URL, log off
+- **Language toggle** — switch UI between English and Dutch
 - **Diagnostics** — Modbus TCP + Protobuf snapshot collector for data correlation and register discovery
-  - Configure gateway IP, interval, DTU serial, Modbus unit ID
+  - Configure gateway IP, interval, DTU serial, Modbus unit ID, Modbus port, Protobuf port
+  - **Save** settings for next session
   - **Start/Stop** snapshot collection
-  - **Export** collected data as JSON for analysis
+  - **Export** collected data as JSON for analysis (with **Copy** button)
   - **Clear** all snapshots
+- **Diagnostics Report** — auto-generated correlation table mapping Cloud API fields to Modbus registers and Protobuf fields, with confidence scores for reverse-engineering local protocols
 
 ## How it works
 

@@ -1,97 +1,199 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #fff; color: #333; }
-    h2 { margin-bottom: 8px; font-size: 18px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; color: #1a1a1a; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    h2 { font-size: 18px; }
     .subtitle { font-size: 13px; color: #888; margin-bottom: 16px; }
-    label { display: block; font-weight: 600; margin: 12px 0 4px; }
-    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
-    .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; background: #61BA1A; color: #fff; }
-    .btn-skip { background: #eee; color: #666; margin-top: 8px; }
+    .lang-toggle { font-size: 11px; font-weight: 600; cursor: pointer; color: #666; border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px; background: #f5f5f5; }
+    label { display: block; font-weight: 600; margin: 12px 0 4px; font-size: 14px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
     .hint { font-size: 12px; color: #888; margin-top: 4px; }
+    .lan-section { margin-top: 4px; }
+    .row { display: flex; gap: 10px; }
+    .row > * { flex: 1; }
+    .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; transition: background 0.2s; }
+    .btn-primary { background: #ccc; color: #fff; }
+    .btn-primary.active { background: #61BA1A; }
   </style>
 </head>
 <body>
-  <h2 id="title">Local LAN Configuration</h2>
-  <p class="subtitle" id="subtitle">Optional: configure local connection for faster updates and local control.</p>
+  <div class="header">
+    <h2 id="t-title">Local LAN Configuration</h2>
+    <button class="lang-toggle" id="langBtn" onclick="toggleLang()">NL</button>
+  </div>
+  <p class="subtitle" id="t-subtitle">Optional: configure local connection for faster updates and local control.</p>
 
-  <label id="lblMode">Connection mode</label>
-  <select id="connectionMode">
-    <option value="cloud">Cloud Only</option>
-    <option value="hybrid">Hybrid (Cloud + Local)</option>
-    <option value="local">Local Only</option>
+  <label id="t-lblMode">Connection mode</label>
+  <select id="connectionMode" onchange="onModeChange()">
+    <option value="cloud" id="opt-cloud">Cloud Only</option>
+    <option value="hybrid" id="opt-hybrid">Hybrid (Cloud + Local)</option>
+    <option value="local" id="opt-local">Local Only</option>
   </select>
+  <p class="hint" id="t-hintMode">Cloud Only: uses S-Miles Cloud API only. Hybrid: Cloud is primary, local LAN is fallback. Local Only: local LAN only, no internet required.</p>
 
-  <label id="lblIp">Gateway/DTS IP Address</label>
-  <input type="text" id="gatewayIp" placeholder="192.168.1.100">
-  <p class="hint" id="hintIp">IP address of your DTS stick or HiBox gateway on the local network.</p>
+  <!-- LAN section: shown only for Hybrid/Local -->
+  <div id="lanSection" style="display:none">
+    <label id="t-lblIp">Gateway/DTS IP Address</label>
+    <input type="text" id="gatewayIp" placeholder="192.168.1.100" oninput="updateButton()">
+    <p class="hint" id="t-hintIp">IP address of your DTS stick or HiBox gateway on the local network.</p>
 
-  <label id="lblProtocol">Protocol</label>
-  <select id="localProtocol">
-    <option value="protobuf">Protobuf (port 10081)</option>
-    <option value="modbus">Modbus TCP (port 502)</option>
-  </select>
+    <div class="row" style="margin-top:4px">
+      <div>
+        <label id="t-lblProtobufPort">Protobuf Port</label>
+        <input type="number" id="protobufPort" value="10081" min="1" max="65535">
+        <p class="hint" id="t-hintProtobufPort">Hoymiles binary protocol port. Default: 10081.</p>
+      </div>
+      <div>
+        <label id="t-lblModbusPort">Modbus Port</label>
+        <input type="number" id="modbusPort" value="502" min="1" max="65535">
+        <p class="hint" id="t-hintModbusPort">Modbus TCP port. Default: 502.</p>
+      </div>
+    </div>
 
-  <label id="lblPort">Port</label>
-  <input type="number" id="localPort" value="10081">
+    <label id="t-lblUnitId">Modbus Unit-ID</label>
+    <input type="number" id="modbusUnitId" value="1" min="1" max="247">
+    <p class="hint" id="t-hintUnitId">Modbus slave address of the gateway. Default: 1.</p>
+  </div>
 
-  <button class="btn" id="nextBtn">
-    <span id="btnText">Next</span>
-  </button>
-  <button class="btn btn-skip" id="skipBtn">
-    <span id="skipText">Skip (Cloud Only)</span>
+  <button class="btn btn-primary" id="nextBtn" onclick="doNext()">
+    <span id="t-btnText">Next</span>
   </button>
 
   <script>
     var _lang = 'en';
 
     var i18n = {
-      en: { title: 'Local LAN Configuration', subtitle: 'Optional: configure local connection for faster updates and local control.', mode: 'Connection mode', ip: 'Gateway/DTS IP Address', hintIp: 'IP address of your DTS stick or HiBox gateway on the local network.', protocol: 'Protocol', port: 'Port', next: 'Next', skip: 'Skip (Cloud Only)' },
-      nl: { title: 'Lokale LAN-configuratie', subtitle: 'Optioneel: configureer een lokale verbinding voor snellere updates en lokale bediening.', mode: 'Verbindingsmodus', ip: 'Gateway/DTS IP-adres', hintIp: 'IP-adres van je DTS stick of HiBox gateway in het lokale netwerk.', protocol: 'Protocol', port: 'Poort', next: 'Volgende', skip: 'Overslaan (alleen Cloud)' }
+      en: {
+        title:            'Local LAN Configuration',
+        subtitle:         'Optional: configure local connection for faster updates and local control.',
+        lblMode:          'Connection mode',
+        hintMode:         'Cloud Only: uses S-Miles Cloud API only. Hybrid: Cloud is primary, local LAN is fallback. Local Only: local LAN only, no internet required.',
+        optCloud:         'Cloud Only',
+        optHybrid:        'Hybrid (Cloud + Local)',
+        optLocal:         'Local Only',
+        lblIp:            'Gateway/DTS IP Address',
+        hintIp:           'IP address of your DTS stick or HiBox gateway on the local network.',
+        lblProtobufPort:  'Protobuf Port',
+        hintProtobufPort: 'Hoymiles binary protocol port. Default: 10081.',
+        lblModbusPort:    'Modbus Port',
+        hintModbusPort:   'Modbus TCP port. Default: 502.',
+        lblUnitId:        'Modbus Unit-ID',
+        hintUnitId:       'Modbus slave address of the gateway. Default: 1. Only change if you have multiple Modbus devices on the same bus.',
+        btnNext:          'Next',
+        langSwitch:       'NL',
+      },
+      nl: {
+        title:            'Lokale LAN-configuratie',
+        subtitle:         'Optioneel: configureer een lokale verbinding voor snellere updates en lokale bediening.',
+        lblMode:          'Verbindingsmodus',
+        hintMode:         'Alleen Cloud: gebruikt de S-Miles Cloud API. Hybride: Cloud is primair, lokaal LAN is fallback. Alleen lokaal: geen internet vereist.',
+        optCloud:         'Alleen Cloud',
+        optHybrid:        'Hybride (Cloud + Lokaal)',
+        optLocal:         'Alleen Lokaal',
+        lblIp:            'Gateway/DTS IP-adres',
+        hintIp:           'IP-adres van je DTS stick of HiBox gateway in het lokale netwerk.',
+        lblProtobufPort:  'Protobuf Poort',
+        hintProtobufPort: 'Hoymiles binair protocol poort. Standaard: 10081.',
+        lblModbusPort:    'Modbus Poort',
+        hintModbusPort:   'Modbus TCP poort. Standaard: 502.',
+        lblUnitId:        'Modbus Unit-ID',
+        hintUnitId:       'Modbus slave-adres van de gateway. Standaard: 1. Alleen wijzigen als je meerdere Modbus-apparaten op dezelfde bus hebt.',
+        btnNext:          'Volgende',
+        langSwitch:       'EN',
+      }
     };
 
+    function t(key) { return (i18n[_lang] || i18n.en)[key] || key; }
+
     function applyLang() {
-      var t = i18n[_lang] || i18n.en;
-      document.getElementById('title').textContent = t.title;
-      document.getElementById('subtitle').textContent = t.subtitle;
-      document.getElementById('lblMode').textContent = t.mode;
-      document.getElementById('lblIp').textContent = t.ip;
-      document.getElementById('hintIp').textContent = t.hintIp;
-      document.getElementById('lblProtocol').textContent = t.protocol;
-      document.getElementById('lblPort').textContent = t.port;
-      document.getElementById('btnText').textContent = t.next;
-      document.getElementById('skipText').textContent = t.skip;
+      document.getElementById('t-title').textContent           = t('title');
+      document.getElementById('t-subtitle').textContent        = t('subtitle');
+      document.getElementById('t-lblMode').textContent         = t('lblMode');
+      document.getElementById('t-hintMode').textContent        = t('hintMode');
+      document.getElementById('opt-cloud').textContent         = t('optCloud');
+      document.getElementById('opt-hybrid').textContent        = t('optHybrid');
+      document.getElementById('opt-local').textContent         = t('optLocal');
+      document.getElementById('t-lblIp').textContent           = t('lblIp');
+      document.getElementById('t-hintIp').textContent          = t('hintIp');
+      document.getElementById('t-lblProtobufPort').textContent = t('lblProtobufPort');
+      document.getElementById('t-hintProtobufPort').textContent= t('hintProtobufPort');
+      document.getElementById('t-lblModbusPort').textContent   = t('lblModbusPort');
+      document.getElementById('t-hintModbusPort').textContent  = t('hintModbusPort');
+      document.getElementById('t-lblUnitId').textContent       = t('lblUnitId');
+      document.getElementById('t-hintUnitId').textContent      = t('hintUnitId');
+      document.getElementById('t-btnText').textContent         = t('btnNext');
+      document.getElementById('langBtn').textContent           = t('langSwitch');
     }
 
-    function updatePort() {
-      var proto = document.getElementById('localProtocol').value;
-      document.getElementById('localPort').value = proto === 'modbus' ? '502' : '10081';
+    function toggleLang() {
+      _lang = _lang === 'en' ? 'nl' : 'en';
+      applyLang();
+    }
+
+    function onModeChange() {
+      var mode = document.getElementById('connectionMode').value;
+      var lan  = document.getElementById('lanSection');
+      if (mode === 'cloud') {
+        lan.style.display = 'none';
+      } else {
+        lan.style.display = 'block';
+      }
+      updateButton();
+    }
+
+    function updateButton() {
+      var mode   = document.getElementById('connectionMode').value;
+      var btn    = document.getElementById('nextBtn');
+      var valid  = false;
+
+      if (mode === 'cloud') {
+        valid = true;
+      } else {
+        var ip = document.getElementById('gatewayIp').value.trim();
+        valid  = ip.length > 0;
+      }
+
+      if (valid) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
     }
 
     async function doNext() {
-      await Homey.emit('setLocalConfig', {
-        connectionMode: document.getElementById('connectionMode').value,
-        gatewayIp: document.getElementById('gatewayIp').value.trim(),
-        localProtocol: document.getElementById('localProtocol').value,
-        localPort: parseInt(document.getElementById('localPort').value) || 10081
-      });
-      Homey.nextView();
+      var mode = document.getElementById('connectionMode').value;
+      var config = { connectionMode: mode };
+
+      if (mode !== 'cloud') {
+        config.gatewayIp    = document.getElementById('gatewayIp').value.trim();
+        config.protobufPort = parseInt(document.getElementById('protobufPort').value) || 10081;
+        config.modbusPort   = parseInt(document.getElementById('modbusPort').value)   || 502;
+        config.modbusUnitId = parseInt(document.getElementById('modbusUnitId').value) || 1;
+
+        if (!config.gatewayIp) return;
+      }
+
+      try {
+        await Homey.emit('setLocalConfig', config);
+        Homey.nextView();
+      } catch (e) {
+        // emit failed — still advance
+        Homey.nextView();
+      }
     }
 
-    async function doSkip() {
-      await Homey.emit('setLocalConfig', { connectionMode: 'cloud' });
-      Homey.nextView();
-    }
-
-    document.getElementById('nextBtn').addEventListener('click', doNext);
-    document.getElementById('skipBtn').addEventListener('click', doSkip);
-    document.getElementById('localProtocol').addEventListener('change', updatePort);
-
+    // Init
     Homey.getLanguage().then(function(lang) {
-      if (lang) { _lang = lang.substring(0, 2); }
+      if (lang) _lang = lang.substring(0, 2);
       applyLang();
     }).catch(function() { applyLang(); });
+
+    // Set initial button state (Cloud Only = always valid)
+    updateButton();
 
     Homey.ready();
   </script>

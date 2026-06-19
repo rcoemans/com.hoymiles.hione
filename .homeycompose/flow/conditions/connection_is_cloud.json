@@ -1,0 +1,9 @@
+{
+  "title": {
+    "en": "Connection is cloud",
+    "nl": "Verbinding is cloud"
+  },
+  "args": [
+    { "name": "device", "type": "device", "filter": "driver_id=station" }
+  ]
+}

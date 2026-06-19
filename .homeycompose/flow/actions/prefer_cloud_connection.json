@@ -1,0 +1,13 @@
+{
+  "title": {
+    "en": "Prefer cloud connection",
+    "nl": "Geef voorkeur aan cloudverbinding"
+  },
+  "hint": {
+    "en": "Switches the connection mode to 'Cloud Only'.",
+    "nl": "Schakelt de verbindingsmodus naar 'Alleen Cloud'."
+  },
+  "args": [
+    { "name": "device", "type": "device", "filter": "driver_id=station" }
+  ]
+}

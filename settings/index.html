@@ -5,80 +5,307 @@
   <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
   <style>
     * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #fff; color: #333; margin: 0; }
-    h1 { font-size: 20px; margin-bottom: 4px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #fff; color: #333; margin: 0; max-width: 700px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    h1 { font-size: 20px; margin: 0; }
     h2 { font-size: 16px; margin: 24px 0 8px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
     .section { margin-bottom: 24px; }
     label { display: block; font-weight: 600; margin: 10px 0 4px; font-size: 13px; }
     input, select { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
     .btn { display: inline-block; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; margin: 4px 4px 4px 0; transition: opacity 0.2s; }
     .btn:hover { opacity: 0.85; }
-    .btn-green { background: #61BA1A; color: #fff; }
-    .btn-red { background: #e74c3c; color: #fff; }
-    .btn-grey { background: #888; color: #fff; }
-    .btn-blue { background: #3498db; color: #fff; }
+    .btn-green  { background: #61BA1A; color: #fff; }
+    .btn-red    { background: #e74c3c; color: #fff; }
+    .btn-grey   { background: #888; color: #fff; }
+    .btn-blue   { background: #3498db; color: #fff; }
+    .btn-orange { background: #e67e22; color: #fff; }
+    .btn-lang   { font-size: 11px; font-weight: 600; cursor: pointer; color: #666; border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px; background: #f5f5f5; }
+    .btn-lang:hover { background: #e8e8e8; }
     .status-bar { padding: 10px 14px; border-radius: 6px; background: #f5f5f5; margin: 10px 0; font-size: 13px; }
     .status-bar.running { background: #e8f5e9; border-left: 3px solid #61BA1A; }
     .status-bar.stopped { background: #fef3e7; border-left: 3px solid #e67e22; }
+    .status-bar.success { background: #e8f5e9; border-left: 3px solid #61BA1A; }
+    .status-bar.error   { background: #fef2f2; border-left: 3px solid #e74c3c; }
     .hint { font-size: 11px; color: #888; margin-top: 2px; }
-    pre { background: #f5f5f5; padding: 12px; border-radius: 6px; font-size: 12px; max-height: 300px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+    pre { background: #f5f5f5; padding: 12px; border-radius: 6px; font-size: 11px; max-height: 300px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
     .row { display: flex; gap: 8px; align-items: flex-end; }
     .row > * { flex: 1; }
+    .btn-row { margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+    th { background: #f5f5f5; padding: 6px 8px; text-align: left; border: 1px solid #ddd; white-space: nowrap; }
+    td { padding: 5px 8px; border: 1px solid #ddd; vertical-align: middle; }
+    tr:nth-child(even) td { background: #fafafa; }
+    .conf-high   { color: #27ae60; font-weight: 600; }
+    .conf-medium { color: #e67e22; font-weight: 600; }
+    .conf-low    { color: #e74c3c; }
   </style>
 </head>
 <body>
-  <h1>Hoymiles HiOne — App Settings</h1>
+  <div class="page-header">
+    <h1 id="t-title">Hoymiles HiOne — App Settings</h1>
+    <button class="btn-lang" id="langBtn" onclick="toggleLang()">NL</button>
+  </div>
 
-  <!-- ── Login Test ── -->
+  <!-- ── Cloud Credentials ── -->
   <div class="section">
-    <h2>Test Cloud Login</h2>
+    <h2 id="t-h-cloud">Cloud Credentials</h2>
     <div class="row">
-      <div><label>Email</label><input type="email" id="testEmail"></div>
-      <div><label>Password</label><input type="password" id="testPassword"></div>
+      <div>
+        <label id="t-l-email">Email</label>
+        <input type="email" id="credEmail">
+      </div>
+      <div>
+        <label id="t-l-password">Password</label>
+        <input type="password" id="credPassword" placeholder="(unchanged)" autocomplete="new-password">
+      </div>
     </div>
-    <button class="btn btn-green" onclick="testLogin()" style="margin-top:10px">Test Login</button>
+    <div>
+      <label id="t-l-apiUrl">Cloud API URL</label>
+      <input type="text" id="credApiUrl">
+      <p class="hint" id="t-h-apiUrl">Override the default Hoymiles API endpoint. Leave as default unless you know what you are changing.</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-green"  id="btnTestLogin"  onclick="testLogin()"  ><span id="t-btn-test">Test Login</span></button>
+      <button class="btn btn-green"  id="btnSaveCreds"  onclick="saveCredentials()"><span id="t-btn-save">Save</span></button>
+      <button class="btn btn-orange" id="btnLogout"     onclick="doLogout()"   ><span id="t-btn-logout">Log off</span></button>
+    </div>
     <div id="loginResult" class="status-bar" style="display:none"></div>
   </div>
 
   <!-- ── Diagnostics ── -->
   <div class="section">
-    <h2>Diagnostics (Modbus / Protobuf)</h2>
-    <p class="hint">Collect snapshots from Modbus TCP and Protobuf simultaneously for data correlation analysis.</p>
+    <h2 id="t-h-diag">Diagnostics (Modbus / Protobuf)</h2>
+    <p class="hint" id="t-h-diagHint">Collect snapshots from Modbus TCP and Protobuf simultaneously for data correlation analysis.</p>
 
     <div class="row">
       <div>
-        <label>Gateway IP</label>
+        <label id="t-l-ip">Gateway IP</label>
         <input type="text" id="diagIp" placeholder="192.168.1.100">
+        <p class="hint" id="t-h-ipHint">LAN IP address of your DTS stick or HiBox gateway.</p>
       </div>
       <div>
-        <label>Interval (sec)</label>
+        <label id="t-l-interval">Interval (sec)</label>
         <input type="number" id="diagInterval" value="60" min="10" max="600">
       </div>
     </div>
     <div class="row" style="margin-top:4px">
       <div>
-        <label>DTU Serial</label>
+        <label id="t-l-dtuSn">DTU Serial</label>
         <input type="text" id="diagDtuSn" placeholder="(optional)">
+        <p class="hint" id="t-h-dtuSn">Serial number of your DTU gateway (e.g. 112700000001). Found on the device label. Required for Protobuf protocol.</p>
       </div>
       <div>
-        <label>Modbus Unit-ID</label>
+        <label id="t-l-unitId">Modbus Unit-ID</label>
         <input type="number" id="diagUnitId" value="1" min="1" max="247">
+        <p class="hint" id="t-h-unitId">Modbus slave address. Default: 1. Only change if you have multiple Modbus devices on the same bus.</p>
+      </div>
+    </div>
+    <div class="row" style="margin-top:4px">
+      <div>
+        <label id="t-l-modbusPort">Modbus Port</label>
+        <input type="number" id="diagModbusPort" value="502" min="1" max="65535">
+        <p class="hint" id="t-h-modbusPort">TCP port for Modbus communication. Default: 502.</p>
+      </div>
+      <div>
+        <label id="t-l-protobufPort">Protobuf Port</label>
+        <input type="number" id="diagProtobufPort" value="10081" min="1" max="65535">
+        <p class="hint" id="t-h-protobufPort">TCP port for Hoymiles proprietary binary protocol. Default: 10081.</p>
       </div>
     </div>
 
-    <div style="margin-top: 12px;">
-      <button class="btn btn-green" id="btnStart" onclick="startDiag()">Start</button>
-      <button class="btn btn-red" id="btnStop" onclick="stopDiag()" disabled>Stop</button>
-      <button class="btn btn-blue" id="btnExport" onclick="exportDiag()">Export</button>
-      <button class="btn btn-grey" id="btnClear" onclick="clearDiag()">Clear</button>
+    <div class="btn-row">
+      <button class="btn btn-green" id="btnSaveDiag"  onclick="saveDiagSettings()"><span id="t-btn-saveDiag">Save</span></button>
+      <button class="btn btn-green" id="btnStart"     onclick="startDiag()"        ><span id="t-btn-start">Start</span></button>
+      <button class="btn btn-red"   id="btnStop"      onclick="stopDiag()"  disabled><span id="t-btn-stop">Stop</span></button>
+      <button class="btn btn-blue"  id="btnExport"    onclick="exportDiag()"       ><span id="t-btn-export">Export</span></button>
+      <button class="btn btn-grey"  id="btnClear"     onclick="clearDiag()"        ><span id="t-btn-clear">Clear</span></button>
     </div>
 
     <div id="diagStatus" class="status-bar stopped">Status: idle</div>
-    <pre id="diagOutput" style="display:none"></pre>
+
+    <div id="exportSection" style="display:none; margin-top:8px">
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:4px">
+        <strong id="t-exportedData">Exported data:</strong>
+        <button class="btn btn-grey" style="padding:6px 14px; font-size:12px" onclick="copySnapshot()" id="btnCopy"><span id="t-btn-copy">Copy</span></button>
+      </div>
+      <pre id="diagOutput"></pre>
+    </div>
+  </div>
+
+  <!-- ── Diagnostics Report ── -->
+  <div class="section">
+    <h2 id="t-h-report">Diagnostics Report</h2>
+    <p class="hint" id="t-h-reportHint">Correlation table mapping Cloud API fields to Modbus and Protobuf data. Useful for reverse-engineering local protocols.</p>
+    <button class="btn btn-blue" onclick="generateReport()"><span id="t-btn-report">Generate Report</span></button>
+    <div id="reportContainer" style="overflow-x:auto; margin-top:10px; display:none"></div>
   </div>
 
   <script>
     var _homey = null;
+    var _lang  = 'en';
+
+    var i18n = {
+      en: {
+        title:         'Hoymiles HiOne — App Settings',
+        hCloud:        'Cloud Credentials',
+        lEmail:        'Email',
+        lPassword:     'Password',
+        lApiUrl:       'Cloud API URL',
+        hApiUrl:       'Override the default Hoymiles API endpoint. Leave as default unless you know what you are changing.',
+        btnTest:       'Test Login',
+        btnSave:       'Save',
+        btnLogout:     'Log off',
+        hDiag:         'Diagnostics (Modbus / Protobuf)',
+        hDiagHint:     'Collect snapshots from Modbus TCP and Protobuf simultaneously for data correlation analysis.',
+        lIp:           'Gateway IP',
+        hIpHint:       'LAN IP address of your DTS stick or HiBox gateway.',
+        lInterval:     'Interval (sec)',
+        lDtuSn:        'DTU Serial',
+        hDtuSn:        'Serial number of your DTU gateway (e.g. 112700000001). Found on the device label. Required for Protobuf protocol.',
+        lUnitId:       'Modbus Unit-ID',
+        hUnitId:       'Modbus slave address. Default: 1. Only change if you have multiple Modbus devices on the same bus.',
+        lModbusPort:   'Modbus Port',
+        hModbusPort:   'TCP port for Modbus communication. Default: 502.',
+        lProtobufPort: 'Protobuf Port',
+        hProtobufPort: 'TCP port for Hoymiles proprietary binary protocol. Default: 10081.',
+        btnSaveDiag:   'Save',
+        btnStart:      'Start',
+        btnStop:       'Stop',
+        btnExport:     'Export',
+        btnClear:      'Clear',
+        exportedData:  'Exported data:',
+        btnCopy:       'Copy',
+        hReport:       'Diagnostics Report',
+        hReportHint:   'Correlation table mapping Cloud API fields to Modbus and Protobuf data. Useful for reverse-engineering local protocols.',
+        btnReport:     'Generate Report',
+        langSwitch:    'NL',
+        loginOk:       'Login successful!',
+        loginFail:     'Login failed: ',
+        loginBusy:     'Logging in...',
+        savedOk:       'Saved!',
+        savedFail:     'Save failed: ',
+        loggedOut:     'Logged off.',
+        diagSavedOk:   'Diagnostics settings saved!',
+        startFail:     'Start failed: ',
+        stopFail:      'Stop failed: ',
+        exportFail:    'Export failed: ',
+        clearFail:     'Clear failed: ',
+        copyOk:        'Copied!',
+        copyFail:      'Copy failed',
+        noSnapshots:   'No snapshots collected yet. Start diagnostics first.',
+        reportFail:    'Report generation failed: ',
+        // Report table headers
+        rField:        'Field',
+        rUnit:         'Unit',
+        rCloudKeys:    'Cloud API keys',
+        rModbusReg:    'Modbus register',
+        rProtobufFld:  'Protobuf field',
+        rNCloud:       '# Cloud',
+        rNModbus:      '# Modbus',
+        rNProtobuf:    '# Protobuf',
+        rLatestCloud:  'Latest Cloud',
+        rLatestModbus: 'Latest Modbus',
+        rLatestProto:  'Latest Protobuf',
+        rDelta:        'Delta',
+        rConfidence:   'Confidence',
+      },
+      nl: {
+        title:         'Hoymiles HiOne — App-instellingen',
+        hCloud:        'Cloud-inloggegevens',
+        lEmail:        'E-mailadres',
+        lPassword:     'Wachtwoord',
+        lApiUrl:       'Cloud API URL',
+        hApiUrl:       'Overschrijf het standaard Hoymiles API-eindpunt. Laat de standaard staan tenzij je weet wat je doet.',
+        btnTest:       'Login testen',
+        btnSave:       'Opslaan',
+        btnLogout:     'Uitloggen',
+        hDiag:         'Diagnostiek (Modbus / Protobuf)',
+        hDiagHint:     'Verzamel snapshots van Modbus TCP en Protobuf tegelijkertijd voor datacorrelatie-analyse.',
+        lIp:           'Gateway IP',
+        hIpHint:       'LAN IP-adres van je DTS stick of HiBox gateway.',
+        lInterval:     'Interval (sec)',
+        lDtuSn:        'DTU Serienummer',
+        hDtuSn:        'Serienummer van je DTU gateway (bijv. 112700000001). Te vinden op het apparaatlabel. Vereist voor Protobuf-protocol.',
+        lUnitId:       'Modbus Unit-ID',
+        hUnitId:       'Modbus slave-adres. Standaard: 1. Alleen aanpassen als je meerdere Modbus-apparaten op dezelfde bus hebt.',
+        lModbusPort:   'Modbus Poort',
+        hModbusPort:   'TCP-poort voor Modbus-communicatie. Standaard: 502.',
+        lProtobufPort: 'Protobuf Poort',
+        hProtobufPort: 'TCP-poort voor het Hoymiles binaire protocol. Standaard: 10081.',
+        btnSaveDiag:   'Opslaan',
+        btnStart:      'Starten',
+        btnStop:       'Stoppen',
+        btnExport:     'Exporteren',
+        btnClear:      'Wissen',
+        exportedData:  'Geëxporteerde data:',
+        btnCopy:       'Kopiëren',
+        hReport:       'Diagnostiekrapport',
+        hReportHint:   'Correlatietabel die Cloud API-velden koppelt aan Modbus- en Protobuf-data. Handig voor het reverse-engineeren van lokale protocollen.',
+        btnReport:     'Rapport genereren',
+        langSwitch:    'EN',
+        loginOk:       'Inloggen geslaagd!',
+        loginFail:     'Inloggen mislukt: ',
+        loginBusy:     'Bezig met inloggen...',
+        savedOk:       'Opgeslagen!',
+        savedFail:     'Opslaan mislukt: ',
+        loggedOut:     'Uitgelogd.',
+        diagSavedOk:   'Diagnostiekinstellingen opgeslagen!',
+        startFail:     'Starten mislukt: ',
+        stopFail:      'Stoppen mislukt: ',
+        exportFail:    'Exporteren mislukt: ',
+        clearFail:     'Wissen mislukt: ',
+        copyOk:        'Gekopieerd!',
+        copyFail:      'Kopiëren mislukt',
+        noSnapshots:   'Nog geen snapshots verzameld. Start eerst de diagnostiek.',
+        reportFail:    'Rapport genereren mislukt: ',
+        rField:        'Veld',
+        rUnit:         'Eenheid',
+        rCloudKeys:    'Cloud API sleutels',
+        rModbusReg:    'Modbus register',
+        rProtobufFld:  'Protobuf veld',
+        rNCloud:       '# Cloud',
+        rNModbus:      '# Modbus',
+        rNProtobuf:    '# Protobuf',
+        rLatestCloud:  'Laatste Cloud',
+        rLatestModbus: 'Laatste Modbus',
+        rLatestProto:  'Laatste Protobuf',
+        rDelta:        'Delta',
+        rConfidence:   'Betrouwbaarheid',
+      }
+    };
+
+    function t(key) { return (i18n[_lang] || i18n.en)[key] || key; }
+
+    function applyLang() {
+      var keys = ['title','hCloud','lEmail','lPassword','lApiUrl','hApiUrl','btnTest','btnSave',
+        'btnLogout','hDiag','hDiagHint','lIp','hIpHint','lInterval','lDtuSn','hDtuSn',
+        'lUnitId','hUnitId','lModbusPort','hModbusPort','lProtobufPort','hProtobufPort',
+        'btnSaveDiag','btnStart','btnStop','btnExport','btnClear','exportedData','btnCopy',
+        'hReport','hReportHint','btnReport'];
+      var idMap = {
+        title:'t-title', hCloud:'t-h-cloud', lEmail:'t-l-email', lPassword:'t-l-password',
+        lApiUrl:'t-l-apiUrl', hApiUrl:'t-h-apiUrl', btnTest:'t-btn-test', btnSave:'t-btn-save',
+        btnLogout:'t-btn-logout', hDiag:'t-h-diag', hDiagHint:'t-h-diagHint',
+        lIp:'t-l-ip', hIpHint:'t-h-ipHint', lInterval:'t-l-interval',
+        lDtuSn:'t-l-dtuSn', hDtuSn:'t-h-dtuSn', lUnitId:'t-l-unitId', hUnitId:'t-h-unitId',
+        lModbusPort:'t-l-modbusPort', hModbusPort:'t-h-modbusPort',
+        lProtobufPort:'t-l-protobufPort', hProtobufPort:'t-h-protobufPort',
+        btnSaveDiag:'t-btn-saveDiag', btnStart:'t-btn-start', btnStop:'t-btn-stop',
+        btnExport:'t-btn-export', btnClear:'t-btn-clear', exportedData:'t-exportedData',
+        btnCopy:'t-btn-copy', hReport:'t-h-report', hReportHint:'t-h-reportHint',
+        btnReport:'t-btn-report'
+      };
+      for (var k of keys) {
+        var el = document.getElementById(idMap[k]);
+        if (el) el.textContent = t(k);
+      }
+      document.getElementById('langBtn').textContent = t('langSwitch');
+    }
+
+    function toggleLang() {
+      _lang = _lang === 'en' ? 'nl' : 'en';
+      applyLang();
+    }
 
     function showStatus(elId, msg, type) {
       var el = document.getElementById(elId);
@@ -88,22 +315,58 @@
       el.className = 'status-bar ' + (type || '');
     }
 
+    // ── Cloud Credentials ──
     function testLogin() {
       if (!_homey) return;
-      var email = document.getElementById('testEmail').value.trim();
-      var pw = document.getElementById('testPassword').value;
+      var email = document.getElementById('credEmail').value.trim();
+      var pw    = document.getElementById('credPassword').value;
       if (!email || !pw) return;
-      showStatus('loginResult', 'Logging in...', '');
+      showStatus('loginResult', t('loginBusy'), '');
       _homey.api('POST', '/login', { email: email, password: pw }, function(err, res) {
-        if (err) {
-          showStatus('loginResult', 'Error: ' + (err.message || err), 'stopped');
-          return;
-        }
-        if (res && res.success) {
-          showStatus('loginResult', 'Login successful!', 'running');
-        } else {
-          showStatus('loginResult', 'Login failed: ' + ((res && res.error) || 'unknown'), 'stopped');
-        }
+        if (err) { showStatus('loginResult', t('loginFail') + (err.message || err), 'error'); return; }
+        if (res && res.success) showStatus('loginResult', t('loginOk'), 'success');
+        else showStatus('loginResult', t('loginFail') + ((res && res.error) || '?'), 'error');
+      });
+    }
+
+    function saveCredentials() {
+      if (!_homey) return;
+      var email  = document.getElementById('credEmail').value.trim();
+      var pw     = document.getElementById('credPassword').value;
+      var apiUrl = document.getElementById('credApiUrl').value.trim();
+      var body = {};
+      if (email)  body.email  = email;
+      if (pw)     body.password = pw;
+      if (apiUrl) body.apiUrl = apiUrl;
+      _homey.api('POST', '/settings/save-login', body, function(err, res) {
+        if (err || !res || !res.success) showStatus('loginResult', t('savedFail') + (err ? err.message : ''), 'error');
+        else showStatus('loginResult', t('savedOk'), 'success');
+      });
+    }
+
+    function doLogout() {
+      if (!_homey) return;
+      _homey.api('POST', '/logout', null, function(err) {
+        if (err) { showStatus('loginResult', t('savedFail') + err.message, 'error'); return; }
+        document.getElementById('credEmail').value    = '';
+        document.getElementById('credPassword').value = '';
+        showStatus('loginResult', t('loggedOut'), 'success');
+      });
+    }
+
+    // ── Diagnostics settings ──
+    function saveDiagSettings() {
+      if (!_homey) return;
+      _homey.api('POST', '/settings/diagnostics', {
+        diagIp:           document.getElementById('diagIp').value.trim(),
+        diagInterval:     parseInt(document.getElementById('diagInterval').value) || 60,
+        diagDtuSn:        document.getElementById('diagDtuSn').value.trim(),
+        diagUnitId:       parseInt(document.getElementById('diagUnitId').value)   || 1,
+        diagModbusPort:   parseInt(document.getElementById('diagModbusPort').value)   || 502,
+        diagProtobufPort: parseInt(document.getElementById('diagProtobufPort').value) || 10081,
+      }, function(err, res) {
+        if (err || !res || !res.success) showStatus('diagStatus', t('savedFail') + (err ? err.message : ''), 'error');
+        else showStatus('diagStatus', t('diagSavedOk'), 'success');
       });
     }
 
@@ -112,17 +375,16 @@
       var ip = document.getElementById('diagIp').value.trim();
       if (!ip) { alert('Please enter a Gateway IP'); return; }
       _homey.api('POST', '/diagnostics/start', {
-        gatewayIp: ip,
-        intervalMs: parseInt(document.getElementById('diagInterval').value) || 60,
-        dtuSn: document.getElementById('diagDtuSn').value.trim() || undefined,
+        gatewayIp:    ip,
+        intervalMs:   parseInt(document.getElementById('diagInterval').value) || 60,
+        dtuSn:        document.getElementById('diagDtuSn').value.trim() || undefined,
         modbusUnitId: parseInt(document.getElementById('diagUnitId').value) || 1,
+        modbusPort:   parseInt(document.getElementById('diagModbusPort').value) || 502,
+        protobufPort: parseInt(document.getElementById('diagProtobufPort').value) || 10081,
       }, function(err) {
-        if (err) {
-          showStatus('diagStatus', 'Start failed: ' + (err.message || err), 'stopped');
-          return;
-        }
+        if (err) { showStatus('diagStatus', t('startFail') + (err.message || err), 'error'); return; }
         document.getElementById('btnStart').disabled = true;
-        document.getElementById('btnStop').disabled = false;
+        document.getElementById('btnStop').disabled  = false;
         refreshStatus();
       });
     }
@@ -130,12 +392,9 @@
     function stopDiag() {
       if (!_homey) return;
       _homey.api('POST', '/diagnostics/stop', null, function(err) {
-        if (err) {
-          showStatus('diagStatus', 'Stop failed: ' + (err.message || err), 'stopped');
-          return;
-        }
+        if (err) { showStatus('diagStatus', t('stopFail') + (err.message || err), 'error'); return; }
         document.getElementById('btnStart').disabled = false;
-        document.getElementById('btnStop').disabled = true;
+        document.getElementById('btnStop').disabled  = true;
         refreshStatus();
       });
     }
@@ -143,25 +402,45 @@
     function exportDiag() {
       if (!_homey) return;
       _homey.api('GET', '/diagnostics/export', function(err, data) {
-        if (err) {
-          showStatus('diagStatus', 'Export failed: ' + (err.message || err), 'stopped');
-          return;
-        }
+        if (err) { showStatus('diagStatus', t('exportFail') + (err.message || err), 'error'); return; }
         var json = JSON.stringify(data, null, 2);
         document.getElementById('diagOutput').textContent = json;
-        document.getElementById('diagOutput').style.display = 'block';
+        document.getElementById('exportSection').style.display = 'block';
       });
+    }
+
+    function copySnapshot() {
+      var text = document.getElementById('diagOutput').textContent;
+      if (!text) return;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+          var btn = document.getElementById('btnCopy');
+          var orig = btn.querySelector('span') ? btn.querySelector('span').textContent : btn.textContent;
+          if (btn.querySelector('span')) btn.querySelector('span').textContent = t('copyOk');
+          else btn.textContent = t('copyOk');
+          setTimeout(function() {
+            if (btn.querySelector('span')) btn.querySelector('span').textContent = t('btnCopy');
+            else btn.textContent = t('btnCopy');
+          }, 2000);
+        }).catch(function() { alert(t('copyFail')); });
+      } else {
+        // Fallback for older browsers
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
     }
 
     function clearDiag() {
       if (!_homey) return;
       if (!confirm('Clear all collected snapshots?')) return;
       _homey.api('POST', '/diagnostics/clear', null, function(err) {
-        if (err) {
-          showStatus('diagStatus', 'Clear failed: ' + (err.message || err), 'stopped');
-          return;
-        }
-        document.getElementById('diagOutput').style.display = 'none';
+        if (err) { showStatus('diagStatus', t('clearFail') + (err.message || err), 'error'); return; }
+        document.getElementById('exportSection').style.display = 'none';
+        document.getElementById('reportContainer').style.display = 'none';
         refreshStatus();
       });
     }
@@ -171,8 +450,8 @@
       _homey.api('GET', '/diagnostics', function(err, st) {
         if (err || !st) return;
         var running = st.running;
-        var count = st.snapshotCount || 0;
-        var last = st.lastSnapshot ? new Date(st.lastSnapshot).toLocaleTimeString() : '-';
+        var count   = st.snapshotCount || 0;
+        var last    = st.lastSnapshot ? new Date(st.lastSnapshot).toLocaleTimeString() : '-';
         showStatus('diagStatus',
           'Status: ' + (running ? 'RUNNING' : 'stopped') +
           ' | Snapshots: ' + count +
@@ -180,13 +459,90 @@
           running ? 'running' : 'stopped'
         );
         document.getElementById('btnStart').disabled = running;
-        document.getElementById('btnStop').disabled = !running;
+        document.getElementById('btnStop').disabled  = !running;
+      });
+    }
+
+    // ── Diagnostics Report ──
+    function generateReport() {
+      if (!_homey) return;
+      _homey.api('GET', '/diagnostics/report', function(err, data) {
+        if (err) { alert(t('reportFail') + err.message); return; }
+        if (!data || !data.fields || data.fields.length === 0) {
+          document.getElementById('reportContainer').innerHTML = '<p class="hint">' + t('noSnapshots') + '</p>';
+          document.getElementById('reportContainer').style.display = 'block';
+          return;
+        }
+        renderReportTable(data);
+      });
+    }
+
+    function renderReportTable(data) {
+      var th = function(s) { return '<th>' + s + '</th>'; };
+      var td = function(s, cls) { return '<td' + (cls ? ' class="' + cls + '"' : '') + '>' + (s == null ? '—' : s) + '</td>'; };
+      var headers = [t('rField'), t('rUnit'), t('rCloudKeys'), t('rModbusReg'), t('rProtobufFld'),
+                     t('rNCloud'), t('rNModbus'), t('rNProtobuf'),
+                     t('rLatestCloud'), t('rLatestModbus'), t('rLatestProto'),
+                     t('rDelta'), t('rConfidence')];
+      var html = '<p style="font-size:12px;color:#888">Generated: ' + data.generatedAt +
+                 ' | Snapshots: ' + data.snapshotCount + '</p><table><tr>' +
+                 headers.map(th).join('') + '</tr>';
+
+      for (var i = 0; i < data.fields.length; i++) {
+        var f = data.fields[i];
+        var confCls = f.confidence >= 70 ? 'conf-high' : f.confidence >= 40 ? 'conf-medium' : 'conf-low';
+        var deltaStr = f.delta != null ? f.delta.toFixed(1) : null;
+        var confStr  = f.confidence + '%';
+        html += '<tr>' +
+          td('<strong>' + f.field + '</strong>') +
+          td(f.unit) +
+          td(f.cloudKeys) +
+          td(f.modbusRegister) +
+          td(f.protobufField) +
+          td(f.snapshotsWithCloud) +
+          td(f.snapshotsWithModbus) +
+          td(f.snapshotsWithProtobuf) +
+          td(f.latestCloud   != null ? f.latestCloud.toFixed(1)   + ' ' + f.unit : null) +
+          td(f.latestModbus  != null ? f.latestModbus.toFixed(1)  + ' ' + f.unit : null) +
+          td(f.latestProtobuf != null ? f.latestProtobuf.toFixed(1) + ' ' + f.unit : null) +
+          td(deltaStr != null ? deltaStr + ' ' + f.unit : null) +
+          td(confStr, confCls) +
+          '</tr>';
+      }
+      html += '</table>';
+      var container = document.getElementById('reportContainer');
+      container.innerHTML = html;
+      container.style.display = 'block';
+    }
+
+    // ── Init ──
+    function loadSavedSettings() {
+      _homey.api('GET', '/settings', function(err, s) {
+        if (err || !s) return;
+        if (s.email)    document.getElementById('credEmail').value    = s.email;
+        if (s.apiUrl)   document.getElementById('credApiUrl').value   = s.apiUrl;
+        if (s.diagIp)   document.getElementById('diagIp').value       = s.diagIp;
+        if (s.diagInterval)   document.getElementById('diagInterval').value   = s.diagInterval;
+        if (s.diagDtuSn)      document.getElementById('diagDtuSn').value      = s.diagDtuSn;
+        if (s.diagUnitId)     document.getElementById('diagUnitId').value     = s.diagUnitId;
+        if (s.diagModbusPort)   document.getElementById('diagModbusPort').value   = s.diagModbusPort;
+        if (s.diagProtobufPort) document.getElementById('diagProtobufPort').value = s.diagProtobufPort;
       });
     }
 
     function onHomeyReady(Homey) {
       _homey = Homey;
       Homey.ready();
+      // Detect Homey's UI language
+      if (Homey.getLanguage) {
+        Homey.getLanguage().then(function(lang) {
+          if (lang) { _lang = lang.substring(0, 2); }
+          applyLang();
+        }).catch(function() { applyLang(); });
+      } else {
+        applyLang();
+      }
+      loadSavedSettings();
       refreshStatus();
       setInterval(refreshStatus, 5000);
     }

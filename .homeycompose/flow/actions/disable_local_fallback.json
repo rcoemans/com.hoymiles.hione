@@ -1,0 +1,13 @@
+{
+  "title": {
+    "en": "Disable local fallback",
+    "nl": "Lokale fallback uitschakelen"
+  },
+  "hint": {
+    "en": "If in Hybrid mode, switches to Cloud Only (removes local LAN fallback).",
+    "nl": "Als in hybridemodus, schakelt naar Alleen Cloud (verwijdert lokale LAN fallback)."
+  },
+  "args": [
+    { "name": "device", "type": "device", "filter": "driver_id=station" }
+  ]
+}

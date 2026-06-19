@@ -21,11 +21,12 @@
       "type": "group",
       "label": { "en": "System info", "nl": "Systeeminfo" },
       "children": [
-        { "id": "appliance", "type": "label", "label": { "en": "Appliance", "nl": "Apparaat" }, "value": "-" },
-        { "id": "model", "type": "label", "label": { "en": "Model", "nl": "Model" }, "value": "-" },
-        { "id": "serial_number", "type": "label", "label": { "en": "Serial number", "nl": "Serienummer" }, "value": "-" },
-        { "id": "firmware_version", "type": "label", "label": { "en": "Firmware version", "nl": "Firmwareversie" }, "value": "-" },
-        { "id": "hardware_version", "type": "label", "label": { "en": "Hardware version", "nl": "Hardwareversie" }, "value": "-" }
+        {
+          "id": "system_info",
+          "type": "textarea",
+          "label": { "en": "Device information", "nl": "Apparaatinformatie" },
+          "value": "-"
+        }
       ]
     }
   ]

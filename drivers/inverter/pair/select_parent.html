@@ -1,69 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: #fff; color: #333; }
-    h2 { margin-bottom: 8px; font-size: 18px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; color: #1a1a1a; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    h2 { font-size: 18px; }
     .subtitle { font-size: 13px; color: #888; margin-bottom: 16px; }
+    .lang-toggle { font-size: 11px; font-weight: 600; cursor: pointer; color: #666; border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px; background: #f5f5f5; }
     .station-list { list-style: none; padding: 0; margin: 0; }
     .station-list li { padding: 14px 16px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: background 0.15s, border-color 0.15s; font-weight: 600; }
     .station-list li:hover { background: #f5f5f5; }
     .station-list li.selected { background: #e8f5e9; border-color: #61BA1A; }
-    .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; background: #ccc; color: #fff; }
-    .btn.active { background: #61BA1A; cursor: pointer; }
+    .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; background: #ccc; color: #fff; transition: background 0.2s; }
+    .btn.active { background: #61BA1A; }
     .loading { text-align: center; padding: 40px; color: #888; }
   </style>
 </head>
 <body>
-  <h2 id="title">Select parent station</h2>
-  <p class="subtitle" id="subtitle">Choose the station this device belongs to.</p>
+  <div class="header">
+    <div>
+      <h2 id="t-title">Select parent station</h2>
+      <p class="subtitle" id="t-subtitle">Choose the station this device belongs to.</p>
+    </div>
+    <button class="lang-toggle" id="langBtn" onclick="toggleLang()">NL</button>
+  </div>
+
   <div id="loading" class="loading">Loading stations...</div>
   <ul class="station-list" id="stationList" style="display:none;"></ul>
-  <button class="btn" id="nextBtn" disabled>Next</button>
+  <button class="btn" id="nextBtn" disabled><span id="t-btnText">Next</span></button>
 
   <script>
-    var selectedId = null;
-    var stations = [];
-
+    var _lang = 'en'; var selectedId = null; var stations = [];
+    var i18n = {
+      en: { title: 'Select parent station', subtitle: 'Choose the station this device belongs to.', loading: 'Loading stations...', next: 'Next', none: 'No stations found. Please add a station first.', langSwitch: 'NL' },
+      nl: { title: 'Selecteer bovenliggend station', subtitle: 'Kies het station waartoe dit apparaat behoort.', loading: 'Stations laden...', next: 'Volgende', none: 'Geen stations gevonden. Voeg eerst een station toe.', langSwitch: 'EN' }
+    };
+    function t(k) { return (i18n[_lang]||i18n.en)[k]||k; }
+    function applyLang() {
+      document.getElementById('t-title').textContent=t('title');
+      document.getElementById('t-subtitle').textContent=t('subtitle');
+      document.getElementById('t-btnText').textContent=t('next');
+      document.getElementById('langBtn').textContent=t('langSwitch');
+    }
+    function toggleLang() { _lang=_lang==='en'?'nl':'en'; applyLang(); render(); }
     function render() {
-      var list = document.getElementById('stationList');
-      list.innerHTML = '';
-      if (stations.length === 0) {
-        list.innerHTML = '<li>No stations found. Please add a station first.</li>';
-      }
-      for (var i = 0; i < stations.length; i++) {
-        (function(s) {
-          var li = document.createElement('li');
-          li.textContent = s.name || 'Station ' + (s.plantId || s.id);
-          li.addEventListener('click', function() {
-            selectedId = s.id;
-            var items = document.querySelectorAll('.station-list li');
-            for (var j = 0; j < items.length; j++) items[j].classList.remove('selected');
-            li.classList.add('selected');
-            var btn = document.getElementById('nextBtn');
-            btn.disabled = false;
-            btn.classList.add('active');
-          });
-          list.appendChild(li);
-        })(stations[i]);
-      }
-      document.getElementById('loading').style.display = 'none';
-      list.style.display = 'block';
+      var list=document.getElementById('stationList'); list.innerHTML='';
+      if(stations.length===0){list.innerHTML='<li>'+t('none')+'</li>';}
+      else for(var i=0;i<stations.length;i++){(function(s){var li=document.createElement('li');li.textContent=s.name||('Station '+(s.plantId||s.id));li.addEventListener('click',function(){selectedId=s.id;document.querySelectorAll('.station-list li').forEach(function(e){e.classList.remove('selected');});li.classList.add('selected');var btn=document.getElementById('nextBtn');btn.disabled=false;btn.classList.add('active');});list.appendChild(li);})(stations[i]);}
+      document.getElementById('loading').style.display='none'; list.style.display='block';
     }
-
-    async function doNext() {
-      if (!selectedId) return;
-      await Homey.emit('selectParent', selectedId);
-      Homey.nextView();
-    }
-
-    document.getElementById('nextBtn').addEventListener('click', doNext);
-
-    Homey.emit('getStationDevices').then(function(list) {
-      stations = list || [];
-      render();
-    }).catch(function() { stations = []; render(); });
-
+    async function doNext(){if(!selectedId)return;await Homey.emit('selectParent',selectedId);Homey.nextView();}
+    document.getElementById('nextBtn').addEventListener('click',doNext);
+    Homey.getLanguage().then(function(lang){if(lang)_lang=lang.substring(0,2);applyLang();}).catch(function(){applyLang();});
+    Homey.emit('getStationDevices').then(function(list){stations=list||[];render();}).catch(function(){stations=[];render();});
     Homey.ready();
   </script>
 </body>

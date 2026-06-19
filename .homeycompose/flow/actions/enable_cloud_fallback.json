@@ -1,0 +1,13 @@
+{
+  "title": {
+    "en": "Enable cloud fallback",
+    "nl": "Cloud fallback inschakelen"
+  },
+  "hint": {
+    "en": "Switches to Hybrid mode: cloud primary, local LAN as fallback.",
+    "nl": "Schakelt naar hybridemodus: cloud primair, lokaal LAN als fallback."
+  },
+  "args": [
+    { "name": "device", "type": "device", "filter": "driver_id=station" }
+  ]
+}

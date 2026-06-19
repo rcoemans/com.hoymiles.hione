@@ -16,21 +16,20 @@ class StationDriver extends Homey.Driver {
 
     // ── Step 1: login_credentials ──
 
-    // Return saved credentials so the pairing page can auto-fill
     session.setHandler('get_saved_login', async () => {
       const email = this.homey.settings.get('saved_email');
       return email ? { email } : null;
     });
 
-    // Auto-login with saved credentials
     session.setHandler('login_saved', async () => {
-      const email    = this.homey.settings.get('saved_email');
+      const email = this.homey.settings.get('saved_email');
       const password = this.homey.settings.get('saved_password');
       if (!email || !password) return false;
       try {
         api = new HoymilesApi({
           log: this.log.bind(this),
           error: this.error.bind(this),
+          baseUrl: this.homey.settings.get('cloud_api_url') || undefined,
         });
         await api.login(email, password, AUTH_MODE_AUTO);
         return true;
@@ -40,20 +39,18 @@ class StationDriver extends Homey.Driver {
       }
     });
 
-    // Forget saved credentials
     session.setHandler('forget_login', async () => {
       this.homey.settings.unset('saved_email');
       this.homey.settings.unset('saved_password');
       return true;
     });
 
-    // Manual login
     session.setHandler('login', async (data: any) => {
       try {
         api = new HoymilesApi({
           log: this.log.bind(this),
           error: this.error.bind(this),
-          baseUrl: data.apiUrl || undefined,
+          baseUrl: data.apiUrl || this.homey.settings.get('cloud_api_url') || undefined,
         });
         await api.login(data.email, data.password, data.authMode || AUTH_MODE_AUTO);
         // Save credentials for next pairing
@@ -65,7 +62,7 @@ class StationDriver extends Homey.Driver {
       }
     });
 
-    // ── Step 2: select_station — provide station list ──
+    // ── Step 2: select_station ──
     session.setHandler('getStations', async () => {
       if (!api) return [];
       try {
@@ -101,8 +98,19 @@ class StationDriver extends Homey.Driver {
 
       const dtu = deviceList.find((d: any) => d.type === 'dtu') || {};
 
+      // Build system info as a single multiline string
+      const systemInfo = [
+        'Appliance: Station',
+        `Model: ${dtu.model || '-'}`,
+        `Serial: ${dtu.sn || '-'}`,
+        `Firmware: ${dtu.firmware || '-'}`,
+        `Hardware: ${dtu.hardware || '-'}`,
+      ].join('\n');
+
+      const connectedDevices = deviceList.map((d: any) => `${d.type}: ${d.model || '?'} (${d.sn})`).join('\n') || '-';
+
       const device = {
-        name: selectedStation.name || 'HiOne Station',
+        name: `${selectedStation.name || 'HiOne Station'} (${selectedStation.id})`,
         data: {
           id: `station:${selectedStation.id}`,
           plantId: selectedStation.id,
@@ -119,18 +127,13 @@ class StationDriver extends Homey.Driver {
         settings: {
           connection_mode: localConfig.connectionMode || 'cloud',
           gateway_ip: localConfig.gatewayIp || '',
-          local_protocol: localConfig.localProtocol || 'protobuf',
-          local_port: localConfig.localPort || 10081,
+          protobuf_port: localConfig.protobufPort || 10081,
+          modbus_port: localConfig.modbusPort || 502,
           modbus_unit_id: localConfig.modbusUnitId || 1,
+          dtu_sn: dtu.sn || '',
           cloud_api_url: api._baseUrl || 'https://neapi.hoymiles.com',
-          appliance: 'Station',
-          model: dtu.model || '-',
-          serial_number: dtu.sn || '-',
-          firmware_version: dtu.firmware || '-',
-          hardware_version: dtu.hardware || '-',
-          connected_devices: deviceList.map((d: any) =>
-            `${d.type}: ${d.model || '?'} (${d.sn})`
-          ).join('\n') || '-',
+          system_info: systemInfo,
+          connected_devices: connectedDevices,
         },
       };
 

@@ -8,11 +8,12 @@ FEATURES
 - Settable parameters: Battery mode, Reserve SoC, Max SoC, Max Charge/Discharge Power, Grid Limit
 - Calculated insights: self-powered percentage, battery runtime, time-to-full, power balance
 - Battery modes: Self-Consumption, Economy, Backup, Off-Grid, Force Charge, Force Discharge, Peak Shaving, Time of Use
-- Three connection modes: Cloud Only, Hybrid (Cloud + Local LAN), Local Only
-- Local protocols: Protobuf (port 10081) and Modbus TCP (port 502)
+- Three connection modes: Cloud Only, Hybrid (Cloud primary + Local LAN fallback), Local Only
+- Local protocols: Protobuf (port 10081) for battery data + Modbus TCP (port 502) for PV/inverter data - both used simultaneously
 - Homey Energy integration: homeBattery with meter_power.charged/discharged
-- Diagnostics: Modbus/Protobuf snapshot collector for data correlation and register discovery
-- Flow triggers, conditions, and actions for full automation
+- App settings: save/restore credentials, configure Cloud API URL, language toggle (EN/NL)
+- Diagnostics: Modbus/Protobuf snapshot collector with correlation report for data reverse-engineering
+- 15 flow triggers, 12 conditions, 18 actions for full automation
 
 REQUIREMENTS
 - Homey Pro (2019 or 2023) with firmware >= 12.0.0

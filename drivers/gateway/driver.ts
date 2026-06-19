@@ -32,7 +32,7 @@ class GatewayDriver extends Homey.Driver {
       const gateways = deviceList.filter((d: any) => d.type === 'gateway');
 
       return gateways.map((gw: any) => ({
-        name: gw.name || `Gateway ${gw.sn}`,
+        name: `Gateway ${gw.sn || gw.model || '?'}`,
         data: {
           id: `${parentDevice.getData().plantId}:gateway:${gw.sn}`,
           plantId: parentDevice.getData().plantId,
@@ -41,11 +41,13 @@ class GatewayDriver extends Homey.Driver {
           sn: gw.sn,
         },
         settings: {
-          appliance: 'Gateway',
-          model: gw.model || '-',
-          serial_number: gw.sn || '-',
-          firmware_version: gw.firmware || '-',
-          hardware_version: gw.hardware || '-',
+          system_info: [
+            'Appliance: Gateway',
+            `Model: ${gw.model || '-'}`,
+            `Serial: ${gw.sn || '-'}`,
+            `Firmware: ${gw.firmware || '-'}`,
+            `Hardware: ${gw.hardware || '-'}`,
+          ].join('\n'),
         },
       }));
     });
